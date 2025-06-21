@@ -11,8 +11,8 @@ Requirements:
 - Python 3.x
 - ffmpeg installed and available in system PATH
 
-Author: [Your Name]
-Date: [Today's Date]
+Author: Demond Balentine
+Date: 6/20/2025
 """
 
 import subprocess
