@@ -40,7 +40,7 @@ def upscale_video(input_path, output_path):
     command = [
         "ffmpeg", "-y", "-i", input_path,
         "-vf", "scale=iw*2:ih*2:flags=lanczos",
-        "-c:a", "copy",  # Copy audio if present
+        "-c:a", "copy",
         output_path
     ]
     run_ffmpeg(command, "Upscaling video")
