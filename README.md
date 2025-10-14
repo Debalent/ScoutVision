@@ -1,6 +1,22 @@
-# ScoutVision
+<div align="center">
+  
+  <!-- Logo Video -->
+  <video src="assets/logo/scoutvision-logo.mp4" width="400" autoplay loop muted></video>
+  
+  # ⚽ ScoutVision
+  
+  ### *AI-Powered Athlete Scouting Platform*
+  
+  **Fusing game film analysis, talent forecasting, mindset profiling, and real-time collaboration—giving modern scouts the tools to identify tomorrow's elite today.**
+  
+  [![.NET](https://img.shields.io/badge/.NET-8.0-512BD4?logo=dotnet)](https://dotnet.microsoft.com/)
+  [![Blazor](https://img.shields.io/badge/Blazor-WebAssembly-512BD4?logo=blazor)](https://blazor.net/)
+  [![Python](https://img.shields.io/badge/Python-3.x-3776AB?logo=python)](https://www.python.org/)
+  [![License](https://img.shields.io/badge/License-Proprietary-red)](LICENSE)
+  
+</div>
 
-ScoutVision is an AI-powered athlete scouting platform that fuses game film analysis, talent forecasting, mindset profiling, and real-time collaboration—giving modern scouts the tools to identify tomorrow’s elite today.
+---
 
 ## Overview
 
