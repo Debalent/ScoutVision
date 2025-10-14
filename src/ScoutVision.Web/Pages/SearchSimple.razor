@@ -228,11 +228,11 @@
     {
         var mockPlayers = new List<Player>
         {
-            new() { Id = 1, FirstName = "Lionel", LastName = "Messi", Position = "Forward", CurrentTeam = "Inter Miami", Age = 36, Nationality = "Argentina", Priority = ScoutingPriority.High },
-            new() { Id = 2, FirstName = "Kylian", LastName = "Mbappé", Position = "Forward", CurrentTeam = "PSG", Age = 24, Nationality = "France", Priority = ScoutingPriority.High },
-            new() { Id = 3, FirstName = "Erling", LastName = "Haaland", Position = "Forward", CurrentTeam = "Manchester City", Age = 23, Nationality = "Norway", Priority = ScoutingPriority.High },
-            new() { Id = 4, FirstName = "Pedri", LastName = "González", Position = "Midfielder", CurrentTeam = "FC Barcelona", Age = 21, Nationality = "Spain", Priority = ScoutingPriority.Medium },
-            new() { Id = 5, FirstName = "Jude", LastName = "Bellingham", Position = "Midfielder", CurrentTeam = "Real Madrid", Age = 20, Nationality = "England", Priority = ScoutingPriority.High }
+            new() { Id = 1, FirstName = "Lionel", LastName = "Messi", Position = "Forward", CurrentTeam = "Inter Miami", DateOfBirth = new DateTime(1987, 6, 24), Nationality = "Argentina", Priority = ScoutingPriority.High },
+            new() { Id = 2, FirstName = "Kylian", LastName = "Mbappé", Position = "Forward", CurrentTeam = "PSG", DateOfBirth = new DateTime(1998, 12, 20), Nationality = "France", Priority = ScoutingPriority.High },
+            new() { Id = 3, FirstName = "Erling", LastName = "Haaland", Position = "Forward", CurrentTeam = "Manchester City", DateOfBirth = new DateTime(2000, 7, 21), Nationality = "Norway", Priority = ScoutingPriority.High },
+            new() { Id = 4, FirstName = "Pedri", LastName = "González", Position = "Midfielder", CurrentTeam = "FC Barcelona", DateOfBirth = new DateTime(2002, 11, 25), Nationality = "Spain", Priority = ScoutingPriority.Medium },
+            new() { Id = 5, FirstName = "Jude", LastName = "Bellingham", Position = "Midfielder", CurrentTeam = "Real Madrid", DateOfBirth = new DateTime(2003, 6, 29), Nationality = "England", Priority = ScoutingPriority.High }
         };
 
         // Simple filter based on query

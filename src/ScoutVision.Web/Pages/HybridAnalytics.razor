@@ -1,6 +1,6 @@
 @page "/hybrid-analytics"
 @using ScoutVision.Web.Services
-@inject IHybridAnalyticsService HybridAnalytics
+@inject IHybridAnalyticsService HybridAnalyticsService
 @inject ILocalizationService Localization
 @inject IJSRuntime JS
 
@@ -10,15 +10,15 @@
             <div class="d-flex justify-content-between align-items-center">
                 <h1 class="display-4">
                     <i class="bi bi-diagram-3"></i>
-                    @Localization.GetString("HybridAnalytics")
+                    Hybrid Analytics
                 </h1>
                 <button class="btn btn-primary btn-lg" @onclick="ShowCreateSessionModal">
                     <i class="bi bi-plus-circle"></i>
-                    @Localization.GetString("NewSession")
+                    New Session
                 </button>
             </div>
             <p class="lead text-muted">
-                @Localization.GetString("HybridAnalyticsDescription")
+                Combined web and 3D analytics for comprehensive tactical insights
             </p>
         </div>
     </div>
@@ -27,7 +27,7 @@
     <div class="row mb-4">
         <div class="col-md-4">
             <div class="card border-primary h-100 @(selectedMode == "web" ? "border-3" : "")" 
-                 style="cursor: pointer;" @onclick="() => SelectMode(\"web\")">
+                 style="cursor: pointer;" @onclick='() => SelectMode("web")'>
                 <div class="card-body text-center">
                     <i class="bi bi-globe2 display-3 text-primary"></i>
                     <h4 class="card-title mt-3">Web Analytics</h4>
@@ -42,7 +42,7 @@
         
         <div class="col-md-4">
             <div class="card border-success h-100 @(selectedMode == "gmod" ? "border-3" : "")" 
-                 style="cursor: pointer;" @onclick="() => SelectMode(\"gmod\")">
+                 style="cursor: pointer;" @onclick='() => SelectMode("gmod")'>
                 <div class="card-body text-center">
                     <i class="bi bi-badge-3d display-3 text-success"></i>
                     <h4 class="card-title mt-3">GMod 3D Visualization</h4>
@@ -57,7 +57,7 @@
         
         <div class="col-md-4">
             <div class="card border-warning h-100 @(selectedMode == "hybrid" ? "border-3" : "")" 
-                 style="cursor: pointer;" @onclick="() => SelectMode(\"hybrid\")">
+                 style="cursor: pointer;" @onclick='() => SelectMode("hybrid")'>
                 <div class="card-body text-center">
                     <i class="bi bi-diagram-3-fill display-3 text-warning"></i>
                     <h4 class="card-title mt-3">Hybrid Mode</h4>
@@ -135,7 +135,7 @@
                 <div class="card-body text-center">
                     <i class="bi bi-person-video2 display-4 text-info"></i>
                     <h5 class="mt-3">Player Analysis</h5>
-                    <button class="btn btn-info mt-2" @onclick="() => QuickStart(\"player\")">
+                    <button class="btn btn-info mt-2" @onclick='() => QuickStart("player")'>
                         Start Analysis
                     </button>
                 </div>
@@ -147,7 +147,7 @@
                 <div class="card-body text-center">
                     <i class="bi bi-grid-3x3-gap display-4 text-success"></i>
                     <h5 class="mt-3">Formation Study</h5>
-                    <button class="btn btn-success mt-2" @onclick="() => QuickStart(\"formation\")">
+                    <button class="btn btn-success mt-2" @onclick='() => QuickStart("formation")'>
                         Start Analysis
                     </button>
                 </div>
@@ -159,7 +159,7 @@
                 <div class="card-body text-center">
                     <i class="bi bi-activity display-4 text-warning"></i>
                     <h5 class="mt-3">Movement Tracking</h5>
-                    <button class="btn btn-warning mt-2" @onclick="() => QuickStart(\"movement\")">
+                    <button class="btn btn-warning mt-2" @onclick='() => QuickStart("movement")'>
                         Start Analysis
                     </button>
                 </div>
@@ -171,7 +171,7 @@
                 <div class="card-body text-center">
                     <i class="bi bi-diagram-3 display-4 text-danger"></i>
                     <h5 class="mt-3">Full Match Review</h5>
-                    <button class="btn btn-danger mt-2" @onclick="() => QuickStart(\"fullmatch\")">
+                    <button class="btn btn-danger mt-2" @onclick='() => QuickStart("fullmatch")'>
                         Start Analysis
                     </button>
                 </div>
@@ -310,7 +310,7 @@
         try
         {
             // Check if GMod addon is running
-            var status = await HybridAnalytics.GetGModSessionStatusAsync("test-connection");
+            var status = await HybridAnalyticsService.GetGModSessionStatusAsync("test-connection");
             gmodConnected = status.Status != "Not Found";
         }
         catch
@@ -370,7 +370,7 @@
         }
 
         // Create the session
-        var session = await HybridAnalytics.CreateAnalysisSessionAsync(newSession);
+        var session = await HybridAnalyticsService.CreateAnalysisSessionAsync(newSession);
         
         if (session != null)
         {
@@ -396,7 +396,7 @@
             Participants = new List<string> { "current-user@team.com" }
         };
 
-        var session = await HybridAnalytics.CreateAnalysisSessionAsync(request);
+        var session = await HybridAnalyticsService.CreateAnalysisSessionAsync(request);
         
         if (session != null)
         {
@@ -407,14 +407,14 @@
 
     private async Task ViewSession(string sessionId)
     {
-        var results = await HybridAnalytics.GetSessionResultsAsync(sessionId);
+        var results = await HybridAnalyticsService.GetSessionResultsAsync(sessionId);
         // Navigate to session detail view
         await JS.InvokeVoidAsync("alert", $"Viewing session {sessionId}");
     }
 
     private async Task SyncWithGMod(string gmodSessionId)
     {
-        var success = await HybridAnalytics.SynchronizeWithGModAsync(gmodSessionId);
+        var success = await HybridAnalyticsService.SynchronizeWithGModAsync(gmodSessionId);
         if (success)
         {
             await JS.InvokeVoidAsync("alert", "Synchronized with GMod successfully!");
@@ -430,7 +430,7 @@
         var session = activeSessions.FirstOrDefault(s => s.SessionId == sessionId);
         if (session != null && !string.IsNullOrEmpty(session.GModSessionId))
         {
-            await HybridAnalytics.StopGModSessionAsync(session.GModSessionId);
+            await HybridAnalyticsService.StopGModSessionAsync(session.GModSessionId);
         }
         
         activeSessions.RemoveAll(s => s.SessionId == sessionId);

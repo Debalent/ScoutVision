@@ -1,5 +1,5 @@
-using ScoutVision.Core.Models;
-using ScoutVision.Core.DTOs;
+using ScoutVision.Core.Entities;
+using ScoutVision.Core.Search;
 using Microsoft.Extensions.Logging;
 using System.Text.Json;
 
@@ -14,7 +14,7 @@ namespace ScoutVision.Web.Services
         
         // 3D Visualization Data
         Task<List<PlayerMovementData>> GetPlayerMovementDataAsync(int matchId);
-        Task<List<HeatMapPoint>> GenerateHeatMapDataAsync(int playerId, int matchId);
+        Task<List<HybridHeatMapPoint>> GenerateHeatMapDataAsync(int playerId, int matchId);
         Task<List<FormationTransition>> GetFormationTransitionsAsync(int matchId);
         
         // GMod Integration
@@ -109,15 +109,15 @@ namespace ScoutVision.Web.Services
             return movementData;
         }
 
-        public async Task<List<HeatMapPoint>> GenerateHeatMapDataAsync(int playerId, int matchId)
+        public async Task<List<HybridHeatMapPoint>> GenerateHeatMapDataAsync(int playerId, int matchId)
         {
-            var heatMapPoints = new List<HeatMapPoint>();
+            var heatMapPoints = new List<HybridHeatMapPoint>();
             var playerData = await GetPlayerMatchDataAsync(playerId, matchId);
 
             // Generate heat map points based on player positions
             foreach (var dataPoint in playerData)
             {
-                heatMapPoints.Add(new HeatMapPoint
+                heatMapPoints.Add(new HybridHeatMapPoint
                 {
                     X = dataPoint.Position.X,
                     Y = dataPoint.Position.Y,
@@ -370,11 +370,11 @@ namespace ScoutVision.Web.Services
             return new List<MovementPattern>();
         }
 
-        private async Task<List<HeatMapPoint>> GeneratePlayerHeatMapAsync(int playerId)
+        private async Task<List<HybridHeatMapPoint>> GeneratePlayerHeatMapAsync(int playerId)
         {
             // Implementation for heat map generation
             await Task.Delay(100);
-            return new List<HeatMapPoint>();
+            return new List<HybridHeatMapPoint>();
         }
 
         private async Task<TacticalPositioning> AnalyzeTacticalPositioningAsync(int playerId)
@@ -502,7 +502,7 @@ namespace ScoutVision.Web.Services
         public int PlayerId { get; set; }
         public PerformanceMetrics PerformanceMetrics { get; set; } = new();
         public List<MovementPattern> MovementPatterns { get; set; } = new();
-        public List<HeatMapPoint> HeatMapData { get; set; } = new();
+        public List<HybridHeatMapPoint> HeatMapData { get; set; } = new();
         public TacticalPositioning TacticalPositioning { get; set; } = new();
         public ComparisonData ComparisonData { get; set; } = new();
         public List<ImprovementSuggestion> ImprovementSuggestions { get; set; } = new();
@@ -597,7 +597,7 @@ namespace ScoutVision.Web.Services
         public double Direction { get; set; }
     }
 
-    public class HeatMapPoint
+    public class HybridHeatMapPoint
     {
         public double X { get; set; }
         public double Y { get; set; }

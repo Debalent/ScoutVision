@@ -1,6 +1,9 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
+using System.Net.Http.Json;
 using ScoutVision.Core.Entities;
 using ScoutVision.Core.Search;
+using ScoutVision.Core.Enums;
 using ScoutVision.Infrastructure.Data;
 
 namespace ScoutVision.Infrastructure.Services;
@@ -221,10 +224,10 @@ public class FootageAnalysisService : IFootageAnalysisService
         // Adjust based on video quality
         score += analysisResult.Quality switch
         {
-            VideoQuality.Ultra4K => 30m,
-            VideoQuality.FullHD => 20m,
-            VideoQuality.HD => 10m,
-            VideoQuality.Standard => 0m,
+            VideoQuality.UHD4K => 30m,
+            VideoQuality.HD1080p => 20m,
+            VideoQuality.HD720p => 10m,
+            VideoQuality.SD480p => 0m,
             _ => 0m
         };
 
@@ -273,7 +276,7 @@ public class StatBookService : IStatBookService
                 League = league,
                 Season = season,
                 Competition = importResult.Competition,
-                Type = StatBookType.SeasonStats,
+                Type = StatBookType.SeasonSummary,
                 DataProvider = dataSource,
                 DataAccuracy = importResult.AccuracyScore,
                 TotalMatches = importResult.TotalMatches,

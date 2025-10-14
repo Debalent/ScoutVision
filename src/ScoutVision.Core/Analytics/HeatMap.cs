@@ -1,5 +1,7 @@
 using ScoutVision.Core.Enums;
 
+using ScoutVision.Core.Entities;
+
 namespace ScoutVision.Core.Analytics;
 
 public class HeatMap : BaseEntity

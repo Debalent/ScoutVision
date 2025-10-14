@@ -1,3 +1,5 @@
+using ScoutVision.Core.Entities;
+
 namespace ScoutVision.Core.Analytics;
 
 public class PerformanceTrend : BaseEntity

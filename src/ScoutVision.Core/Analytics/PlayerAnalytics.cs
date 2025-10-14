@@ -1,3 +1,4 @@
+using ScoutVision.Core.Entities;
 using ScoutVision.Core.Enums;
 
 namespace ScoutVision.Core.Analytics;

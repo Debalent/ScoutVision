@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using ScoutVision.Core.Entities;
 using ScoutVision.Core.Search;
+using ScoutVision.Core.Analytics;
 
 namespace ScoutVision.Infrastructure.Data;
 

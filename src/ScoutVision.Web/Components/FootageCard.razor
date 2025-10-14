@@ -91,10 +91,10 @@
     {
         return Footage.Quality switch
         {
-            VideoQuality.Ultra4K => Color.Success,
-            VideoQuality.FullHD => Color.Primary,
-            VideoQuality.HD => Color.Info,
-            VideoQuality.Standard => Color.Secondary,
+            VideoQuality.UHD4K => Color.Success,
+            VideoQuality.HD1080p => Color.Primary,
+            VideoQuality.HD720p => Color.Info,
+            VideoQuality.SD480p => Color.Secondary,
             _ => Color.Default
         };
     }

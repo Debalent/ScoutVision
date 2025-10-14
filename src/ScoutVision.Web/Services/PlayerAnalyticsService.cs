@@ -79,7 +79,7 @@ public class PlayerAnalyticsService : IPlayerAnalyticsService
         {
             PlayerId = playerId,
             MatchId = matchId,
-            DataPoints = new List<HeatMapPoint>()
+            DataPoints = new List<PlayerHeatMapPoint>()
         };
 
         // Generate heat map points (simulated data)
@@ -90,7 +90,7 @@ public class PlayerAnalyticsService : IPlayerAnalyticsService
                 var intensity = CalculateHeatMapIntensity(x, y);
                 if (intensity > 0.1)
                 {
-                    heatMap.DataPoints.Add(new HeatMapPoint
+                    heatMap.DataPoints.Add(new PlayerHeatMapPoint
                     {
                         X = x,
                         Y = y,
@@ -458,10 +458,10 @@ public class HeatMapData
 {
     public int PlayerId { get; set; }
     public int? MatchId { get; set; }
-    public List<HeatMapPoint> DataPoints { get; set; } = new();
+    public List<PlayerHeatMapPoint> DataPoints { get; set; } = new();
 }
 
-public class HeatMapPoint
+public class PlayerHeatMapPoint
 {
     public double X { get; set; }
     public double Y { get; set; }
