@@ -1,0 +1,554 @@
+@page "/player-analytics/{PlayerId:int}"
+@using ScoutVision.Web.Services
+@inject IPlayerAnalyticsService AnalyticsService
+@inject ILocalizationService Localization
+@inject IJSRuntime JS
+
+<div class="container-fluid py-4">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <h1 class="display-4">
+                    <i class="bi bi-bar-chart-line"></i>
+                    Player Analytics @if (!string.IsNullOrEmpty(playerName)) { <small class="text-muted">- @playerName</small> }
+                </h1>
+                <div>
+                    <button class="btn btn-outline-primary me-2" @onclick="ExportReport">
+                        <i class="bi bi-download"></i> Export Report
+                    </button>
+                    <button class="btn btn-primary" @onclick="() => ShowCompareModal = true">
+                        <i class="bi bi-people"></i> Compare Players
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @if (isLoading)
+    {
+        <div class="text-center py-5">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+            <p class="mt-3">Loading analytics...</p>
+        </div>
+    }
+    else if (analytics != null)
+    {
+        <!-- Overall Performance Card -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card border-primary shadow-sm">
+                    <div class="card-body">
+                        <h4 class="card-title mb-4">Overall Performance Rating</h4>
+                        <div class="row align-items-center">
+                            <div class="col-md-3 text-center">
+                                <div class="position-relative d-inline-block">
+                                    <svg width="200" height="200">
+                                        <circle cx="100" cy="100" r="80" fill="none" stroke="#e9ecef" stroke-width="20"/>
+                                        <circle cx="100" cy="100" r="80" fill="none" stroke="#0d6efd" stroke-width="20"
+                                                stroke-dasharray="@GetCircleDashArray(analytics.OverallRating)" 
+                                                stroke-dashoffset="@GetCircleDashOffset(analytics.OverallRating)"
+                                                transform="rotate(-90 100 100)"/>
+                                    </svg>
+                                    <div class="position-absolute top-50 start-50 translate-middle">
+                                        <h2 class="mb-0">@analytics.OverallRating.ToString("F1")</h2>
+                                        <small class="text-muted">/10</small>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-9">
+                                <div class="row g-3">
+                                    <div class="col-md-3">
+                                        <div class="text-center p-3 bg-light rounded">
+                                            <h5 class="text-primary mb-0">@GetAverageMetric(analytics.PhysicalMetrics)</h5>
+                                            <small class="text-muted">Physical</small>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="text-center p-3 bg-light rounded">
+                                            <h5 class="text-success mb-0">@GetAverageMetric(analytics.TechnicalMetrics)</h5>
+                                            <small class="text-muted">Technical</small>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="text-center p-3 bg-light rounded">
+                                            <h5 class="text-warning mb-0">@GetAverageMetric(analytics.TacticalMetrics)</h5>
+                                            <small class="text-muted">Tactical</small>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="text-center p-3 bg-light rounded">
+                                            <h5 class="text-info mb-0">@GetAverageMetric(analytics.MentalMetrics)</h5>
+                                            <small class="text-muted">Mental</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Performance Trends -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-white">
+                        <h5 class="mb-0"><i class="bi bi-graph-up"></i> Performance Trends</h5>
+                    </div>
+                    <div class="card-body">
+                        @if (trendData != null && trendData.Any())
+                        {
+                            <div class="table-responsive">
+                                <table class="table table-sm">
+                                    <thead>
+                                        <tr>
+                                            <th>Date</th>
+                                            <th>Rating</th>
+                                            <th>Goals</th>
+                                            <th>Assists</th>
+                                            <th>Pass Accuracy</th>
+                                            <th>Duels Won</th>
+                                            <th>Distance</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var trend in trendData.TakeLast(5))
+                                        {
+                                            <tr>
+                                                <td>@trend.Date.ToString("MMM dd")</td>
+                                                <td><span class="badge bg-primary">@trend.OverallRating.ToString("F1")</span></td>
+                                                <td>@trend.GoalsScored</td>
+                                                <td>@trend.Assists</td>
+                                                <td>@trend.PassAccuracy.ToString("F0")%</td>
+                                                <td>@trend.DuelsWon.ToString("F0")%</td>
+                                                <td>@trend.DistanceCovered.ToString("F1") km</td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div class="alert alert-info mt-3">
+                                <strong>Trend Analysis:</strong> Performance has been 
+                                @if (IsTrendImproving()) { <span class="text-success">improving ↗</span> }
+                                else if (IsTrendDeclining()) { <span class="text-danger">declining ↘</span> }
+                                else { <span class="text-primary">stable →</span> }
+                                over the last 10 matches.
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Radar Chart & Heat Map -->
+        <div class="row mb-4">
+            <div class="col-lg-6 mb-3">
+                <div class="card shadow-sm h-100">
+                    <div class="card-header bg-white">
+                        <h5 class="mb-0"><i class="bi bi-diagram-3"></i> Skill Radar Chart</h5>
+                    </div>
+                    <div class="card-body">
+                        @if (radarChart != null)
+                        {
+                            <div class="text-center">
+                                <canvas id="radarChart" width="400" height="400"></canvas>
+                            </div>
+                            <div class="mt-3">
+                                <small class="text-muted">
+                                    <span class="badge bg-primary">●</span> Player
+                                    <span class="badge bg-secondary ms-2">●</span> League Average
+                                </small>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-6 mb-3">
+                <div class="card shadow-sm h-100">
+                    <div class="card-header bg-white">
+                        <h5 class="mb-0"><i class="bi bi-map"></i> Position Heat Map</h5>
+                    </div>
+                    <div class="card-body">
+                        @if (heatMapData != null)
+                        {
+                            <div id="heatMapContainer" style="background-color: #2d4a2b; border-radius: 8px; padding: 20px; position: relative; height: 400px;">
+                                <!-- Simplified heat map visualization -->
+                                <div class="text-white text-center pt-5">
+                                    <p class="mb-3">Heat Map: @heatMapData.DataPoints.Count zones analyzed</p>
+                                    <p class="small">High Activity Zones: @heatMapData.DataPoints.Count(p => p.Intensity > 0.5)</p>
+                                    <div class="mt-4">
+                                        <span class="badge bg-danger me-2">High Activity</span>
+                                        <span class="badge bg-warning me-2">Medium Activity</span>
+                                        <span class="badge bg-info">Low Activity</span>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Statistical Insights -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-white">
+                        <h5 class="mb-0"><i class="bi bi-lightbulb"></i> Statistical Insights</h5>
+                    </div>
+                    <div class="card-body">
+                        @if (insights != null && insights.Any())
+                        {
+                            <div class="row">
+                                @foreach (var insight in insights)
+                                {
+                                    <div class="col-md-6 mb-3">
+                                        <div class="card border-start border-4 @GetInsightBorderClass(insight.Importance)">
+                                            <div class="card-body">
+                                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                                    <h6 class="mb-0">@insight.Title</h6>
+                                                    <span class="badge @GetTrendBadgeClass(insight.Trend)">@insight.Trend</span>
+                                                </div>
+                                                <p class="small text-muted mb-2">@insight.Description</p>
+                                                <div class="d-flex justify-content-between align-items-center">
+                                                    <span class="badge bg-light text-dark">@insight.Category</span>
+                                                    <small class="text-muted">Confidence: @insight.ConfidenceScore.ToString("P0")</small>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Detailed Metrics -->
+        <div class="row mb-4">
+            <div class="col-lg-3 mb-3">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-primary text-white">
+                        <h6 class="mb-0"><i class="bi bi-activity"></i> Physical</h6>
+                    </div>
+                    <div class="card-body">
+                        @foreach (var metric in analytics.PhysicalMetrics)
+                        {
+                            <div class="d-flex justify-content-between mb-2">
+                                <span class="small">@metric.Key</span>
+                                <strong>@metric.Value.ToString("F0")</strong>
+                            </div>
+                            <div class="progress mb-3" style="height: 5px;">
+                                <div class="progress-bar bg-primary" style="width: @metric.Value%"></div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 mb-3">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-success text-white">
+                        <h6 class="mb-0"><i class="bi bi-trophy"></i> Technical</h6>
+                    </div>
+                    <div class="card-body">
+                        @foreach (var metric in analytics.TechnicalMetrics)
+                        {
+                            <div class="d-flex justify-content-between mb-2">
+                                <span class="small">@metric.Key</span>
+                                <strong>@metric.Value.ToString("F0")</strong>
+                            </div>
+                            <div class="progress mb-3" style="height: 5px;">
+                                <div class="progress-bar bg-success" style="width: @metric.Value%"></div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 mb-3">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-warning text-dark">
+                        <h6 class="mb-0"><i class="bi bi-diagram-3"></i> Tactical</h6>
+                    </div>
+                    <div class="card-body">
+                        @foreach (var metric in analytics.TacticalMetrics)
+                        {
+                            <div class="d-flex justify-content-between mb-2">
+                                <span class="small">@metric.Key</span>
+                                <strong>@metric.Value.ToString("F0")</strong>
+                            </div>
+                            <div class="progress mb-3" style="height: 5px;">
+                                <div class="progress-bar bg-warning" style="width: @metric.Value%"></div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 mb-3">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-info text-white">
+                        <h6 class="mb-0"><i class="bi bi-brain"></i> Mental</h6>
+                    </div>
+                    <div class="card-body">
+                        @foreach (var metric in analytics.MentalMetrics)
+                        {
+                            <div class="d-flex justify-content-between mb-2">
+                                <span class="small">@metric.Key</span>
+                                <strong>@metric.Value.ToString("F0")</strong>
+                            </div>
+                            <div class="progress mb-3" style="height: 5px;">
+                                <div class="progress-bar bg-info" style="width: @metric.Value%"></div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Strengths, Weaknesses & Predictive Analytics -->
+        <div class="row mb-4">
+            <div class="col-lg-8 mb-3">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-white">
+                        <h5 class="mb-0"><i class="bi bi-clipboard-check"></i> Strengths & Areas for Improvement</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h6 class="text-success"><i class="bi bi-check-circle"></i> Strengths</h6>
+                                <ul class="list-unstyled">
+                                    @foreach (var strength in analytics.StrengthsAndWeaknesses["Strengths"])
+                                    {
+                                        <li class="mb-2">
+                                            <span class="badge bg-success-subtle text-success me-2">✓</span>
+                                            @strength
+                                        </li>
+                                    }
+                                </ul>
+                            </div>
+                            <div class="col-md-6">
+                                <h6 class="text-warning"><i class="bi bi-exclamation-triangle"></i> Improvement Areas</h6>
+                                <ul class="list-unstyled">
+                                    @foreach (var area in analytics.ImprovementAreas)
+                                    {
+                                        <li class="mb-2">
+                                            <span class="badge bg-warning-subtle text-warning me-2">!</span>
+                                            @area
+                                        </li>
+                                    }
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4 mb-3">
+                <div class="card shadow-sm border-info">
+                    <div class="card-header bg-info text-white">
+                        <h6 class="mb-0"><i class="bi bi-crystal-ball"></i> Predictive Analytics</h6>
+                    </div>
+                    <div class="card-body">
+                        @if (predictive != null)
+                        {
+                            <div class="mb-3">
+                                <small class="text-muted">Market Value</small>
+                                <h5 class="mb-0 text-success">€@((predictive.CurrentMarketValue / 1000000).ToString("F1"))M</h5>
+                            </div>
+                            <div class="mb-3">
+                                <small class="text-muted">1-Year Projection</small>
+                                <h6 class="mb-0">€@((predictive.ProjectedMarketValue1Year / 1000000).ToString("F1"))M</h6>
+                            </div>
+                            <div class="mb-3">
+                                <small class="text-muted">Potential Rating</small>
+                                <div class="progress" style="height: 25px;">
+                                    <div class="progress-bar bg-info" style="width: @predictive.PotentialRating%">
+                                        @predictive.PotentialRating
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <small class="text-muted">Injury Risk</small>
+                                <div class="progress" style="height: 10px;">
+                                    <div class="progress-bar @GetInjuryRiskColor(predictive.InjuryRiskScore)" 
+                                         style="width: @(predictive.InjuryRiskScore * 100)%"></div>
+                                </div>
+                                <small class="text-muted">@(predictive.InjuryRiskScore * 100).ToString("F0")%</small>
+                            </div>
+                            <div class="alert alert-light mb-0">
+                                <small><strong>Trajectory:</strong> @predictive.PerformanceTrajectory</small>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+<!-- Compare Players Modal -->
+@if (ShowCompareModal)
+{
+    <div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5);">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="bi bi-people"></i> Compare Players</h5>
+                    <button type="button" class="btn-close" @onclick="() => ShowCompareModal = false"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Select players to compare with Player @PlayerId:</p>
+                    <div class="mb-3">
+                        <label class="form-label">Player IDs (comma-separated)</label>
+                        <input type="text" class="form-control" @bind="comparePlayerIds" placeholder="2, 3, 4" />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Comparison Metric</label>
+                        <select class="form-select" @bind="comparisonMetric">
+                            <option value="Overall">Overall Rating</option>
+                            <option value="Goals">Goals</option>
+                            <option value="Assists">Assists</option>
+                            <option value="PassAccuracy">Pass Accuracy</option>
+                            <option value="DuelsWon">Duels Won</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" @onclick="() => ShowCompareModal = false">Cancel</button>
+                    <button type="button" class="btn btn-primary" @onclick="ComparePlayers">
+                        <i class="bi bi-graph-up"></i> Compare
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter] public int PlayerId { get; set; }
+
+    private PlayerPerformanceAnalytics? analytics;
+    private List<PerformanceTrendData>? trendData;
+    private HeatMapData? heatMapData;
+    private List<StatisticalInsight>? insights;
+    private PlayerRadarChart? radarChart;
+    private PredictiveAnalytics? predictive;
+
+    private bool isLoading = true;
+    private string playerName = "John Doe";
+    private bool ShowCompareModal = false;
+    private string comparePlayerIds = "";
+    private string comparisonMetric = "Overall";
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadPlayerAnalytics();
+    }
+
+    private async Task LoadPlayerAnalytics()
+    {
+        isLoading = true;
+        try
+        {
+            analytics = await AnalyticsService.GetPlayerPerformanceAsync(PlayerId);
+            trendData = await AnalyticsService.GetPerformanceTrendsAsync(PlayerId, DateTime.Now.AddMonths(-3), DateTime.Now);
+            heatMapData = await AnalyticsService.GenerateHeatMapAsync(PlayerId);
+            insights = await AnalyticsService.GetStatisticalInsightsAsync(PlayerId);
+            radarChart = await AnalyticsService.GenerateRadarChartAsync(PlayerId);
+            predictive = await AnalyticsService.GetPredictiveAnalyticsAsync(PlayerId);
+        }
+        catch (Exception ex)
+        {
+            await JS.InvokeVoidAsync("console.error", $"Error loading analytics: {ex.Message}");
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private string GetAverageMetric(Dictionary<string, double> metrics)
+    {
+        return metrics.Any() ? metrics.Values.Average().ToString("F0") : "N/A";
+    }
+
+    private string GetCircleDashArray(double rating)
+    {
+        var circumference = 2 * Math.PI * 80;
+        var progress = (rating / 10.0) * circumference;
+        return $"{progress} {circumference}";
+    }
+
+    private string GetCircleDashOffset(double rating)
+    {
+        return "0";
+    }
+
+    private bool IsTrendImproving()
+    {
+        if (trendData == null || trendData.Count < 5) return false;
+        var recent = trendData.TakeLast(5).Select(t => t.OverallRating).ToList();
+        return recent.Last() > recent.First() + 0.3;
+    }
+
+    private bool IsTrendDeclining()
+    {
+        if (trendData == null || trendData.Count < 5) return false;
+        var recent = trendData.TakeLast(5).Select(t => t.OverallRating).ToList();
+        return recent.Last() < recent.First() - 0.3;
+    }
+
+    private string GetInsightBorderClass(string importance)
+    {
+        return importance.ToLower() switch
+        {
+            "high" => "border-danger",
+            "medium" => "border-warning",
+            _ => "border-info"
+        };
+    }
+
+    private string GetTrendBadgeClass(string trend)
+    {
+        return trend.ToLower() switch
+        {
+            "improving" => "bg-success",
+            "declining" => "bg-danger",
+            _ => "bg-secondary"
+        };
+    }
+
+    private string GetInjuryRiskColor(double risk)
+    {
+        if (risk < 0.2) return "bg-success";
+        if (risk < 0.4) return "bg-warning";
+        return "bg-danger";
+    }
+
+    private async Task ExportReport()
+    {
+        await JS.InvokeVoidAsync("alert", "Export functionality would generate PDF/Excel report");
+    }
+
+    private async Task ComparePlayers()
+    {
+        try
+        {
+            var playerIds = comparePlayerIds.Split(',').Select(id => int.Parse(id.Trim())).ToList();
+            playerIds.Insert(0, PlayerId);
+
+            var comparison = await AnalyticsService.ComparePlayersAsync(playerIds, comparisonMetric);
+            
+            // Navigate to comparison page or show results
+            await JS.InvokeVoidAsync("alert", $"Comparing {playerIds.Count} players on {comparisonMetric}");
+            ShowCompareModal = false;
+        }
+        catch (Exception ex)
+        {
+            await JS.InvokeVoidAsync("alert", $"Error: {ex.Message}");
+        }
+    }
+}

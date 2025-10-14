@@ -38,6 +38,8 @@ builder.Services.AddBlazoredLocalStorage();
 // Add custom services
 builder.Services.AddSingleton<ILocalizationService, LocalizationService>();
 builder.Services.AddSingleton<IThemeService, ThemeService>();
+builder.Services.AddScoped<IHybridAnalyticsService, HybridAnalyticsService>();
+builder.Services.AddScoped<IPlayerAnalyticsService, PlayerAnalyticsService>();
 
 // Add HTTP Client for API calls
 builder.Services.AddHttpClient("ScoutVisionAPI", client =>
