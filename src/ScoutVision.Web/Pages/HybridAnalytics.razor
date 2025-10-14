@@ -1,0 +1,440 @@
+@page "/hybrid-analytics"
+@using ScoutVision.Web.Services
+@inject IHybridAnalyticsService HybridAnalytics
+@inject ILocalizationService Localization
+@inject IJSRuntime JS
+
+<div class="container-fluid py-4">
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <h1 class="display-4">
+                    <i class="bi bi-diagram-3"></i>
+                    @Localization.GetString("HybridAnalytics")
+                </h1>
+                <button class="btn btn-primary btn-lg" @onclick="ShowCreateSessionModal">
+                    <i class="bi bi-plus-circle"></i>
+                    @Localization.GetString("NewSession")
+                </button>
+            </div>
+            <p class="lead text-muted">
+                @Localization.GetString("HybridAnalyticsDescription")
+            </p>
+        </div>
+    </div>
+
+    <!-- Analysis Mode Selection -->
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card border-primary h-100 @(selectedMode == "web" ? "border-3" : "")" 
+                 style="cursor: pointer;" @onclick="() => SelectMode(\"web\")">
+                <div class="card-body text-center">
+                    <i class="bi bi-globe2 display-3 text-primary"></i>
+                    <h4 class="card-title mt-3">Web Analytics</h4>
+                    <p class="card-text">Traditional 2D charts, graphs, and statistical analysis</p>
+                    @if (selectedMode == "web")
+                    {
+                        <span class="badge bg-primary">Selected</span>
+                    }
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="card border-success h-100 @(selectedMode == "gmod" ? "border-3" : "")" 
+                 style="cursor: pointer;" @onclick="() => SelectMode(\"gmod\")">
+                <div class="card-body text-center">
+                    <i class="bi bi-badge-3d display-3 text-success"></i>
+                    <h4 class="card-title mt-3">GMod 3D Visualization</h4>
+                    <p class="card-text">Immersive 3D tactical analysis and spatial visualization</p>
+                    @if (selectedMode == "gmod")
+                    {
+                        <span class="badge bg-success">Selected</span>
+                    }
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="card border-warning h-100 @(selectedMode == "hybrid" ? "border-3" : "")" 
+                 style="cursor: pointer;" @onclick="() => SelectMode(\"hybrid\")">
+                <div class="card-body text-center">
+                    <i class="bi bi-diagram-3-fill display-3 text-warning"></i>
+                    <h4 class="card-title mt-3">Hybrid Mode</h4>
+                    <p class="card-text">Combined web and 3D analytics for comprehensive insights</p>
+                    @if (selectedMode == "hybrid")
+                    {
+                        <span class="badge bg-warning">Selected</span>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Active Sessions -->
+    @if (activeSessions.Any())
+    {
+        <div class="row mb-4">
+            <div class="col-12">
+                <h3>
+                    <i class="bi bi-activity"></i>
+                    Active Sessions
+                </h3>
+            </div>
+            @foreach (var session in activeSessions)
+            {
+                <div class="col-md-6 col-lg-4 mb-3">
+                    <div class="card">
+                        <div class="card-header bg-primary text-white">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span><i class="bi bi-camera-video"></i> @session.AnalysisType</span>
+                                <span class="badge bg-light text-dark">@session.Status</span>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <p><strong>Match ID:</strong> @session.MatchId</p>
+                            <p><strong>Created:</strong> @session.CreatedAt.ToString("g")</p>
+                            <p><strong>Participants:</strong> @session.Participants.Count</p>
+                            @if (session.Include3DVisualization)
+                            {
+                                <span class="badge bg-success">
+                                    <i class="bi bi-badge-3d"></i> 3D Enabled
+                                </span>
+                            }
+                        </div>
+                        <div class="card-footer">
+                            <div class="btn-group w-100" role="group">
+                                <button class="btn btn-sm btn-primary" @onclick="() => ViewSession(session.SessionId)">
+                                    <i class="bi bi-eye"></i> View
+                                </button>
+                                @if (session.Include3DVisualization && !string.IsNullOrEmpty(session.GModSessionId))
+                                {
+                                    <button class="btn btn-sm btn-success" @onclick="() => SyncWithGMod(session.GModSessionId)">
+                                        <i class="bi bi-arrow-repeat"></i> Sync
+                                    </button>
+                                }
+                                <button class="btn btn-sm btn-danger" @onclick="() => StopSession(session.SessionId)">
+                                    <i class="bi bi-stop-circle"></i> Stop
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+
+    <!-- Quick Actions -->
+    <div class="row">
+        <div class="col-12">
+            <h3><i class="bi bi-lightning-charge"></i> Quick Actions</h3>
+        </div>
+        
+        <div class="col-md-3 mb-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body text-center">
+                    <i class="bi bi-person-video2 display-4 text-info"></i>
+                    <h5 class="mt-3">Player Analysis</h5>
+                    <button class="btn btn-info mt-2" @onclick="() => QuickStart(\"player\")">
+                        Start Analysis
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3 mb-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body text-center">
+                    <i class="bi bi-grid-3x3-gap display-4 text-success"></i>
+                    <h5 class="mt-3">Formation Study</h5>
+                    <button class="btn btn-success mt-2" @onclick="() => QuickStart(\"formation\")">
+                        Start Analysis
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3 mb-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body text-center">
+                    <i class="bi bi-activity display-4 text-warning"></i>
+                    <h5 class="mt-3">Movement Tracking</h5>
+                    <button class="btn btn-warning mt-2" @onclick="() => QuickStart(\"movement\")">
+                        Start Analysis
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3 mb-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body text-center">
+                    <i class="bi bi-diagram-3 display-4 text-danger"></i>
+                    <h5 class="mt-3">Full Match Review</h5>
+                    <button class="btn btn-danger mt-2" @onclick="() => QuickStart(\"fullmatch\")">
+                        Start Analysis
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- GMod Connection Status -->
+    @if (selectedMode != "web")
+    {
+        <div class="row mt-4">
+            <div class="col-12">
+                <div class="alert @(gmodConnected ? "alert-success" : "alert-warning")" role="alert">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <i class="bi @(gmodConnected ? "bi-check-circle" : "bi-exclamation-triangle")"></i>
+                            <strong>GMod Status:</strong>
+                            @if (gmodConnected)
+                            {
+                                <span>Connected - Ready for 3D visualization</span>
+                            }
+                            else
+                            {
+                                <span>Not Connected - Start GMod addon to enable 3D features</span>
+                            }
+                        </div>
+                        <button class="btn btn-sm @(gmodConnected ? "btn-success" : "btn-warning")" 
+                                @onclick="CheckGModConnection">
+                            <i class="bi bi-arrow-clockwise"></i> Check Connection
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+<!-- Create Session Modal -->
+@if (showCreateModal)
+{
+    <div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5);">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="bi bi-plus-circle"></i>
+                        Create New Analysis Session
+                    </h5>
+                    <button type="button" class="btn-close" @onclick="CloseCreateModal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Match ID</label>
+                        <input type="number" class="form-control" @bind="newSession.MatchId" />
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Analysis Type</label>
+                        <select class="form-select" @bind="newSession.AnalysisType">
+                            <option value="player">Player Analysis</option>
+                            <option value="formation">Formation Study</option>
+                            <option value="movement">Movement Tracking</option>
+                            <option value="fullmatch">Full Match Review</option>
+                        </select>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Visualization Mode</label>
+                        <select class="form-select" @bind="newSession.VisualizationType">
+                            <option value="2D">2D Web Only</option>
+                            <option value="3D">3D GMod Only</option>
+                            <option value="Hybrid">Hybrid (Both)</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-check mb-3">
+                        <input class="form-check-input" type="checkbox" 
+                               @bind="newSession.Include3DVisualization" id="enable3D" />
+                        <label class="form-check-label" for="enable3D">
+                            Enable 3D Visualization (Requires GMod)
+                        </label>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Participant Emails (comma-separated)</label>
+                        <input type="text" class="form-control" @bind="participantsInput" 
+                               placeholder="analyst1@team.com, analyst2@team.com" />
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" @onclick="CloseCreateModal">
+                        Cancel
+                    </button>
+                    <button type="button" class="btn btn-primary" @onclick="CreateSession">
+                        <i class="bi bi-plus-circle"></i> Create Session
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    private string selectedMode = "hybrid";
+    private bool gmodConnected = false;
+    private bool showCreateModal = false;
+    private string participantsInput = "";
+    
+    private List<AnalysisSession> activeSessions = new();
+    private AnalysisSessionRequest newSession = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        // Initialize with default values
+        newSession = new AnalysisSessionRequest
+        {
+            MatchId = 1,
+            AnalysisType = "player",
+            VisualizationType = "Hybrid",
+            Include3DVisualization = true,
+            Participants = new List<string>()
+        };
+
+        await CheckGModConnection();
+        await LoadActiveSessions();
+    }
+
+    private void SelectMode(string mode)
+    {
+        selectedMode = mode;
+        StateHasChanged();
+    }
+
+    private async Task CheckGModConnection()
+    {
+        try
+        {
+            // Check if GMod addon is running
+            var status = await HybridAnalytics.GetGModSessionStatusAsync("test-connection");
+            gmodConnected = status.Status != "Not Found";
+        }
+        catch
+        {
+            gmodConnected = false;
+        }
+        StateHasChanged();
+    }
+
+    private async Task LoadActiveSessions()
+    {
+        // Mock implementation - replace with actual data loading
+        activeSessions = new List<AnalysisSession>
+        {
+            new AnalysisSession
+            {
+                SessionId = "session-001",
+                MatchId = 101,
+                AnalysisType = "Player Analysis",
+                CreatedAt = DateTime.UtcNow.AddMinutes(-30),
+                Status = "Active",
+                Participants = new List<string> { "analyst1@team.com", "analyst2@team.com" },
+                Include3DVisualization = true,
+                GModSessionId = "gmod-session-001"
+            }
+        };
+    }
+
+    private void ShowCreateSessionModal()
+    {
+        showCreateModal = true;
+        newSession = new AnalysisSessionRequest
+        {
+            MatchId = 1,
+            AnalysisType = "player",
+            VisualizationType = "Hybrid",
+            Include3DVisualization = selectedMode != "web",
+            Participants = new List<string>()
+        };
+    }
+
+    private void CloseCreateModal()
+    {
+        showCreateModal = false;
+    }
+
+    private async Task CreateSession()
+    {
+        // Parse participants
+        if (!string.IsNullOrWhiteSpace(participantsInput))
+        {
+            newSession.Participants = participantsInput
+                .Split(',')
+                .Select(p => p.Trim())
+                .Where(p => !string.IsNullOrEmpty(p))
+                .ToList();
+        }
+
+        // Create the session
+        var session = await HybridAnalytics.CreateAnalysisSessionAsync(newSession);
+        
+        if (session != null)
+        {
+            activeSessions.Add(session);
+            await JS.InvokeVoidAsync("alert", $"Session {session.SessionId} created successfully!");
+            CloseCreateModal();
+        }
+        else
+        {
+            await JS.InvokeVoidAsync("alert", "Failed to create session. Please try again.");
+        }
+    }
+
+    private async Task QuickStart(string analysisType)
+    {
+        var request = new AnalysisSessionRequest
+        {
+            MatchId = 1, // Default match - should prompt user for actual match
+            AnalysisType = analysisType,
+            VisualizationType = selectedMode == "web" ? "2D" : 
+                               selectedMode == "gmod" ? "3D" : "Hybrid",
+            Include3DVisualization = selectedMode != "web",
+            Participants = new List<string> { "current-user@team.com" }
+        };
+
+        var session = await HybridAnalytics.CreateAnalysisSessionAsync(request);
+        
+        if (session != null)
+        {
+            activeSessions.Add(session);
+            await JS.InvokeVoidAsync("alert", $"Quick {analysisType} session started!");
+        }
+    }
+
+    private async Task ViewSession(string sessionId)
+    {
+        var results = await HybridAnalytics.GetSessionResultsAsync(sessionId);
+        // Navigate to session detail view
+        await JS.InvokeVoidAsync("alert", $"Viewing session {sessionId}");
+    }
+
+    private async Task SyncWithGMod(string gmodSessionId)
+    {
+        var success = await HybridAnalytics.SynchronizeWithGModAsync(gmodSessionId);
+        if (success)
+        {
+            await JS.InvokeVoidAsync("alert", "Synchronized with GMod successfully!");
+        }
+        else
+        {
+            await JS.InvokeVoidAsync("alert", "Failed to sync with GMod. Check connection.");
+        }
+    }
+
+    private async Task StopSession(string sessionId)
+    {
+        var session = activeSessions.FirstOrDefault(s => s.SessionId == sessionId);
+        if (session != null && !string.IsNullOrEmpty(session.GModSessionId))
+        {
+            await HybridAnalytics.StopGModSessionAsync(session.GModSessionId);
+        }
+        
+        activeSessions.RemoveAll(s => s.SessionId == sessionId);
+        await JS.InvokeVoidAsync("alert", $"Session {sessionId} stopped.");
+        StateHasChanged();
+    }
+}

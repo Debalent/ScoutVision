@@ -1,0 +1,606 @@
+@page "/search"
+@inject HttpClient Http
+@inject IJSRuntime JSRuntime
+
+<div class="container-fluid mt-4">
+    <!-- Search Header -->
+    <MudCard Class="mb-6">
+        <MudCardContent>
+            <MudGrid AlignItems="Center">
+                <MudItem xs="12" md="8">
+                    <MudTextField @bind-Value="searchQuery" 
+                                  Label="Search players, footage, statistics..." 
+                                  Variant="Variant.Outlined" 
+                                  Adornment="Adornment.Start" 
+                                  AdornmentIcon="Icons.Material.Filled.Search"
+                                  OnKeyPress="OnSearchKeyPress"
+                                  FullWidth="true"
+                                  Class="search-input" />
+                </MudItem>
+                <MudItem xs="12" md="4">
+                    <MudButton Variant="Variant.Filled" 
+                               Color="Color.Primary" 
+                               StartIcon="Icons.Material.Filled.Search"
+                               OnClick="ExecuteSearch"
+                               FullWidth="true"
+                               Size="Size.Large">
+                        Search
+                    </MudButton>
+                </MudItem>
+            </MudGrid>
+        </MudCardContent>
+    </MudCard>
+
+    <!-- Search Filters -->
+    <MudCard Class="mb-6">
+        <MudCardHeader>
+            <CardHeaderContent>
+                <MudText Typo="Typo.h6">Search Filters</MudText>
+            </CardHeaderContent>
+            <CardHeaderActions>
+                <MudButton StartIcon="@(showFilters ? Icons.Material.Filled.ExpandLess : Icons.Material.Filled.ExpandMore)"
+                           Color="Color.Primary"
+                           OnClick="ToggleFilters">
+                    @(showFilters ? "Hide" : "Show") Filters
+                </MudButton>
+            </CardHeaderActions>
+        </MudCardHeader>
+        
+        @if (showFilters)
+        {
+            <MudCardContent>
+                <MudGrid>
+                    <!-- Search Type Selection -->
+                    <MudItem xs="12" md="3">
+                        <MudSelect T="string" @bind-Value="selectedSearchType" Label="Search Type" Variant="Variant.Outlined">
+                            <MudSelectItem Value="@("all")">All Content</MudSelectItem>
+                            <MudSelectItem Value="@("players")">Players Only</MudSelectItem>
+                            <MudSelectItem Value="@("footage")">Game Footage</MudSelectItem>
+                            <MudSelectItem Value="@("statbooks")">Statistics</MudSelectItem>
+                        </MudSelect>
+                    </MudItem>
+
+                    <!-- Player-specific filters -->
+                    @if (selectedSearchType is "all" or "players")
+                    {
+                        <MudItem xs="12" md="3">
+                            <MudSelect T="string" @bind-Value="selectedPosition" Label="Position" Variant="Variant.Outlined" Clearable="true">
+                                @foreach (var position in availablePositions)
+                                {
+                                    <MudSelectItem Value="@position">@position</MudSelectItem>
+                                }
+                            </MudSelect>
+                        </MudItem>
+                        <MudItem xs="12" md="3">
+                            <MudSelect T="string" @bind-Value="selectedTeam" Label="Team" Variant="Variant.Outlined" Clearable="true">
+                                @foreach (var team in availableTeams)
+                                {
+                                    <MudSelectItem Value="@team">@team</MudSelectItem>
+                                }
+                            </MudSelect>
+                        </MudItem>
+                        <MudItem xs="12" md="3">
+                            <MudSelect T="string" @bind-Value="selectedNationality" Label="Nationality" Variant="Variant.Outlined" Clearable="true">
+                                @foreach (var nationality in availableNationalities)
+                                {
+                                    <MudSelectItem Value="@nationality">@nationality</MudSelectItem>
+                                }
+                            </MudSelect>
+                        </MudItem>
+                    }
+
+                    <!-- Footage-specific filters -->
+                    @if (selectedSearchType is "all" or "footage")
+                    {
+                        <MudItem xs="12" md="3">
+                            <MudSelect T="string" @bind-Value="selectedCompetition" Label="Competition" Variant="Variant.Outlined" Clearable="true">
+                                @foreach (var competition in availableCompetitions)
+                                {
+                                    <MudSelectItem Value="@competition">@competition</MudSelectItem>
+                                }
+                            </MudSelect>
+                        </MudItem>
+                        <MudItem xs="12" md="3">
+                            <MudSelect T="string" @bind-Value="selectedSeason" Label="Season" Variant="Variant.Outlined" Clearable="true">
+                                @foreach (var season in availableSeasons)
+                                {
+                                    <MudSelectItem Value="@season">@season</MudSelectItem>
+                                }
+                            </MudSelect>
+                        </MudItem>
+                        <MudItem xs="12" md="3">
+                            <MudSwitch @bind-Checked="highlightsOnly" Label="Highlights Only" Color="Color.Primary" />
+                        </MudItem>
+                        <MudItem xs="12" md="3">
+                            <MudSwitch @bind-Checked="fullMatchOnly" Label="Full Matches Only" Color="Color.Primary" />
+                        </MudItem>
+                    }
+                </MudGrid>
+
+                <MudGrid Class="mt-4">
+                    <MudItem xs="12" md="6">
+                        <MudButton Variant="Variant.Outlined" 
+                                   Color="Color.Primary" 
+                                   StartIcon="Icons.Material.Filled.FilterAlt"
+                                   OnClick="ApplyFilters">
+                            Apply Filters
+                        </MudButton>
+                    </MudItem>
+                    <MudItem xs="12" md="6" Class="d-flex justify-end">
+                        <MudButton Variant="Variant.Text" 
+                                   StartIcon="Icons.Material.Filled.Clear"
+                                   OnClick="ClearFilters">
+                            Clear All
+                        </MudButton>
+                    </MudItem>
+                </MudGrid>
+            </MudCardContent>
+        }
+    </MudCard>
+
+    <!-- Search Results -->
+    @if (isLoading)
+    {
+        <MudCard>
+            <MudCardContent>
+                <div class="d-flex justify-center align-center pa-8">
+                    <MudProgressCircular Color="Color.Primary" Indeterminate="true" />
+                    <MudText Class="ml-4">Searching...</MudText>
+                </div>
+            </MudCardContent>
+        </MudCard>
+    }
+    else if (searchResults != null && searchResults.Any())
+    {
+        <!-- Results Summary -->
+        <MudCard Class="mb-4">
+            <MudCardContent>
+                <MudGrid AlignItems="Center">
+                    <MudItem xs="12" md="6">
+                        <MudText Typo="Typo.h6">
+                            Found @totalResults results for "@lastSearchQuery"
+                        </MudText>
+                    </MudItem>
+                    <MudItem xs="12" md="6" Class="d-flex justify-end">
+                        <MudSelect T="string" @bind-Value="sortBy" Label="Sort by" Variant="Variant.Outlined" Class="mr-4">
+                            <MudSelectItem Value="@("relevance")">Relevance</MudSelectItem>
+                            <MudSelectItem Value="@("date")">Date</MudSelectItem>
+                            <MudSelectItem Value="@("rating")">Rating</MudSelectItem>
+                            <MudSelectItem Value="@("name")">Name</MudSelectItem>
+                        </MudSelect>
+                        <MudToggleIconButton @bind-Toggled="isGridView"
+                                             Icon="@Icons.Material.Filled.ViewList"
+                                             ToggledIcon="@Icons.Material.Filled.GridView"
+                                             Title="Toggle View" />
+                    </MudItem>
+                </MudGrid>
+            </MudCardContent>
+        </MudCard>
+
+        <!-- Player Results -->
+        @if (playerResults.Any())
+        {
+            <MudCard Class="mb-6">
+                <MudCardHeader>
+                    <CardHeaderContent>
+                        <MudText Typo="Typo.h6">Players (@playerResults.Count)</MudText>
+                    </CardHeaderContent>
+                </MudCardHeader>
+                <MudCardContent>
+                    @if (isGridView)
+                    {
+                        <MudGrid>
+                            @foreach (var player in playerResults)
+                            {
+                                <MudItem xs="12" sm="6" md="4" lg="3">
+                                    <PlayerCard Player="player" OnViewDetails="ViewPlayerDetails" />
+                                </MudItem>
+                            }
+                        </MudGrid>
+                    }
+                    else
+                    {
+                        <MudList>
+                            @foreach (var player in playerResults)
+                            {
+                                <MudListItem OnClick="() => ViewPlayerDetails(player.Id)">
+                                    <div class="d-flex align-center">
+                                        <MudAvatar Size="Size.Medium" Class="mr-4">
+                                            @player.FullName.Substring(0, 2).ToUpper()
+                                        </MudAvatar>
+                                        <div class="flex-grow-1">
+                                            <MudText Typo="Typo.subtitle1">@player.FullName</MudText>
+                                            <MudText Typo="Typo.body2" Color="Color.Secondary">
+                                                @player.Position • @player.CurrentTeam • Age @player.Age
+                                            </MudText>
+                                        </div>
+                                        <MudChip Size="Size.Small" Color="GetPriorityColor(player.Priority)">
+                                            @player.Priority
+                                        </MudChip>
+                                    </div>
+                                </MudListItem>
+                                <MudDivider />
+                            }
+                        </MudList>
+                    }
+                </MudCardContent>
+            </MudCard>
+        }
+
+        <!-- Footage Results -->
+        @if (footageResults.Any())
+        {
+            <MudCard Class="mb-6">
+                <MudCardHeader>
+                    <CardHeaderContent>
+                        <MudText Typo="Typo.h6">Game Footage (@footageResults.Count)</MudText>
+                    </CardHeaderContent>
+                </MudCardHeader>
+                <MudCardContent>
+                    <MudGrid>
+                        @foreach (var footage in footageResults)
+                        {
+                            <MudItem xs="12" md="6" lg="4">
+                                <FootageCard Footage="footage" OnWatch="WatchFootage" />
+                            </MudItem>
+                        }
+                    </MudGrid>
+                </MudCardContent>
+            </MudCard>
+        }
+
+        <!-- StatBook Results -->
+        @if (statBookResults.Any())
+        {
+            <MudCard Class="mb-6">
+                <MudCardHeader>
+                    <CardHeaderContent>
+                        <MudText Typo="Typo.h6">Statistics (@statBookResults.Count)</MudText>
+                    </CardHeaderContent>
+                </MudCardHeader>
+                <MudCardContent>
+                    <MudList>
+                        @foreach (var statBook in statBookResults)
+                        {
+                            <MudListItem OnClick="() => ViewStatBook(statBook.Id)">
+                                <div class="d-flex align-center">
+                                    <MudIcon Icon="Icons.Material.Filled.Assessment" Class="mr-4" />
+                                    <div class="flex-grow-1">
+                                        <MudText Typo="Typo.subtitle1">@statBook.Title</MudText>
+                                        <MudText Typo="Typo.body2" Color="Color.Secondary">
+                                            @statBook.League • @statBook.Season • Updated @statBook.LastUpdated.ToString("MMM dd, yyyy")
+                                        </MudText>
+                                    </div>
+                                    <div class="d-flex align-center">
+                                        <MudRating ReadOnly="true" SelectedValue="(int)statBook.UserRating" />
+                                        <MudText Class="ml-2">@statBook.UserRating.ToString("F1")</MudText>
+                                    </div>
+                                </div>
+                            </MudListItem>
+                            <MudDivider />
+                        }
+                    </MudList>
+                </MudCardContent>
+            </MudCard>
+        }
+
+        <!-- Pagination -->
+        <MudCard>
+            <MudCardContent>
+                <div class="d-flex justify-center">
+                    <MudPagination Count="totalPages" @bind-Selected="currentPage" OnSelectedChanged="OnPageChanged" />
+                </div>
+            </MudCardContent>
+        </MudCard>
+    }
+    else if (!isLoading && hasSearched)
+    {
+        <!-- No Results -->
+        <MudCard>
+            <MudCardContent>
+                <div class="text-center pa-8">
+                    <MudIcon Icon="Icons.Material.Outlined.SearchOff" Style="font-size: 4rem;" Color="Color.Secondary" />
+                    <MudText Typo="Typo.h6" Class="mt-4">No results found</MudText>
+                    <MudText Typo="Typo.body2" Color="Color.Secondary" Class="mt-2">
+                        Try adjusting your search terms or filters
+                    </MudText>
+                    <MudButton Variant="Variant.Outlined" 
+                               Color="Color.Primary" 
+                               StartIcon="Icons.Material.Filled.Clear"
+                               OnClick="ClearSearch"
+                               Class="mt-4">
+                        Clear Search
+                    </MudButton>
+                </div>
+            </MudCardContent>
+        </MudCard>
+    }
+    else
+    {
+        <!-- Initial State -->
+        <MudCard>
+            <MudCardContent>
+                <div class="text-center pa-8">
+                    <MudIcon Icon="Icons.Material.Outlined.Search" Style="font-size: 4rem;" Color="Color.Primary" />
+                    <MudText Typo="Typo.h5" Class="mt-4">Discover Players, Footage, and Statistics</MudText>
+                    <MudText Typo="Typo.body1" Color="Color.Secondary" Class="mt-2">
+                        Use our powerful search to find exactly what you're looking for
+                    </MudText>
+                    
+                    <!-- Quick Search Suggestions -->
+                    <div class="mt-6">
+                        <MudText Typo="Typo.subtitle1" Class="mb-3">Popular Searches:</MudText>
+                        <MudChipSet>
+                            @foreach (var suggestion in popularSearches)
+                            {
+                                <MudChip OnClick="() => QuickSearch(suggestion)" 
+                                         Color="Color.Primary" 
+                                         Variant="Variant.Outlined">
+                                    @suggestion
+                                </MudChip>
+                            }
+                        </MudChipSet>
+                    </div>
+                </div>
+            </MudCardContent>
+        </MudCard>
+    }
+        });
+    }
+}
+</div>
+
+@code {
+    // Search state
+    private string searchQuery = string.Empty;
+    private string lastSearchQuery = string.Empty;
+    private bool isLoading = false;
+    private bool hasSearched = false;
+    private bool showFilters = false;
+    private bool isGridView = true;
+
+    // Filter state
+    private string selectedSearchType = "all";
+    private string selectedPosition = string.Empty;
+    private string selectedTeam = string.Empty;
+    private string selectedNationality = string.Empty;
+    private string selectedCompetition = string.Empty;
+    private string selectedSeason = string.Empty;
+    private bool highlightsOnly = false;
+    private bool fullMatchOnly = false;
+    private string sortBy = "relevance";
+
+    // Results state
+    private List<object> searchResults = new();
+    private List<Player> playerResults = new();
+    private List<GameFootage> footageResults = new();
+    private List<StatBook> statBookResults = new();
+    private int totalResults = 0;
+    private int currentPage = 1;
+    private int totalPages = 1;
+    private const int pageSize = 20;
+
+    // Filter options
+    private List<string> availablePositions = new();
+    private List<string> availableTeams = new();
+    private List<string> availableNationalities = new();
+    private List<string> availableCompetitions = new();
+    private List<string> availableSeasons = new();
+
+    // Popular searches
+    private List<string> popularSearches = new()
+    {
+        "young forwards", "premier league", "champions league", "defensive midfielders", 
+        "la liga highlights", "bundesliga stats", "serie a", "ligue 1"
+    };
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadFilterOptions();
+    }
+
+    private async Task LoadFilterOptions()
+    {
+        try
+        {
+            var response = await Http.GetFromJsonAsync<SearchFiltersResponse>("api/search/filters");
+            if (response != null)
+            {
+                availablePositions = response.Positions;
+                availableTeams = response.Teams;
+                availableNationalities = response.Nationalities;
+                availableCompetitions = response.Competitions;
+                availableSeasons = response.Seasons;
+            }
+        }
+        catch (Exception ex)
+        {
+            // Handle error - could show a snackbar
+            Console.WriteLine($"Error loading filter options: {ex.Message}");
+        }
+    }
+
+    private async Task OnSearchKeyPress(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter")
+        {
+            await ExecuteSearch();
+        }
+    }
+
+    private async Task ExecuteSearch()
+    {
+        if (string.IsNullOrWhiteSpace(searchQuery)) return;
+
+        isLoading = true;
+        hasSearched = true;
+        lastSearchQuery = searchQuery;
+        currentPage = 1;
+
+        try
+        {
+            var searchUrl = BuildSearchUrl();
+            var response = await Http.GetFromJsonAsync<SearchResultsResponse>(searchUrl);
+
+            if (response != null)
+            {
+                playerResults = response.Players ?? new List<Player>();
+                footageResults = response.Footage ?? new List<GameFootage>();
+                statBookResults = response.StatBooks ?? new List<StatBook>();
+                
+                searchResults = new List<object>();
+                searchResults.AddRange(playerResults);
+                searchResults.AddRange(footageResults);
+                searchResults.AddRange(statBookResults);
+
+                totalResults = response.TotalResults;
+                totalPages = response.TotalPages;
+            }
+        }
+        catch (Exception ex)
+        {
+            // Handle error
+            Console.WriteLine($"Search error: {ex.Message}");
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private string BuildSearchUrl()
+    {
+        var queryParams = new List<string>
+        {
+            $"query={Uri.EscapeDataString(searchQuery)}",
+            $"page={currentPage}",
+            $"pageSize={pageSize}"
+        };
+
+        if (selectedSearchType != "all")
+            queryParams.Add($"types={selectedSearchType}");
+
+        if (!string.IsNullOrEmpty(selectedPosition))
+            queryParams.Add($"position={Uri.EscapeDataString(selectedPosition)}");
+
+        if (!string.IsNullOrEmpty(selectedTeam))
+            queryParams.Add($"team={Uri.EscapeDataString(selectedTeam)}");
+
+        if (!string.IsNullOrEmpty(selectedNationality))
+            queryParams.Add($"nationality={Uri.EscapeDataString(selectedNationality)}");
+
+        if (!string.IsNullOrEmpty(selectedCompetition))
+            queryParams.Add($"competition={Uri.EscapeDataString(selectedCompetition)}");
+
+        if (!string.IsNullOrEmpty(selectedSeason))
+            queryParams.Add($"season={Uri.EscapeDataString(selectedSeason)}");
+
+        if (highlightsOnly)
+            queryParams.Add("highlightsOnly=true");
+
+        if (fullMatchOnly)
+            queryParams.Add("fullMatchOnly=true");
+
+        return $"api/search/comprehensive?{string.Join("&", queryParams)}";
+    }
+
+    private void ToggleFilters()
+    {
+        showFilters = !showFilters;
+    }
+
+    private async Task ApplyFilters()
+    {
+        if (hasSearched)
+        {
+            await ExecuteSearch();
+        }
+    }
+
+    private void ClearFilters()
+    {
+        selectedSearchType = "all";
+        selectedPosition = string.Empty;
+        selectedTeam = string.Empty;
+        selectedNationality = string.Empty;
+        selectedCompetition = string.Empty;
+        selectedSeason = string.Empty;
+        highlightsOnly = false;
+        fullMatchOnly = false;
+    }
+
+    private void ClearSearch()
+    {
+        searchQuery = string.Empty;
+        lastSearchQuery = string.Empty;
+        hasSearched = false;
+        searchResults.Clear();
+        playerResults.Clear();
+        footageResults.Clear();
+        statBookResults.Clear();
+        totalResults = 0;
+        currentPage = 1;
+        totalPages = 1;
+        ClearFilters();
+    }
+
+    private async Task QuickSearch(string query)
+    {
+        searchQuery = query;
+        await ExecuteSearch();
+    }
+
+    private async Task OnPageChanged(int page)
+    {
+        currentPage = page;
+        await ExecuteSearch();
+    }
+
+    private void ViewPlayerDetails(int playerId)
+    {
+        // Navigate to player details page
+        // Navigation.NavigateTo($"/players/{playerId}");
+    }
+
+    private void WatchFootage(int footageId)
+    {
+        // Navigate to footage player
+        // Navigation.NavigateTo($"/footage/{footageId}");
+    }
+
+    private void ViewStatBook(int statBookId)
+    {
+        // Navigate to stat book viewer
+        // Navigation.NavigateTo($"/statbooks/{statBookId}");
+    }
+
+    private Color GetPriorityColor(ScoutingPriority priority)
+    {
+        return priority switch
+        {
+            ScoutingPriority.High => Color.Error,
+            ScoutingPriority.Medium => Color.Warning,
+            ScoutingPriority.Low => Color.Info,
+            _ => Color.Default
+        };
+    }
+
+    // Supporting classes for API responses
+    private class SearchResultsResponse
+    {
+        public List<Player>? Players { get; set; }
+        public List<GameFootage>? Footage { get; set; }
+        public List<StatBook>? StatBooks { get; set; }
+        public int TotalResults { get; set; }
+        public int TotalPages { get; set; }
+    }
+
+    private class SearchFiltersResponse
+    {
+        public List<string> Positions { get; set; } = new();
+        public List<string> Teams { get; set; } = new();
+        public List<string> Nationalities { get; set; } = new();
+        public List<string> Competitions { get; set; } = new();
+        public List<string> Seasons { get; set; } = new();
+    }
+}

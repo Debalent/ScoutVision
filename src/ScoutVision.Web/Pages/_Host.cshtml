@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ScoutVision</title>
+    <base href="~/" />
+    
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
+    
+    <!-- MudBlazor CSS -->
+    <link href="_content/MudBlazor/MudBlazor.min.css" rel="stylesheet" />
+    
+    <!-- Custom CSS for theme support -->
+    <link href="css/site.css" rel="stylesheet" />
+    
+    <link rel="icon" type="image/png" href="favicon.png"/>
+    
+    <style>
+        /* Theme CSS Variables */
+        :root[data-theme="light"] {
+            --mud-palette-primary: #1976d2;
+            --mud-palette-secondary: #00c853;
+            --mud-palette-background: #fafafa;
+            --mud-palette-surface: #ffffff;
+            --mud-palette-text-primary: rgba(0,0,0,0.87);
+            --mud-palette-text-secondary: rgba(0,0,0,0.54);
+        }
+        
+        :root[data-theme="dark"] {
+            --mud-palette-primary: #42a5f5;
+            --mud-palette-secondary: #00e676;
+            --mud-palette-background: #121212;
+            --mud-palette-surface: #1e1e1e;
+            --mud-palette-text-primary: rgba(255,255,255,0.87);
+            --mud-palette-text-secondary: rgba(255,255,255,0.54);
+        }
+        
+        body {
+            background-color: var(--mud-palette-background);
+            color: var(--mud-palette-text-primary);
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+    </style>
+</head>
+
+<body>
+    <component type="typeof(App)" render-mode="ServerPrerendered" />
+
+    <div id="blazor-error-ui">
+        <environment include="Staging,Production">
+            An error has occurred. This application may no longer respond until reloaded.
+        </environment>
+        <environment include="Development">
+            An unhandled exception has occurred. See browser dev tools for details.
+        </environment>
+        <a href="" class="reload">Reload</a>
+        <a class="dismiss">🗙</a>
+    </div>
+
+    <!-- Scripts -->
+    <script src="_framework/blazor.server.js"></script>
+    <script src="_content/MudBlazor/MudBlazor.min.js"></script>
+    
+    <!-- Theme switching script -->
+    <script>
+        window.themeManager = {
+            setTheme: (theme) => {
+                document.documentElement.setAttribute('data-theme', theme);
+                localStorage.setItem('theme', theme);
+            },
+            getTheme: () => {
+                return localStorage.getItem('theme') || 'light';
+            },
+            toggleTheme: () => {
+                const current = window.themeManager.getTheme();
+                const newTheme = current === 'light' ? 'dark' : 'light';
+                window.themeManager.setTheme(newTheme);
+                return newTheme;
+            }
+        };
+        
+        // Initialize theme on load
+        document.addEventListener('DOMContentLoaded', () => {
+            const theme = window.themeManager.getTheme();
+            window.themeManager.setTheme(theme);
+        });
+    </script>
+</body>
+</html>

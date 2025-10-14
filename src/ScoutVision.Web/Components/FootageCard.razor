@@ -1,0 +1,108 @@
+
+
+<MudCard Class="footage-card" Elevation="2">
+    <MudCardMedia Image="@GetThumbnailUrl()" Height="200" />
+    <MudCardContent>
+        <MudText Typo="Typo.h6" Class="mb-2">@Footage.Title</MudText>
+        <MudText Typo="Typo.body2" Color="Color.Secondary" Class="mb-3">
+            @Footage.Description
+        </MudText>
+        
+        <MudGrid>
+            <MudItem xs="6">
+                <MudText Typo="Typo.caption" Color="Color.Secondary">Match</MudText>
+                <MudText Typo="Typo.body2">@Footage.HomeTeam vs @Footage.AwayTeam</MudText>
+            </MudItem>
+            <MudItem xs="6">
+                <MudText Typo="Typo.caption" Color="Color.Secondary">Date</MudText>
+                <MudText Typo="Typo.body2">@Footage.MatchDate.ToString("MMM dd, yyyy")</MudText>
+            </MudItem>
+            <MudItem xs="6">
+                <MudText Typo="Typo.caption" Color="Color.Secondary">Competition</MudText>
+                <MudText Typo="Typo.body2">@Footage.Competition</MudText>
+            </MudItem>
+            <MudItem xs="6">
+                <MudText Typo="Typo.caption" Color="Color.Secondary">Duration</MudText>
+                <MudText Typo="Typo.body2">@FormatDuration(Footage.Duration)</MudText>
+            </MudItem>
+        </MudGrid>
+
+        <div class="d-flex align-center mt-3">
+            <MudChip Size="Size.Small" Color="GetQualityColor()" Class="mr-2">
+                @Footage.Quality
+            </MudChip>
+            @if (Footage.IsHighlightsOnly)
+            {
+                <MudChip Size="Size.Small" Color="Color.Info" Class="mr-2">
+                    Highlights
+                </MudChip>
+            }
+            @if (Footage.IsFullMatch)
+            {
+                <MudChip Size="Size.Small" Color="Color.Success">
+                    Full Match
+                </MudChip>
+            }
+        </div>
+        
+        @if (Footage.RelevanceScore > 0)
+        {
+            <div class="d-flex align-center mt-2">
+                <MudIcon Icon="Icons.Material.Filled.Star" Size="Size.Small" Color="Color.Warning" />
+                <MudText Typo="Typo.caption" Class="ml-1">
+                    Relevance: @Footage.RelevanceScore.ToString("F1")%
+                </MudText>
+            </div>
+        }
+    </MudCardContent>
+    
+    <MudCardActions>
+        <MudButton Variant="Variant.Filled" 
+                   Color="Color.Primary" 
+                   StartIcon="Icons.Material.Filled.PlayArrow"
+                   OnClick="() => OnWatch.InvokeAsync(Footage.Id)">
+            Watch
+        </MudButton>
+        <MudButton Variant="Variant.Text" 
+                   Color="Color.Secondary" 
+                   StartIcon="Icons.Material.Filled.Analytics">
+            Analyze
+        </MudButton>
+        <MudButton Variant="Variant.Text" 
+                   Color="Color.Secondary" 
+                   StartIcon="Icons.Material.Filled.Download">
+            Download
+        </MudButton>
+    </MudCardActions>
+</MudCard>
+
+@code {
+    [Parameter] public GameFootage Footage { get; set; } = new();
+    [Parameter] public EventCallback<int> OnWatch { get; set; }
+
+    private string GetThumbnailUrl()
+    {
+        return !string.IsNullOrEmpty(Footage.ThumbnailUrl) 
+            ? Footage.ThumbnailUrl 
+            : "/images/default-footage-thumbnail.jpg";
+    }
+
+    private Color GetQualityColor()
+    {
+        return Footage.Quality switch
+        {
+            VideoQuality.Ultra4K => Color.Success,
+            VideoQuality.FullHD => Color.Primary,
+            VideoQuality.HD => Color.Info,
+            VideoQuality.Standard => Color.Secondary,
+            _ => Color.Default
+        };
+    }
+
+    private string FormatDuration(TimeSpan duration)
+    {
+        if (duration.TotalHours >= 1)
+            return duration.ToString(@"h\:mm\:ss");
+        return duration.ToString(@"m\:ss");
+    }
+}

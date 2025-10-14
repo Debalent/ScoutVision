@@ -1,0 +1,140 @@
+@using ScoutVision.Web.Services
+@inject IThemeService ThemeService
+@inject IJSRuntime JSRuntime
+
+<MudThemeProvider @ref="_mudThemeProvider" Theme="_currentTheme" />
+<MudDialogProvider />
+<MudSnackbarProvider />
+
+@code {
+    private MudThemeProvider _mudThemeProvider = null!;
+    private MudTheme _currentTheme = new();
+    private bool _isDarkMode = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _isDarkMode = await ThemeService.GetIsDarkModeAsync();
+        UpdateTheme();
+        
+        ThemeService.ThemeChanged += OnThemeChanged;
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await _mudThemeProvider.WatchSystemPreference(OnSystemPreferenceChanged);
+        }
+    }
+
+    private async Task OnSystemPreferenceChanged(bool newValue)
+    {
+        _isDarkMode = newValue;
+        await ThemeService.SetDarkModeAsync(newValue);
+    }
+
+    private async void OnThemeChanged()
+    {
+        _isDarkMode = await ThemeService.GetIsDarkModeAsync();
+        UpdateTheme();
+        StateHasChanged();
+    }
+
+    private void UpdateTheme()
+    {
+        _currentTheme = new MudTheme()
+        {
+            Palette = _isDarkMode ? CreateDarkPalette() : CreateLightPalette(),
+            Typography = new Typography()
+            {
+                Default = new Default()
+                {
+                    FontFamily = new[] { "Roboto", "Helvetica", "Arial", "sans-serif" }
+                },
+                H1 = new H1() { FontSize = "3rem", FontWeight = 300, LineHeight = 1.167 },
+                H2 = new H2() { FontSize = "2.5rem", FontWeight = 300, LineHeight = 1.2 },
+                H3 = new H3() { FontSize = "2rem", FontWeight = 400, LineHeight = 1.167 },
+                H4 = new H4() { FontSize = "1.75rem", FontWeight = 400, LineHeight = 1.235 },
+                H5 = new H5() { FontSize = "1.5rem", FontWeight = 400, LineHeight = 1.334 },
+                H6 = new H6() { FontSize = "1.25rem", FontWeight = 500, LineHeight = 1.6 }
+            },
+            LayoutProperties = new LayoutProperties()
+            {
+                DrawerWidthLeft = "260px",
+                DrawerWidthRight = "300px"
+            }
+        };
+    }
+
+    private PaletteLight CreateLightPalette()
+    {
+        return new PaletteLight()
+        {
+            Primary = Colors.Blue.Default,
+            Secondary = Colors.Green.Accent4,
+            AppbarBackground = Colors.Blue.Default,
+            Background = Colors.Grey.Lighten4,
+            DrawerBackground = "#FFF",
+            DrawerText = "rgba(0,0,0, 0.50)",
+            DrawerIcon = "rgba(0,0,0, 0.50)",
+            Success = Colors.Green.Accent3,
+            Black = "#27272f",
+            White = Colors.Shades.White,
+            Dark = "#27272f",
+            TextPrimary = "rgba(0,0,0, 0.87)",
+            TextSecondary = "rgba(0,0,0, 0.54)",
+            ActionDefault = "rgba(0,0,0, 0.54)",
+            ActionDisabled = "rgba(0,0,0, 0.26)",
+            ActionDisabledBackground = "rgba(0,0,0, 0.12)",
+            Divider = "rgba(0,0,0, 0.12)",
+            DividerLight = "rgba(0,0,0, 0.06)",
+            TableLines = "rgba(0,0,0, 0.12)",
+            LinesDefault = "rgba(0,0,0, 0.12)",
+            LinesInputs = "rgba(0,0,0, 0.42)",
+            TextDisabled = "rgba(0,0,0, 0.38)",
+            Info = Colors.Blue.Default,
+            Warning = Colors.Orange.Default,
+            Error = Colors.Red.Default,
+            Surface = Colors.Shades.White
+        };
+    }
+
+    private PaletteDark CreateDarkPalette()
+    {
+        return new PaletteDark()
+        {
+            Primary = Colors.Blue.Lighten1,
+            Secondary = Colors.Green.Accent4,
+            AppbarBackground = "#1e1e2e",
+            Background = "#181825",
+            BackgroundGrey = "#11111b",
+            Surface = "#1e1e2e",
+            DrawerBackground = "#11111b",
+            DrawerText = "rgba(255,255,255, 0.50)",
+            DrawerIcon = "rgba(255,255,255, 0.50)",
+            Success = Colors.Green.Accent3,
+            Black = "#27272f",
+            White = Colors.Shades.White,
+            Dark = Colors.Grey.Darken3,
+            TextPrimary = "rgba(255,255,255, 0.70)",
+            TextSecondary = "rgba(255,255,255, 0.50)",
+            ActionDefault = "#adadb1",
+            ActionDisabled = "rgba(255,255,255, 0.26)",
+            ActionDisabledBackground = "rgba(255,255,255, 0.12)",
+            Divider = "rgba(255,255,255, 0.12)",
+            DividerLight = "rgba(255,255,255, 0.06)",
+            TableLines = "rgba(255,255,255, 0.12)",
+            LinesDefault = "rgba(255,255,255, 0.12)",
+            LinesInputs = "rgba(255,255,255, 0.3)",
+            TextDisabled = "rgba(255,255,255, 0.2)",
+            Info = Colors.Blue.Lighten1,
+            Warning = Colors.Orange.Lighten1,
+            Error = Colors.Red.Lighten1
+        };
+    }
+
+    public void Dispose()
+    {
+        ThemeService.ThemeChanged -= OnThemeChanged;
+    }
+}

@@ -1,0 +1,78 @@
+
+
+<MudCard Class="player-card" Elevation="2">
+    <MudCardContent>
+        <div class="d-flex align-center mb-3">
+            <MudAvatar Size="Size.Large" Class="mr-3">
+                @GetPlayerInitials()
+            </MudAvatar>
+            <div class="flex-grow-1">
+                <MudText Typo="Typo.h6">@Player.FullName</MudText>
+                <MudText Typo="Typo.body2" Color="Color.Secondary">
+                    @Player.Position
+                </MudText>
+            </div>
+            <MudChip Size="Size.Small" Color="GetPriorityColor()">
+                @Player.Priority
+            </MudChip>
+        </div>
+
+        <MudGrid>
+            <MudItem xs="6">
+                <MudText Typo="Typo.caption" Color="Color.Secondary">Team</MudText>
+                <MudText Typo="Typo.body2">@Player.CurrentTeam</MudText>
+            </MudItem>
+            <MudItem xs="6">
+                <MudText Typo="Typo.caption" Color="Color.Secondary">Age</MudText>
+                <MudText Typo="Typo.body2">@Player.Age</MudText>
+            </MudItem>
+            <MudItem xs="6">
+                <MudText Typo="Typo.caption" Color="Color.Secondary">Nationality</MudText>
+                <MudText Typo="Typo.body2">@Player.Nationality</MudText>
+            </MudItem>
+            <MudItem xs="6">
+                <MudText Typo="Typo.caption" Color="Color.Secondary">Status</MudText>
+                <MudText Typo="Typo.body2">@Player.Status</MudText>
+            </MudItem>
+        </MudGrid>
+    </MudCardContent>
+    
+    <MudCardActions>
+        <MudButton Variant="Variant.Text" 
+                   Color="Color.Primary" 
+                   StartIcon="Icons.Material.Filled.Visibility"
+                   OnClick="() => OnViewDetails.InvokeAsync(Player.Id)">
+            View Details
+        </MudButton>
+        <MudButton Variant="Variant.Text" 
+                   Color="Color.Secondary" 
+                   StartIcon="Icons.Material.Filled.BarChart">
+            Analytics
+        </MudButton>
+    </MudCardActions>
+</MudCard>
+
+@code {
+    [Parameter] public Player Player { get; set; } = new();
+    [Parameter] public EventCallback<int> OnViewDetails { get; set; }
+
+    private string GetPlayerInitials()
+    {
+        if (string.IsNullOrEmpty(Player.FullName)) return "??";
+        var parts = Player.FullName.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+        if (parts.Length >= 2)
+            return $"{parts[0][0]}{parts[^1][0]}".ToUpper();
+        return Player.FullName.Substring(0, Math.Min(2, Player.FullName.Length)).ToUpper();
+    }
+
+    private Color GetPriorityColor()
+    {
+        return Player.Priority switch
+        {
+            ScoutingPriority.High => Color.Error,
+            ScoutingPriority.Medium => Color.Warning,
+            ScoutingPriority.Low => Color.Info,
+            _ => Color.Default
+        };
+    }
+}

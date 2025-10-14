@@ -1,0 +1,225 @@
+@page "/"
+@page "/dashboard"
+@inject HttpClient Http
+
+<PageTitle>Dashboard - ScoutVision</PageTitle>
+
+<MudGrid>
+    <!-- Summary Cards -->
+    <MudItem xs="12" md="3">
+        <MudCard Elevation="2" Class="pa-4">
+            <MudCardContent>
+                <div style="display: flex; align-items: center;">
+                    <MudIcon Icon="Icons.Material.Filled.People" Color="Color.Primary" Style="margin-right: 12px;" />
+                    <div>
+                        <MudText Typo="Typo.h4">@_totalPlayers</MudText>
+                        <MudText Typo="Typo.body2">Total Players</MudText>
+                    </div>
+                </div>
+            </MudCardContent>
+        </MudCard>
+    </MudItem>
+    
+    <MudItem xs="12" md="3">
+        <MudCard Elevation="2" Class="pa-4">
+            <MudCardContent>
+                <div style="display: flex; align-items: center;">
+                    <MudIcon Icon="Icons.Material.Filled.VideoLibrary" Color="Color.Secondary" Style="margin-right: 12px;" />
+                    <div>
+                        <MudText Typo="Typo.h4">@_totalVideos</MudText>
+                        <MudText Typo="Typo.body2">Videos Analyzed</MudText>
+                    </div>
+                </div>
+            </MudCardContent>
+        </MudCard>
+    </MudItem>
+    
+    <MudItem xs="12" md="3">
+        <MudCard Elevation="2" Class="pa-4">
+            <MudCardContent>
+                <div style="display: flex; align-items: center;">
+                    <MudIcon Icon="Icons.Material.Filled.Assessment" Color="Color.Success" Style="margin-right: 12px;" />
+                    <div>
+                        <MudText Typo="Typo.h4">@_totalReports</MudText>
+                        <MudText Typo="Typo.body2">Scout Reports</MudText>
+                    </div>
+                </div>
+            </MudCardContent>
+        </MudCard>
+    </MudItem>
+    
+    <MudItem xs="12" md="3">
+        <MudCard Elevation="2" Class="pa-4">
+            <MudCardContent>
+                <div style="display: flex; align-items: center;">
+                    <MudIcon Icon="Icons.Material.Filled.TrendingUp" Color="Color.Warning" Style="margin-right: 12px;" />
+                    <div>
+                        <MudText Typo="Typo.h4">@_highPotentialPlayers</MudText>
+                        <MudText Typo="Typo.body2">High Potential</MudText>
+                    </div>
+                </div>
+            </MudCardContent>
+        </MudCard>
+    </MudItem>
+    
+    <!-- Recent Activities -->
+    <MudItem xs="12" lg="8">
+        <MudCard Elevation="2">
+            <MudCardHeader>
+                <CardHeaderContent>
+                    <MudText Typo="Typo.h6">Recent Activities</MudText>
+                </CardHeaderContent>
+            </MudCardHeader>
+            <MudCardContent>
+                <MudList Clickable="true">
+                    @if (_recentActivities != null)
+                    {
+                        @foreach (var activity in _recentActivities)
+                        {
+                            <MudListItem Icon="@GetActivityIcon(activity.Type)" Text="@activity.Description" 
+                                        SecondaryText="@activity.Timestamp.ToString("MMM dd, yyyy HH:mm")" />
+                            <MudDivider />
+                        }
+                    }
+                </MudList>
+            </MudCardContent>
+        </MudCard>
+    </MudItem>
+    
+    <!-- Top Prospects -->
+    <MudItem xs="12" lg="4">
+        <MudCard Elevation="2">
+            <MudCardHeader>
+                <CardHeaderContent>
+                    <MudText Typo="Typo.h6">Top Prospects</MudText>
+                </CardHeaderContent>
+            </MudCardHeader>
+            <MudCardContent>
+                <MudList Clickable="true">
+                    @if (_topProspects != null)
+                    {
+                        @foreach (var player in _topProspects)
+                        {
+                            <MudListItem>
+                                <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                                    <div>
+                                        <MudText Typo="Typo.body1">@player.FullName</MudText>
+                                        <MudText Typo="Typo.body2" Color="Color.Secondary">@player.Position - @player.CurrentTeam</MudText>
+                                    </div>
+                                    <MudChip Color="@GetPriorityColor(player.Priority)" Size="Size.Small">
+                                        @player.Priority
+                                    </MudChip>
+                                </div>
+                            </MudListItem>
+                        }
+                    }
+                </MudList>
+            </MudCardContent>
+        </MudCard>
+    </MudItem>
+    
+    <!-- Performance Trends Chart -->
+    <MudItem xs="12">
+        <MudCard Elevation="2">
+            <MudCardHeader>
+                <CardHeaderContent>
+                    <MudText Typo="Typo.h6">Performance Analysis Trends</MudText>
+                </CardHeaderContent>
+            </MudCardHeader>
+            <MudCardContent>
+                <div style="height: 300px; display: flex; align-items: center; justify-content: center; background-color: #f5f5f5; border-radius: 8px;">
+                    <MudText Typo="Typo.h6" Color="Color.Secondary">
+                        Performance Trends Chart
+                        <br />
+                        <MudText Typo="Typo.body2">(Chart visualization will be implemented with Chart.js or similar)</MudText>
+                    </MudText>
+                </div>
+            </MudCardContent>
+        </MudCard>
+    </MudItem>
+</MudGrid>
+
+@code {
+    private int _totalPlayers = 0;
+    private int _totalVideos = 0;
+    private int _totalReports = 0;
+    private int _highPotentialPlayers = 0;
+    
+    private List<Activity>? _recentActivities;
+    private List<Player>? _topProspects;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadDashboardData();
+    }
+
+    private async Task LoadDashboardData()
+    {
+        try
+        {
+            // Load sample data - In real app, these would be API calls
+            _totalPlayers = 247;
+            _totalVideos = 1834;
+            _totalReports = 892;
+            _highPotentialPlayers = 23;
+            
+            _recentActivities = GetSampleActivities();
+            _topProspects = GetSampleProspects();
+        }
+        catch (Exception ex)
+        {
+            // Handle error
+            Console.WriteLine($"Error loading dashboard data: {ex.Message}");
+        }
+    }
+
+    private List<Activity> GetSampleActivities()
+    {
+        return new List<Activity>
+        {
+            new() { Type = "VideoAnalysis", Description = "New video analysis completed for Marcus Johnson", Timestamp = DateTime.Now.AddMinutes(-15) },
+            new() { Type = "ScoutReport", Description = "Scout report submitted for Sarah Chen by John Smith", Timestamp = DateTime.Now.AddHours(-2) },
+            new() { Type = "TalentPrediction", Description = "AI talent prediction updated for Alex Rodriguez", Timestamp = DateTime.Now.AddHours(-4) },
+            new() { Type = "PlayerAdded", Description = "New player profile created: Emma Thompson", Timestamp = DateTime.Now.AddHours(-6) },
+            new() { Type = "MindsetProfile", Description = "Mindset assessment completed for David Wilson", Timestamp = DateTime.Now.AddDays(-1) }
+        };
+    }
+
+    private List<Player> GetSampleProspects()
+    {
+        return new List<Player>
+        {
+            new() { Id = 1, FirstName = "Marcus", LastName = "Johnson", Position = "Forward", CurrentTeam = "Elite FC", Priority = ScoutingPriority.Critical },
+            new() { Id = 2, FirstName = "Sarah", LastName = "Chen", Position = "Midfielder", CurrentTeam = "Thunder United", Priority = ScoutingPriority.High },
+            new() { Id = 3, FirstName = "Alex", LastName = "Rodriguez", Position = "Defender", CurrentTeam = "Victory SC", Priority = ScoutingPriority.High },
+            new() { Id = 4, FirstName = "Emma", LastName = "Thompson", Position = "Goalkeeper", CurrentTeam = "Phoenix FC", Priority = ScoutingPriority.Medium },
+            new() { Id = 5, FirstName = "David", LastName = "Wilson", Position = "Winger", CurrentTeam = "Storm Athletic", Priority = ScoutingPriority.High }
+        };
+    }
+
+    private string GetActivityIcon(string type) => type switch
+    {
+        "VideoAnalysis" => Icons.Material.Filled.VideoLibrary,
+        "ScoutReport" => Icons.Material.Filled.Assignment,
+        "TalentPrediction" => Icons.Material.Filled.TrendingUp,
+        "PlayerAdded" => Icons.Material.Filled.PersonAdd,
+        "MindsetProfile" => Icons.Material.Filled.Psychology,
+        _ => Icons.Material.Filled.Info
+    };
+
+    private Color GetPriorityColor(ScoutingPriority priority) => priority switch
+    {
+        ScoutingPriority.Critical => Color.Error,
+        ScoutingPriority.High => Color.Warning,
+        ScoutingPriority.Medium => Color.Info,
+        ScoutingPriority.Low => Color.Default,
+        _ => Color.Default
+    };
+
+    public class Activity
+    {
+        public string Type { get; set; } = string.Empty;
+        public string Description { get; set; } = string.Empty;
+        public DateTime Timestamp { get; set; }
+    }
+}

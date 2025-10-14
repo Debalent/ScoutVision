@@ -1,0 +1,156 @@
+version: '3.8'
+
+services:
+  # SQL Server Database
+  db:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: scoutvision-db
+    environment:
+      - ACCEPT_EULA=Y
+      - SA_PASSWORD=ScoutVision2024!
+      - MSSQL_PID=Developer
+    ports:
+      - "1433:1433"
+    volumes:
+      - sqlserver_data:/var/opt/mssql
+    networks:
+      - scoutvision-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "/opt/mssql-tools/bin/sqlcmd", "-S", "localhost", "-U", "sa", "-P", "ScoutVision2024!", "-Q", "SELECT 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+  # ScoutVision API
+  api:
+    build:
+      context: .
+      dockerfile: src/ScoutVision.API/Dockerfile
+    container_name: scoutvision-api
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:8080
+      - ConnectionStrings__DefaultConnection=Server=db,1433;Database=ScoutVisionDB;User Id=sa;Password=ScoutVision2024!;TrustServerCertificate=true;
+      - AIServices__PythonServiceUrl=http://ai:8000
+    ports:
+      - "5000:8080"
+    depends_on:
+      db:
+        condition: service_healthy
+      ai:
+        condition: service_healthy
+    networks:
+      - scoutvision-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+  # ScoutVision Web UI
+  web:
+    build:
+      context: .
+      dockerfile: src/ScoutVision.Web/Dockerfile
+    container_name: scoutvision-web
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:8080
+      - ApiSettings__BaseUrl=http://api:8080
+    ports:
+      - "5001:8080"
+    depends_on:
+      api:
+        condition: service_healthy
+    networks:
+      - scoutvision-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+  # ScoutVision AI Service
+  ai:
+    build:
+      context: src/ScoutVision.AI
+      dockerfile: Dockerfile
+    container_name: scoutvision-ai
+    environment:
+      - PYTHONUNBUFFERED=1
+      - API_HOST=0.0.0.0
+      - API_PORT=8000
+    ports:
+      - "8000:8000"
+    volumes:
+      - ai_uploads:/app/uploads
+      - ai_models:/app/models
+    networks:
+      - scoutvision-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import requests; requests.get('http://localhost:8000/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 120s
+
+  # Redis (for caching and session management)
+  redis:
+    image: redis:7-alpine
+    container_name: scoutvision-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - scoutvision-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Nginx (Load Balancer and Reverse Proxy)
+  nginx:
+    image: nginx:alpine
+    container_name: scoutvision-nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./ssl:/etc/nginx/ssl:ro
+    depends_on:
+      - web
+      - api
+    networks:
+      - scoutvision-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+volumes:
+  sqlserver_data:
+    driver: local
+  ai_uploads:
+    driver: local
+  ai_models:
+    driver: local
+  redis_data:
+    driver: local
+
+networks:
+  scoutvision-network:
+    driver: bridge
+    name: scoutvision-network

@@ -1,0 +1,380 @@
+@page "/manual"
+@using ScoutVision.Web.Services
+@inject ILocalizationService Localizer
+@inject IThemeService ThemeService
+
+<div class="container-fluid mt-4">
+    <MudCard>
+        <MudCardHeader>
+            <CardHeaderContent>
+                <div class="d-flex align-center justify-space-between">
+                    <MudText Typo="Typo.h4">@_manualTitle</MudText>
+                    <div class="d-flex align-center">
+                        <!-- Language Selector -->
+                        <MudSelect T="string" 
+                                   Value="@_currentLanguage" 
+                                   ValueChanged="OnLanguageChanged"
+                                   Label="Language"
+                                   Variant="Variant.Outlined"
+                                   Class="mr-3"
+                                   Style="min-width: 150px;">
+                            @foreach (var lang in _supportedLanguages)
+                            {
+                                <MudSelectItem Value="@lang.Code">
+                                    @lang.Flag @lang.Name
+                                </MudSelectItem>
+                            }
+                        </MudSelect>
+                        
+                        <!-- Theme Toggle -->
+                        <MudTooltip Text="@_themeToggleText">
+                            <MudIconButton Icon="@(_isDarkMode ? Icons.Material.Filled.LightMode : Icons.Material.Filled.DarkMode)"
+                                           Color="Color.Primary"
+                                           OnClick="ToggleTheme" />
+                        </MudTooltip>
+                    </div>
+                </div>
+            </CardHeaderContent>
+        </MudCardHeader>
+        
+        <MudCardContent>
+            <MudGrid>
+                <!-- Table of Contents -->
+                <MudItem xs="12" md="3">
+                    <MudPaper Class="pa-4" Elevation="2">
+                        <MudText Typo="Typo.h6" Class="mb-3">@_tableOfContents</MudText>
+                        <MudNavMenu>
+                            <MudNavLink OnClick="() => ShowSection(ManualSection.GettingStarted)" 
+                                        Icon="Icons.Material.Filled.PlayArrow"
+                                        Match="NavLinkMatch.Prefix">
+                                @_gettingStartedTitle
+                            </MudNavLink>
+                            <MudNavLink OnClick="() => ShowSection(ManualSection.Navigation)" 
+                                        Icon="Icons.Material.Filled.Navigation"
+                                        Match="NavLinkMatch.Prefix">
+                                @_navigationGuideTitle
+                            </MudNavLink>
+                            <MudNavLink OnClick="() => ShowSection(ManualSection.Search)" 
+                                        Icon="Icons.Material.Filled.Search"
+                                        Match="NavLinkMatch.Prefix">
+                                @_searchGuideTitle
+                            </MudNavLink>
+                            <MudNavLink OnClick="() => ShowSection(ManualSection.Analytics)" 
+                                        Icon="Icons.Material.Filled.Analytics"
+                                        Match="NavLinkMatch.Prefix">
+                                @_analyticsGuideTitle
+                            </MudNavLink>
+                            <MudNavLink OnClick="() => ShowSection(ManualSection.PlayerManagement)" 
+                                        Icon="Icons.Material.Filled.People"
+                                        Match="NavLinkMatch.Prefix">
+                                @_playerManagementTitle
+                            </MudNavLink>
+                            <MudNavLink OnClick="() => ShowSection(ManualSection.VideoAnalysis)" 
+                                        Icon="Icons.Material.Filled.VideoLibrary"
+                                        Match="NavLinkMatch.Prefix">
+                                @_videoAnalysisTitle
+                            </MudNavLink>
+                            <MudNavLink OnClick="() => ShowSection(ManualSection.Reports)" 
+                                        Icon="Icons.Material.Filled.Assessment"
+                                        Match="NavLinkMatch.Prefix">
+                                @_reportsTitle
+                            </MudNavLink>
+                            <MudNavLink OnClick="() => ShowSection(ManualSection.Troubleshooting)" 
+                                        Icon="Icons.Material.Filled.Build"
+                                        Match="NavLinkMatch.Prefix">
+                                @_troubleshootingTitle
+                            </MudNavLink>
+                            <MudNavLink OnClick="() => ShowSection(ManualSection.FAQ)" 
+                                        Icon="Icons.Material.Filled.Help"
+                                        Match="NavLinkMatch.Prefix">
+                                @_faqTitle
+                            </MudNavLink>
+                        </MudNavMenu>
+                    </MudPaper>
+                </MudItem>
+                
+                <!-- Content Area -->
+                <MudItem xs="12" md="9">
+                    <MudPaper Class="pa-6" Elevation="2">
+                        @switch (_currentSection)
+                        {
+                            case ManualSection.GettingStarted:
+                                <GettingStartedSection />
+                                break;
+                            case ManualSection.Navigation:
+                                <NavigationSection />
+                                break;
+                            case ManualSection.Search:
+                                <SearchSection />
+                                break;
+                            case ManualSection.Analytics:
+                                <AnalyticsSection />
+                                break;
+                            case ManualSection.PlayerManagement:
+                                <PlayerManagementSection />
+                                break;
+                            case ManualSection.VideoAnalysis:
+                                <VideoAnalysisSection />
+                                break;
+                            case ManualSection.Reports:
+                                <ReportsSection />
+                                break;
+                            case ManualSection.Troubleshooting:
+                                <TroubleshootingSection />
+                                break;
+                            case ManualSection.FAQ:
+                                <FAQSection />
+                                break;
+                        }
+                    </MudPaper>
+                </MudItem>
+            </MudGrid>
+        </MudCardContent>
+    </MudCard>
+</div>
+
+@code {
+    private ManualSection _currentSection = ManualSection.GettingStarted;
+    private string _currentLanguage = "en";
+    private List<SupportedLanguage> _supportedLanguages = new();
+    private bool _isDarkMode = false;
+    
+    // Localized strings
+    private string _manualTitle = "";
+    private string _tableOfContents = "";
+    private string _gettingStartedTitle = "";
+    private string _navigationGuideTitle = "";
+    private string _searchGuideTitle = "";
+    private string _analyticsGuideTitle = "";
+    private string _playerManagementTitle = "";
+    private string _videoAnalysisTitle = "";
+    private string _reportsTitle = "";
+    private string _troubleshootingTitle = "";
+    private string _faqTitle = "";
+    private string _themeToggleText = "";
+
+    protected override async Task OnInitializedAsync()
+    {
+        _currentLanguage = await Localizer.GetCurrentLanguageAsync();
+        _supportedLanguages = await Localizer.GetSupportedLanguagesAsync();
+        _isDarkMode = await ThemeService.GetIsDarkModeAsync();
+        
+        Localizer.LanguageChanged += OnLanguageChangedInternal;
+        ThemeService.ThemeChanged += OnThemeChangedInternal;
+        
+        await UpdateLocalizedStrings();
+    }
+
+    private async Task UpdateLocalizedStrings()
+    {
+        _manualTitle = await Localizer.GetTextAsync("manual.title");
+        _tableOfContents = await Localizer.GetTextAsync("manual.table_of_contents");
+        _gettingStartedTitle = await Localizer.GetTextAsync("manual.getting_started");
+        _navigationGuideTitle = await Localizer.GetTextAsync("manual.navigation");
+        _searchGuideTitle = await Localizer.GetTextAsync("manual.search_guide");
+        _analyticsGuideTitle = await Localizer.GetTextAsync("manual.analytics_guide");
+        _playerManagementTitle = await Localizer.GetTextAsync("manual.player_management");
+        _videoAnalysisTitle = await Localizer.GetTextAsync("manual.video_analysis");
+        _reportsTitle = await Localizer.GetTextAsync("manual.reports");
+        _troubleshootingTitle = await Localizer.GetTextAsync("manual.troubleshooting");
+        _faqTitle = await Localizer.GetTextAsync("manual.faq");
+        _themeToggleText = await Localizer.GetTextAsync("theme.toggle");
+        StateHasChanged();
+    }
+
+    private async Task OnLanguageChanged(string newLanguage)
+    {
+        await Localizer.SetLanguageAsync(newLanguage);
+        _currentLanguage = newLanguage;
+    }
+
+    private async void OnLanguageChangedInternal()
+    {
+        await UpdateLocalizedStrings();
+    }
+
+    private async Task ToggleTheme()
+    {
+        await ThemeService.ToggleThemeAsync();
+    }
+
+    private async void OnThemeChangedInternal()
+    {
+        _isDarkMode = await ThemeService.GetIsDarkModeAsync();
+        StateHasChanged();
+    }
+
+    private void ShowSection(ManualSection section)
+    {
+        _currentSection = section;
+        StateHasChanged();
+    }
+
+    public void Dispose()
+    {
+        Localizer.LanguageChanged -= OnLanguageChangedInternal;
+        ThemeService.ThemeChanged -= OnThemeChangedInternal;
+    }
+}
+
+@* Manual Sections *@
+@* Getting Started Section *@
+<div style="display: none;">
+    <div id="GettingStartedSection">
+        <MudText Typo="Typo.h4" Class="mb-4">Getting Started with ScoutVision</MudText>
+        
+        <MudText Typo="Typo.h5" Class="mb-3">Welcome to ScoutVision</MudText>
+        <MudText Typo="Typo.body1" Class="mb-4">
+            ScoutVision is a comprehensive athletic scouting platform powered by AI and advanced analytics. 
+            This user manual will guide you through all the features and capabilities of the system.
+        </MudText>
+
+        <MudAlert Severity="Severity.Info" Class="mb-4">
+            <strong>Quick Start:</strong> Begin by exploring the Dashboard to get an overview of your scouting data, 
+            then use the Search function to find players and footage.
+        </MudAlert>
+
+        <MudText Typo="Typo.h6" Class="mb-3">System Requirements</MudText>
+        <MudList>
+            <MudListItem Icon="Icons.Material.Filled.Computer">
+                <MudText>Modern web browser (Chrome, Firefox, Safari, Edge)</MudText>
+            </MudListItem>
+            <MudListItem Icon="Icons.Material.Filled.Wifi">
+                <MudText>Stable internet connection</MudText>
+            </MudListItem>
+            <MudListItem Icon="Icons.Material.Filled.Memory">
+                <MudText>Minimum 4GB RAM recommended</MudText>
+            </MudListItem>
+        </MudList>
+
+        <MudText Typo="Typo.h6" Class="mb-3 mt-4">Key Features</MudText>
+        <MudGrid>
+            <MudItem xs="12" md="6">
+                <MudCard Elevation="2">
+                    <MudCardContent>
+                        <div class="d-flex align-center mb-2">
+                            <MudIcon Icon="Icons.Material.Filled.Search" Class="mr-2" />
+                            <MudText Typo="Typo.h6">Smart Search</MudText>
+                        </div>
+                        <MudText Typo="Typo.body2">
+                            AI-powered search across players, game footage, and statistical databases.
+                        </MudText>
+                    </MudCardContent>
+                </MudCard>
+            </MudItem>
+            <MudItem xs="12" md="6">
+                <MudCard Elevation="2">
+                    <MudCardContent>
+                        <div class="d-flex align-center mb-2">
+                            <MudIcon Icon="Icons.Material.Filled.Analytics" Class="mr-2" />
+                            <MudText Typo="Typo.h6">Advanced Analytics</MudText>
+                        </div>
+                        <MudText Typo="Typo.body2">
+                            Comprehensive performance metrics, heat maps, and trend analysis.
+                        </MudText>
+                    </MudCardContent>
+                </MudCard>
+            </MudItem>
+        </MudGrid>
+    </div>
+</div>
+
+@code {
+    public enum ManualSection
+    {
+        GettingStarted,
+        Navigation,
+        Search,
+        Analytics,
+        PlayerManagement,
+        VideoAnalysis,
+        Reports,
+        Troubleshooting,
+        FAQ
+    }
+}
+
+@* Section Components would go here - simplified for now *@
+<div>
+    @if (_currentSection == ManualSection.GettingStarted)
+    {
+        <MudText Typo="Typo.h4" Class="mb-4">@_gettingStartedTitle</MudText>
+        
+        <MudText Typo="Typo.h5" Class="mb-3">Welcome to ScoutVision</MudText>
+        <MudText Typo="Typo.body1" Class="mb-4">
+            ScoutVision is a comprehensive athletic scouting platform powered by AI and advanced analytics.
+        </MudText>
+
+        <MudAlert Severity="Severity.Info" Class="mb-4">
+            <strong>Quick Start:</strong> Begin by exploring the Dashboard, then use Search to find players and footage.
+        </MudAlert>
+
+        <MudExpansionPanels>
+            <MudExpansionPanel Text="System Requirements">
+                <MudList>
+                    <MudListItem Icon="Icons.Material.Filled.Computer">Modern web browser</MudListItem>
+                    <MudListItem Icon="Icons.Material.Filled.Wifi">Stable internet connection</MudListItem>
+                    <MudListItem Icon="Icons.Material.Filled.Memory">4GB RAM minimum</MudListItem>
+                </MudList>
+            </MudExpansionPanel>
+            
+            <MudExpansionPanel Text="Key Features">
+                <MudGrid>
+                    <MudItem xs="12" md="6">
+                        <MudText Typo="Typo.subtitle1">🔍 Smart Search</MudText>
+                        <MudText Typo="Typo.body2">AI-powered search across all content</MudText>
+                    </MudItem>
+                    <MudItem xs="12" md="6">
+                        <MudText Typo="Typo.subtitle1">📊 Advanced Analytics</MudText>
+                        <MudText Typo="Typo.body2">Performance metrics and insights</MudText>
+                    </MudItem>
+                </MudGrid>
+            </MudExpansionPanel>
+        </MudExpansionPanels>
+    }
+    else if (_currentSection == ManualSection.Search)
+    {
+        <MudText Typo="Typo.h4" Class="mb-4">Search Guide</MudText>
+        
+        <MudText Typo="Typo.body1" Class="mb-4">
+            Learn how to effectively use ScoutVision's powerful search capabilities.
+        </MudText>
+
+        <MudExpansionPanels>
+            <MudExpansionPanel Text="Basic Search">
+                <MudText Typo="Typo.body1" Class="mb-3">
+                    Use the search bar to find players, footage, or statistics by typing keywords.
+                </MudText>
+                <MudAlert Severity="Severity.Success">
+                    <strong>Tip:</strong> Use specific terms like player names, team names, or positions for better results.
+                </MudAlert>
+            </MudExpansionPanel>
+            
+            <MudExpansionPanel Text="Advanced Filters">
+                <MudText Typo="Typo.body1" Class="mb-3">
+                    Click "Show Filters" to access advanced search options:
+                </MudText>
+                <MudList>
+                    <MudListItem>Filter by player position</MudListItem>
+                    <MudListItem>Filter by team or nationality</MudListItem>
+                    <MudListItem>Filter by age range</MudListItem>
+                    <MudListItem>Filter by content type (players, footage, stats)</MudListItem>
+                </MudList>
+            </MudExpansionPanel>
+            
+            <MudExpansionPanel Text="Search Results">
+                <MudText Typo="Typo.body1">
+                    Results are organized by type and can be sorted by relevance, date, rating, or name. 
+                    Use the grid/list toggle to change how results are displayed.
+                </MudText>
+            </MudExpansionPanel>
+        </MudExpansionPanels>
+    }
+    else
+    {
+        <MudText Typo="Typo.h4" Class="mb-4">@(_currentSection.ToString().Replace("_", " "))</MudText>
+        <MudText Typo="Typo.body1">
+            This section is under development. More comprehensive content will be added for each feature area.
+        </MudText>
+    }
+</div>
