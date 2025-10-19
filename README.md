@@ -1,7 +1,7 @@
 <div align="center">
   
-  <!-- Logo Video -->
-  <video src="assets/logo/scoutvision-logo.mp4" width="400" autoplay loop muted></video>
+  <!-- Static Logo for GitHub rendering -->
+  <img src="assets/logo/scoutvision-logo.svg" alt="ScoutVision logo" width="400" />
   
   # ⚽ ScoutVision
   
