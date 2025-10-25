@@ -1,13 +1,31 @@
+@inject AuthenticationStateProvider AuthStateProvider
+@using System.Security.Claims
+
 <MudNavMenu>
     <MudNavLink Href="/" Icon="Icons.Material.Filled.Dashboard" IconColor="Color.Primary">Dashboard</MudNavLink>
-    <MudNavLink Href="/players" Icon="Icons.Material.Filled.People" IconColor="Color.Secondary">Players</MudNavLink>
-    <MudNavLink Href="/scouting" Icon="Icons.Material.Filled.Search" IconColor="Color.Tertiary">Scouting Reports</MudNavLink>
-    <MudNavLink Href="/video-analysis" Icon="Icons.Material.Filled.VideoLibrary" IconColor="Color.Success">Video Analysis</MudNavLink>
-    <MudNavLink Href="/talent-predictions" Icon="Icons.Material.Filled.TrendingUp" IconColor="Color.Warning">Talent Predictions</MudNavLink>
-    <MudNavLink Href="/mindset-profiles" Icon="Icons.Material.Filled.Psychology" IconColor="Color.Info">Mindset Profiles</MudNavLink>
-    
+    @if ((_user?.IsInRole("Admin") ?? false) || (_user?.IsInRole("Coach") ?? false))
+    {
+        <MudNavLink Href="/players" Icon="Icons.Material.Filled.People" IconColor="Color.Secondary">Players</MudNavLink>
+    }
+    @if (_user?.HasClaim("Category", "Scouting") ?? false)
+    {
+        <MudNavLink Href="/scouting" Icon="Icons.Material.Filled.Search" IconColor="Color.Tertiary">Scouting Reports</MudNavLink>
+    }
+    @if (_user?.HasClaim("Category", "Video") ?? false)
+    {
+        <MudNavLink Href="/video-analysis" Icon="Icons.Material.Filled.VideoLibrary" IconColor="Color.Success">Video Analysis</MudNavLink>
+    }
+    @if (_user?.HasClaim("Category", "Talent") ?? false)
+    {
+        <MudNavLink Href="/talent-predictions" Icon="Icons.Material.Filled.TrendingUp" IconColor="Color.Warning">Talent Predictions</MudNavLink>
+    }
+    @if (_user?.HasClaim("Category", "Mindset") ?? false)
+    {
+        <MudNavLink Href="/mindset-profiles" Icon="Icons.Material.Filled.Psychology" IconColor="Color.Info">Mindset Profiles</MudNavLink>
+    }
+
     <MudDivider Class="my-2" />
-    
+
     <MudNavGroup Text="Analytics" Icon="Icons.Material.Filled.Analytics" Expanded="false">
         <MudNavLink Href="/hybrid-analytics" Icon="Icons.Material.Filled.ViewInAr">Hybrid Analytics</MudNavLink>
         <MudNavLink Href="/player-analytics/1" Icon="Icons.Material.Filled.Person">Player Analytics</MudNavLink>
@@ -15,10 +33,22 @@
         <MudNavLink Href="/performance-metrics" Icon="Icons.Material.Filled.Assessment">Performance Metrics</MudNavLink>
         <MudNavLink Href="/reports" Icon="Icons.Material.Filled.Report">Advanced Reports</MudNavLink>
     </MudNavGroup>
-    
+
     <MudNavGroup Text="Management" Icon="Icons.Material.Filled.Settings" Expanded="false">
-        <MudNavLink Href="/tags" Icon="Icons.Material.Filled.Label">Manage Tags</MudNavLink>
-        <MudNavLink Href="/users" Icon="Icons.Material.Filled.Group">User Management</MudNavLink>
-        <MudNavLink Href="/settings" Icon="Icons.Material.Filled.Settings">Settings</MudNavLink>
+        @if (_user?.IsInRole("Admin") ?? false)
+        {
+            <MudNavLink Href="/tags" Icon="Icons.Material.Filled.Label">Manage Tags</MudNavLink>
+            <MudNavLink Href="/users" Icon="Icons.Material.Filled.Group">User Management</MudNavLink>
+            <MudNavLink Href="/settings" Icon="Icons.Material.Filled.Settings">Settings</MudNavLink>
+        }
     </MudNavGroup>
 </MudNavMenu>
+
+@code {
+    private ClaimsPrincipal? _user;
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+        _user = authState.User;
+    }
+}

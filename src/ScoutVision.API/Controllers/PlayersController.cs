@@ -6,6 +6,8 @@ using Swashbuckle.AspNetCore.Annotations;
 
 namespace ScoutVision.API.Controllers;
 
+using Microsoft.AspNetCore.Authorization;
+
 [ApiController]
 [Route("api/[controller]")]
 public class PlayersController : ControllerBase
@@ -18,6 +20,7 @@ public class PlayersController : ControllerBase
     }
 
     [HttpGet]
+    [Authorize(Roles = "Admin,Coach,Analyst,Club")]
     [SwaggerOperation(Summary = "Get all players", Description = "Retrieves a paginated list of all players")]
     public async Task<ActionResult<IEnumerable<Player>>> GetPlayers(
         [FromQuery] int page = 1, 
@@ -47,6 +50,7 @@ public class PlayersController : ControllerBase
     }
 
     [HttpGet("{id}")]
+    [Authorize(Roles = "Admin,Coach,Analyst,Club")]
     [SwaggerOperation(Summary = "Get player by ID", Description = "Retrieves a specific player with all related data")]
     public async Task<ActionResult<Player>> GetPlayer(int id)
     {
@@ -69,11 +73,12 @@ public class PlayersController : ControllerBase
     }
 
     [HttpPost]
+    [Authorize(Roles = "Admin,Coach")]
     [SwaggerOperation(Summary = "Create new player", Description = "Creates a new player profile")]
     public async Task<ActionResult<Player>> PostPlayer(Player player)
     {
-        player.CreatedAt = DateTime.UtcNow;
-        player.CreatedBy = "System"; // TODO: Get from authenticated user
+    player.CreatedAt = DateTime.UtcNow;
+    player.CreatedBy = User?.Identity?.Name ?? "Unknown";
         
         _context.Players.Add(player);
         await _context.SaveChangesAsync();
@@ -82,6 +87,7 @@ public class PlayersController : ControllerBase
     }
 
     [HttpPut("{id}")]
+    [Authorize(Roles = "Admin,Coach")]
     [SwaggerOperation(Summary = "Update player", Description = "Updates an existing player profile")]
     public async Task<IActionResult> PutPlayer(int id, Player player)
     {
@@ -90,8 +96,8 @@ public class PlayersController : ControllerBase
             return BadRequest();
         }
 
-        player.UpdatedAt = DateTime.UtcNow;
-        player.UpdatedBy = "System"; // TODO: Get from authenticated user
+    player.UpdatedAt = DateTime.UtcNow;
+    player.UpdatedBy = User?.Identity?.Name ?? "Unknown";
 
         _context.Entry(player).State = EntityState.Modified;
 
@@ -115,6 +121,7 @@ public class PlayersController : ControllerBase
     }
 
     [HttpDelete("{id}")]
+    [Authorize(Roles = "Admin")]
     [SwaggerOperation(Summary = "Delete player", Description = "Soft deletes a player profile")]
     public async Task<IActionResult> DeletePlayer(int id)
     {
@@ -126,7 +133,7 @@ public class PlayersController : ControllerBase
 
         player.IsDeleted = true;
         player.UpdatedAt = DateTime.UtcNow;
-        player.UpdatedBy = "System"; // TODO: Get from authenticated user
+    player.UpdatedBy = User?.Identity?.Name ?? "Unknown";
         
         await _context.SaveChangesAsync();
 
@@ -134,6 +141,7 @@ public class PlayersController : ControllerBase
     }
 
     [HttpGet("{id}/dashboard")]
+    [Authorize(Roles = "Admin,Coach,Analyst,Club")]
     [SwaggerOperation(Summary = "Get player dashboard data", Description = "Gets comprehensive dashboard data for a player")]
     public async Task<ActionResult<object>> GetPlayerDashboard(int id)
     {
