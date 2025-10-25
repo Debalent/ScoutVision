@@ -1,0 +1,45 @@
+@page "/tax-calculator"
+@inject HttpClient Http
+
+<MudPaper Class="pa-4" Elevation="2">
+    <MudText Typo="Typo.h5">Pricing & Tax Calculator</MudText>
+    <MudTextField @bind-Value="Seats" Label="Number of Seats" Variant="Variant.Outlined" />
+    <MudSelect T="string" @bind-Value="Country" Label="Country" Variant="Variant.Outlined">
+        <MudSelectItem Value="US">United States</MudSelectItem>
+        <MudSelectItem Value="UK">United Kingdom</MudSelectItem>
+        <MudSelectItem Value="DE">Germany</MudSelectItem>
+        <MudSelectItem Value="FR">France</MudSelectItem>
+        <MudSelectItem Value="IN">India</MudSelectItem>
+        <MudSelectItem Value="Other">Other</MudSelectItem>
+    </MudSelect>
+    <MudButton OnClick="Calculate" Color="Color.Primary">Calculate</MudButton>
+    <MudText>@Result</MudText>
+</MudPaper>
+
+@code {
+    int Seats = 1;
+    string Country = "US";
+    string Result = "";
+
+    async Task Calculate()
+    {
+        var req = new { seats = Seats, country = Country };
+        var response = await Http.PostAsJsonAsync("/api/tax/calculate", req);
+        if (response.IsSuccessStatusCode)
+        {
+            var res = await response.Content.ReadFromJsonAsync<TaxResult>();
+            Result = $"Subtotal: ${res.Subtotal:F2}\nTax: ${res.Tax:F2}\nTotal: ${res.Total:F2}";
+        }
+        else
+        {
+            Result = "Calculation failed.";
+        }
+    }
+
+    public class TaxResult
+    {
+        public double Subtotal { get; set; }
+        public double Tax { get; set; }
+        public double Total { get; set; }
+    }
+}
