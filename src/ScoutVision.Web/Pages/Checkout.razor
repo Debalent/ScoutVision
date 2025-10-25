@@ -1,0 +1,33 @@
+@page "/checkout"
+@using System.Net.Http.Json
+@inject HttpClient Http
+@using MudBlazor
+
+<PageTitle>Checkout</PageTitle>
+
+<MudPaper Class="pa-6" Elevation="2">
+    <MudText Typo="Typo.h4" Class="mb-4">ScoutVision Checkout</MudText>
+    <MudForm @ref="_form">
+        <MudNumericField @bind-Value="Amount" Label="Amount (USD cents)" Min="100" Max="1000000" Required="true" />
+        <MudButton Variant="Variant.Filled" Color="Color.Success" OnClick="CreatePaymentIntent">Pay Now</MudButton>
+    </MudForm>
+    @if (!string.IsNullOrEmpty(ClientSecret))
+    {
+        <MudText Typo="Typo.body1" Class="mt-4">Payment Intent Created! Client Secret: <b>@ClientSecret</b></MudText>
+        <!-- Integrate Stripe.js or redirect to Stripe Checkout here -->
+    }
+</MudPaper>
+
+@code {
+    private MudForm _form;
+    public long Amount { get; set; } = 1000;
+    public string ClientSecret { get; set; } = string.Empty;
+
+    private async Task CreatePaymentIntent()
+    {
+        await _form.Validate();
+        if (!_form.IsValid) return;
+        ClientSecret = await Http.PostAsJsonAsync<string>($"/api/stripe/create-payment-intent?amount={Amount}", null);
+        StateHasChanged();
+    }
+}
