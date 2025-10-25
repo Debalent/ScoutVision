@@ -1,0 +1,23 @@
+@page "/email-demo"
+@inject HttpClient Http
+
+<MudPaper Class="pa-4" Elevation="2">
+    <MudText Typo="Typo.h5">Send Test Invoice Email</MudText>
+    <MudTextField @bind-Value="Recipient" Label="Recipient Email" Variant="Variant.Outlined" />
+    <MudTextField @bind-Value="Details" Label="Invoice Details" Variant="Variant.Outlined" />
+    <MudButton OnClick="SendInvoice" Color="Color.Primary">Send Invoice</MudButton>
+    <MudText>@Status</MudText>
+</MudPaper>
+
+@code {
+    string Recipient = "";
+    string Details = "Test invoice for ScoutVision subscription.";
+    string Status = "";
+
+    async Task SendInvoice()
+    {
+        var req = new { to = Recipient, details = Details };
+        var response = await Http.PostAsJsonAsync("/api/email/send-invoice", req);
+        Status = response.IsSuccessStatusCode ? "Invoice email sent!" : "Failed to send email.";
+    }
+}
