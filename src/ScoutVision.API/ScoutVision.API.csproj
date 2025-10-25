@@ -4,22 +4,93 @@
     <TargetFramework>net8.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
+    <Version>2.0.0</Version>
+    <Title>ScoutVision Pro Intelligence API</Title>
+    <Description>Comprehensive sports intelligence platform with real-time predictions, injury prevention, and transfer valuation</Description>
+    <Authors>ScoutVision Team</Authors>
   </PropertyGroup>
 
   <ItemGroup>
+    <!-- Web Framework -->
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="8.0.0" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.0">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
-    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.4.0" />
+  <PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
+  <PackageReference Include="Swashbuckle.AspNetCore.Annotations" Version="6.5.0" />
+
+    <!-- Entity Framework -->
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.0" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="8.0.0" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="8.0.0" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.0" />
+    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="8.0.0" />
+
+    <!-- Authentication & Security -->
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.0" />
+    <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="7.0.3" />
+    <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="8.0.0" />
+
+    <!-- Real-time Communication -->
+    <PackageReference Include="Microsoft.AspNetCore.SignalR" Version="1.1.0" />
+    <PackageReference Include="Microsoft.AspNetCore.SignalR.Core" Version="1.1.0" />
+
+    <!-- Caching -->
+  <PackageReference Include="StackExchange.Redis" Version="2.7.4" />
+    <PackageReference Include="Microsoft.Extensions.Caching.StackExchangeRedis" Version="8.0.0" />
+
+    <!-- Message Queue -->
+    <PackageReference Include="RabbitMQ.Client" Version="6.8.1" />
+
+    <!-- Logging & Observability -->
+    <PackageReference Include="Serilog" Version="3.1.1" />
+    <PackageReference Include="Serilog.AspNetCore" Version="8.0.1" />
+    <PackageReference Include="Serilog.Sinks.Elasticsearch" Version="9.0.2" />
+    <PackageReference Include="Serilog.Sinks.Console" Version="5.0.1" />
+    <PackageReference Include="Serilog.Sinks.File" Version="5.0.0" />
+
+    <!-- OpenTelemetry -->
+    <PackageReference Include="OpenTelemetry.Api" Version="1.7.0" />
+  <!-- Removed OpenTelemetry.Sdk: not available on NuGet.org -->
+  <PackageReference Include="OpenTelemetry.Exporter.Jaeger" Version="1.6.0-rc.1" /> <!-- Confirmed available -->
+    <PackageReference Include="OpenTelemetry.Extensions.Hosting" Version="1.7.0" />
+    <PackageReference Include="OpenTelemetry.Instrumentation.AspNetCore" Version="1.7.0" />
+    <PackageReference Include="OpenTelemetry.Instrumentation.EntityFrameworkCore" Version="1.0.0-beta.6" />
+    <PackageReference Include="OpenTelemetry.Instrumentation.Http" Version="1.7.0" />
+  <PackageReference Include="OpenTelemetry.Exporter.Prometheus.AspNetCore" Version="1.4.0-alpha.2" /> <!-- Confirmed available -->
+
+    <!-- Health Checks -->
+    <PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks" Version="8.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks.EntityFrameworkCore" Version="8.0.0" />
+
+    <!-- Metrics -->
+    <PackageReference Include="prometheus-net" Version="8.1.0" />
+    <PackageReference Include="prometheus-net.AspNetCore" Version="8.1.0" />
+
+    <!-- HTTP Client Resilience -->
+    <PackageReference Include="Microsoft.Extensions.Http.Polly" Version="8.0.0" />
+    <PackageReference Include="Polly" Version="8.2.0" />
+
+    <!-- Data Serialization -->
+    <PackageReference Include="System.Text.Json" Version="8.0.0" />
+
+    <!-- Configuration -->
+    <PackageReference Include="Microsoft.Extensions.Configuration" Version="8.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="8.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="8.0.0" />
+
+    <!-- Utilities -->
+  <PackageReference Include="MediatR" Version="12.2.0" /> <!-- Confirmed available -->
+  <PackageReference Include="MediatR.Extensions.Microsoft.DependencyInjection" Version="11.1.0" /> <!-- Confirmed available, but check compatibility -->
+    <PackageReference Include="AutoMapper" Version="13.0.1" />
     <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="12.0.1" />
-    <PackageReference Include="FluentValidation.AspNetCore" Version="11.3.0" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+
+    <!-- Data Protection -->
+    <PackageReference Include="Microsoft.AspNetCore.DataProtection" Version="8.0.0" />
+    <PackageReference Include="Microsoft.AspNetCore.DataProtection.StackExchangeRedis" Version="8.0.0" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\ScoutVision.Core\ScoutVision.Core.csproj" />
     <ProjectReference Include="..\ScoutVision.Infrastructure\ScoutVision.Infrastructure.csproj" />
+    <ProjectReference Include="..\ScoutVision.Core\ScoutVision.Core.csproj" />
   </ItemGroup>
 
 </Project>
