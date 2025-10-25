@@ -1,0 +1,23 @@
+@page "/trial-coupon"
+@inject HttpClient Http
+
+<MudPaper Class="pa-4" Elevation="2">
+    <MudText Typo="Typo.h5">Free Trial & Coupon</MudText>
+    <MudTextField @bind-Value="Email" Label="Email" Variant="Variant.Outlined" />
+    <MudTextField @bind-Value="Coupon" Label="Coupon Code (optional)" Variant="Variant.Outlined" />
+    <MudButton OnClick="ApplyTrial" Color="Color.Primary">Start Free Trial</MudButton>
+    <MudText>@Status</MudText>
+</MudPaper>
+
+@code {
+    string Email = "";
+    string Coupon = "";
+    string Status = "";
+
+    async Task ApplyTrial()
+    {
+        var req = new { email = Email, coupon = Coupon };
+        var response = await Http.PostAsJsonAsync("/api/trial/apply", req);
+        Status = response.IsSuccessStatusCode ? "Trial started!" : "Failed to start trial.";
+    }
+}
