@@ -1,0 +1,51 @@
+@page "/admin-billing-dashboard"
+@inject HttpClient Http
+
+<MudPaper Class="pa-4" Elevation="2">
+    <MudText Typo="Typo.h5">Admin Billing Dashboard</MudText>
+    <MudTable Items="_stats" Hover="true">
+        <HeaderContent>
+            <MudTh>Metric</MudTh>
+            <MudTh>Value</MudTh>
+        </HeaderContent>
+        <RowTemplate>
+            <MudTd>@context.Metric</MudTd>
+            <MudTd>@context.Value</MudTd>
+        </RowTemplate>
+    </MudTable>
+    <MudButton OnClick="Refresh" Color="Color.Primary">Refresh</MudButton>
+</MudPaper>
+
+@code {
+    List<BillingStat> _stats = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadStats();
+    }
+
+    async Task Refresh()
+    {
+        await LoadStats();
+    }
+
+    async Task LoadStats()
+    {
+        var response = await Http.GetAsync("/api/admin/billing/stats");
+        if (response.IsSuccessStatusCode)
+        {
+            var stats = await response.Content.ReadFromJsonAsync<List<BillingStat>>();
+            _stats = stats ?? new();
+        }
+        else
+        {
+            _stats = new();
+        }
+    }
+
+    public class BillingStat
+    {
+        public string Metric { get; set; }
+        public string Value { get; set; }
+    }
+}
