@@ -1,0 +1,63 @@
+@page "/billing"
+@using System.Net.Http.Json
+@inject HttpClient Http
+@using MudBlazor
+
+<PageTitle>ScoutVision Billing</PageTitle>
+
+<MudPaper Class="pa-6" Elevation="2">
+    <MudText Typo="Typo.h4" Class="mb-4">Generate Invoice</MudText>
+    <MudForm @ref="_form">
+        <MudTextField @bind-Value="OrgId" Label="Organization ID" Required="true" />
+        <MudNumericField @bind-Value="UserCount" Label="User Count" Min="1" Max="1000" Required="true" />
+        <MudSwitch @bind-Checked="IsAnnual" Color="Color.Primary" Label="Annual Billing" />
+        <MudButton Variant="Variant.Filled" Color="Color.Success" OnClick="GenerateInvoice">Generate Invoice</MudButton>
+    </MudForm>
+    @if (Invoice != null)
+    {
+        <MudDivider Class="my-4" />
+        <MudText Typo="Typo.h6">Invoice Details</MudText>
+        <MudTable>
+            <MudTh>Organization</MudTh>
+            <MudTh>User Count</MudTh>
+            <MudTh>Annual</MudTh>
+            <MudTh>Amount Due</MudTh>
+            <MudTh>Invoice Date</MudTh>
+            <MudTh>Due Date</MudTh>
+            <MudTr>
+                <MudTd>@Invoice.OrganizationId</MudTd>
+                <MudTd>@Invoice.UserCount</MudTd>
+                <MudTd>@Invoice.IsAnnual</MudTd>
+                <MudTd>@Invoice.AmountDue.ToString("C")</MudTd>
+                <MudTd>@Invoice.InvoiceDate.ToShortDateString()</MudTd>
+                <MudTd>@Invoice.DueDate.ToShortDateString()</MudTd>
+            </MudTr>
+        </MudTable>
+    }
+</MudPaper>
+
+@code {
+    private MudForm _form;
+    public string OrgId { get; set; } = string.Empty;
+    public int UserCount { get; set; } = 1;
+    public bool IsAnnual { get; set; } = false;
+    public Invoice? Invoice { get; set; }
+
+    public class Invoice
+    {
+        public string OrganizationId { get; set; } = string.Empty;
+        public int UserCount { get; set; }
+        public bool IsAnnual { get; set; }
+        public decimal AmountDue { get; set; }
+        public DateTime InvoiceDate { get; set; }
+        public DateTime DueDate { get; set; }
+    }
+
+    private async Task GenerateInvoice()
+    {
+        await _form.Validate();
+        if (!_form.IsValid) return;
+        Invoice = await Http.PostAsJsonAsync<Invoice>($"/api/billing/generate-invoice?orgId={OrgId}&userCount={UserCount}&annual={IsAnnual}", null);
+        StateHasChanged();
+    }
+}
