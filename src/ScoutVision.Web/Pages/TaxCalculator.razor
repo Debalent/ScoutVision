@@ -5,12 +5,12 @@
     <MudText Typo="Typo.h5">Pricing & Tax Calculator</MudText>
     <MudTextField @bind-Value="Seats" Label="Number of Seats" Variant="Variant.Outlined" />
     <MudSelect T="string" @bind-Value="Country" Label="Country" Variant="Variant.Outlined">
-        <MudSelectItem Value="US">United States</MudSelectItem>
-        <MudSelectItem Value="UK">United Kingdom</MudSelectItem>
-        <MudSelectItem Value="DE">Germany</MudSelectItem>
-        <MudSelectItem Value="FR">France</MudSelectItem>
-        <MudSelectItem Value="IN">India</MudSelectItem>
-        <MudSelectItem Value="Other">Other</MudSelectItem>
+        <MudSelectItem T="string" Value="@("US")">United States</MudSelectItem>
+        <MudSelectItem T="string" Value="@("UK")">United Kingdom</MudSelectItem>
+        <MudSelectItem T="string" Value="@("DE")">Germany</MudSelectItem>
+        <MudSelectItem T="string" Value="@("FR")">France</MudSelectItem>
+        <MudSelectItem T="string" Value="@("IN")">India</MudSelectItem>
+        <MudSelectItem T="string" Value="@("Other")">Other</MudSelectItem>
     </MudSelect>
     <MudButton OnClick="Calculate" Color="Color.Primary">Calculate</MudButton>
     <MudText>@Result</MudText>

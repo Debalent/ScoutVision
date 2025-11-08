@@ -4,6 +4,9 @@ using StackExchange.Redis;
 using RabbitMQ.Client;
 using ScoutVision.Infrastructure.Data;
 using ScoutVision.Infrastructure.Messaging;
+using Microsoft.Extensions.Logging;
+using Microsoft.AspNetCore.Http;
+using System.Text.Json;
 
 namespace ScoutVision.Infrastructure.Monitoring;
 
@@ -145,7 +148,8 @@ public class HealthCheckResponseWriter
             })
         };
 
-        await context.Response.WriteAsJsonAsync(response);
+        context.Response.ContentType = "application/json";
+        await JsonSerializer.SerializeAsync(context.Response.Body, response);
     }
 }
 

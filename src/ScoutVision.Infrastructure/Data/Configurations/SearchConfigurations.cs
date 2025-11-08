@@ -13,8 +13,8 @@ public class FootagePlayerConfiguration : IEntityTypeConfiguration<FootagePlayer
         builder.Property(fp => fp.ScreenTime)
             .IsRequired();
 
-        builder.Property(fp => fp.PerformanceRating)
-            .HasPrecision(5, 2);
+        builder.Property(fp => fp.PlayerHighlights)
+            .HasColumnType("nvarchar(max)");
 
         builder.HasOne(fp => fp.GameFootage)
             .WithMany(gf => gf.FootagePlayers)
@@ -67,11 +67,7 @@ public class StatBookEntryConfiguration : IEntityTypeConfiguration<StatBookEntry
     {
         builder.HasKey(sbe => sbe.Id);
 
-        builder.Property(sbe => sbe.PlayerName)
-            .HasMaxLength(100)
-            .IsRequired();
-
-        builder.Property(sbe => sbe.TeamName)
+        builder.Property(sbe => sbe.EntityName)
             .HasMaxLength(100)
             .IsRequired();
 
@@ -79,16 +75,16 @@ public class StatBookEntryConfiguration : IEntityTypeConfiguration<StatBookEntry
             .HasMaxLength(50)
             .IsRequired();
 
-        builder.Property(sbe => sbe.Goals)
-            .HasPrecision(8, 2);
+        builder.Property(sbe => sbe.MatchesPlayed)
+            .HasMaxLength(50);
 
-        builder.Property(sbe => sbe.Assists)
-            .HasPrecision(8, 2);
+        builder.Property(sbe => sbe.StatisticsData)
+            .HasColumnType("nvarchar(max)");
 
-        builder.Property(sbe => sbe.Rating)
-            .HasPrecision(4, 2);
+        builder.Property(sbe => sbe.PerformanceMetrics)
+            .HasColumnType("nvarchar(max)");
 
-        builder.Property(sbe => sbe.AdditionalStats)
+        builder.Property(sbe => sbe.RankingData)
             .HasColumnType("nvarchar(max)");
 
         builder.HasOne(sbe => sbe.StatBook)
@@ -97,7 +93,6 @@ public class StatBookEntryConfiguration : IEntityTypeConfiguration<StatBookEntry
             .OnDelete(DeleteBehavior.Cascade);
 
         builder.HasIndex(sbe => sbe.StatBookId);
-        builder.HasIndex(sbe => sbe.PlayerName);
-        builder.HasIndex(sbe => sbe.TeamName);
+        builder.HasIndex(sbe => sbe.EntityName);
     }
 }

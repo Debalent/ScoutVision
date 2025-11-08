@@ -15,6 +15,9 @@ using ScoutVision.Infrastructure.RealTime;
 using ScoutVision.Infrastructure.Messaging;
 using ScoutVision.Infrastructure.Caching;
 using ScoutVision.Infrastructure.Monitoring;
+using Hangfire;
+using Hangfire.SqlServer;
+using AspNetCoreRateLimit;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -163,7 +166,7 @@ try
     });
     builder.Services.AddSingleton<IMessageBroker, RabbitMQBroker>();
 
-    // Services
+    // Core Services
     builder.Services.AddScoped<ISearchService, SearchService>();
     builder.Services.AddScoped<IFootageAnalysisService, FootageAnalysisService>();
     builder.Services.AddScoped<IStatBookService, StatBookService>();
@@ -173,12 +176,31 @@ try
     builder.Services.AddScoped<IMultiTenantService, MultiTenantService>();
     builder.Services.AddSingleton<ScoutVision.API.Services.EmailService>();
 
+    // TODO: Implement concrete service classes for the following interfaces
+    // Notification Services - interfaces defined in ScoutVision.Infrastructure.Notifications
+    // Reporting Services - interfaces defined in ScoutVision.Infrastructure.Reporting
+    // Collaboration Services - interfaces defined in ScoutVision.Infrastructure.Collaboration
+    // Security Services - interfaces defined in ScoutVision.Infrastructure.Security
+    // Data Integration Services - interfaces defined in ScoutVision.Infrastructure.Integration
+    // Marketplace Services - interfaces defined in ScoutVision.Infrastructure.Marketplace
+    // Advanced AI Services - interfaces defined in ScoutVision.AI.Services
+
+    // Background Jobs with Hangfire
+    builder.Services.AddHangfire(config => config
+        .SetDataCompatibilityLevel(Hangfire.CompatibilityLevel.Version_180)
+        .UseSimpleAssemblyNameTypeSerializer()
+        .UseRecommendedSerializerSettings()
+        .UseSqlServerStorage(builder.Configuration.GetConnectionString("DefaultConnection")));
+    builder.Services.AddHangfireServer();
+
+    // Rate Limiting (AspNetCoreRateLimit)
+    builder.Services.AddMemoryCache();
+    builder.Services.Configure<AspNetCoreRateLimit.IpRateLimitOptions>(builder.Configuration.GetSection("IpRateLimiting"));
+    builder.Services.AddInMemoryRateLimiting();
+    builder.Services.AddSingleton<AspNetCoreRateLimit.IRateLimitConfiguration, AspNetCoreRateLimit.RateLimitConfiguration>();
+
     // HTTP Client factory for external APIs
-    builder.Services.AddHttpClient()
-        .ConfigureHttpClientDefaults(http =>
-        {
-            http.AddStandardResilienceHandler();
-        });
+    builder.Services.AddHttpClient();
 
     // CORS - allow real-time connections
     builder.Services.AddCors(options =>

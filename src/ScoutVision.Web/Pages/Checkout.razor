@@ -27,7 +27,8 @@
     {
         await _form.Validate();
         if (!_form.IsValid) return;
-        ClientSecret = await Http.PostAsJsonAsync<string>($"/api/stripe/create-payment-intent?amount={Amount}", null);
+        var response = await Http.PostAsync($"/api/stripe/create-payment-intent?amount={Amount}", null);
+        ClientSecret = await response.Content.ReadAsStringAsync();
         StateHasChanged();
     }
 }

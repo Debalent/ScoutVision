@@ -1,6 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using ScoutVision.Core.Search;
+using ScoutVision.Core.Entities;
+using ScoutVision.Core.Enums;
 using ScoutVision.Infrastructure.Data;
 using Swashbuckle.AspNetCore.Annotations;
 
@@ -526,8 +528,9 @@ public class SearchController : ControllerBase
 
     private async Task<List<string>> GetRelatedSearches(string query, SearchType searchType)
     {
+        var firstWord = query.Split(' ').FirstOrDefault() ?? "";
         return await _context.SearchQueries
-            .Where(sq => sq.SearchType == searchType && sq.QueryText.Contains(query.Split(' ')[0]))
+            .Where(sq => sq.SearchType == searchType && sq.QueryText.Contains(firstWord))
             .Select(sq => sq.QueryText)
             .Distinct()
             .Take(5)
@@ -611,11 +614,13 @@ public class SearchController : ControllerBase
     {
         if (player == null) return new List<object>();
 
-        return await _context.Players
+        var similarPlayers = await _context.Players
             .Where(p => p.Position == player.Position && p.Id != player.Id)
             .Select(p => new { p.Id, p.FullName, p.Position, p.CurrentTeam })
             .Take(3)
             .ToListAsync();
+
+        return similarPlayers.Cast<object>().ToList();
     }
 
     private async Task<List<object>> ExecuteSearchByType(SearchType searchType, string query, int limit)

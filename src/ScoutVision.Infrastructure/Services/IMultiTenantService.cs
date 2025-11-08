@@ -1,4 +1,7 @@
 using System.Security.Claims;
+using Microsoft.Extensions.Logging;
+using Microsoft.AspNetCore.Http;
+using ScoutVision.Infrastructure.Caching;
 
 namespace ScoutVision.Infrastructure.Services;
 

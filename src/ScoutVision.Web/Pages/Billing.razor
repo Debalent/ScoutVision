@@ -17,22 +17,28 @@
     {
         <MudDivider Class="my-4" />
         <MudText Typo="Typo.h6">Invoice Details</MudText>
-        <MudTable>
-            <MudTh>Organization</MudTh>
-            <MudTh>User Count</MudTh>
-            <MudTh>Annual</MudTh>
-            <MudTh>Amount Due</MudTh>
-            <MudTh>Invoice Date</MudTh>
-            <MudTh>Due Date</MudTh>
-            <MudTr>
-                <MudTd>@Invoice.OrganizationId</MudTd>
-                <MudTd>@Invoice.UserCount</MudTd>
-                <MudTd>@Invoice.IsAnnual</MudTd>
-                <MudTd>@Invoice.AmountDue.ToString("C")</MudTd>
-                <MudTd>@Invoice.InvoiceDate.ToShortDateString()</MudTd>
-                <MudTd>@Invoice.DueDate.ToShortDateString()</MudTd>
-            </MudTr>
-        </MudTable>
+        <MudSimpleTable>
+            <thead>
+                <tr>
+                    <th>Organization</th>
+                    <th>User Count</th>
+                    <th>Annual</th>
+                    <th>Amount Due</th>
+                    <th>Invoice Date</th>
+                    <th>Due Date</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>@Invoice.OrganizationId</td>
+                    <td>@Invoice.UserCount</td>
+                    <td>@Invoice.IsAnnual</td>
+                    <td>@Invoice.AmountDue.ToString("C")</td>
+                    <td>@Invoice.InvoiceDate.ToShortDateString()</td>
+                    <td>@Invoice.DueDate.ToShortDateString()</td>
+                </tr>
+            </tbody>
+        </MudSimpleTable>
     }
 </MudPaper>
 
@@ -41,9 +47,9 @@
     public string OrgId { get; set; } = string.Empty;
     public int UserCount { get; set; } = 1;
     public bool IsAnnual { get; set; } = false;
-    public Invoice? Invoice { get; set; }
+    public InvoiceModel? Invoice { get; set; }
 
-    public class Invoice
+    public class InvoiceModel
     {
         public string OrganizationId { get; set; } = string.Empty;
         public int UserCount { get; set; }
@@ -57,7 +63,8 @@
     {
         await _form.Validate();
         if (!_form.IsValid) return;
-        Invoice = await Http.PostAsJsonAsync<Invoice>($"/api/billing/generate-invoice?orgId={OrgId}&userCount={UserCount}&annual={IsAnnual}", null);
+        var response = await Http.PostAsync($"/api/billing/generate-invoice?orgId={OrgId}&userCount={UserCount}&annual={IsAnnual}", null);
+        Invoice = await response.Content.ReadFromJsonAsync<InvoiceModel>();
         StateHasChanged();
     }
 }

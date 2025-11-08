@@ -70,28 +70,29 @@ public class FootageAnalysisService : IFootageAnalysisService
             // Update metadata with analysis results
             metadata.Duration = analysisResult.Duration;
             metadata.Quality = analysisResult.Quality;
-            metadata.FileSize = analysisResult.FileSize;
-            metadata.AnalysisCompletedAt = DateTime.UtcNow;
+            // Store FileSize in AnalysisMetadata JSON
+            var analysisMetadata = new { FileSize = analysisResult.FileSize, AnalysisCompletedAt = DateTime.UtcNow };
+            metadata.AnalysisMetadata = System.Text.Json.JsonSerializer.Serialize(analysisMetadata);
             metadata.RelevanceScore = CalculateRelevanceScore(analysisResult);
 
             // Extract and save player involvement
             foreach (var playerData in analysisResult.DetectedPlayers)
             {
                 var player = await _context.Players
-                    .FirstOrDefaultAsync(p => p.FullName == playerData.Name || 
-                                            p.JerseyNumber == playerData.JerseyNumber);
-                
+                    .FirstOrDefaultAsync(p => p.FullName == playerData.Name);
+
                 if (player != null)
                 {
                     var footagePlayer = new FootagePlayer
                     {
                         GameFootageId = metadata.Id,
                         PlayerId = player.Id,
-                        ScreenTime = playerData.ScreenTime,
-                        IsFeaturedPlayer = playerData.ScreenTime > 60,
-                        PerformanceRating = playerData.PerformanceScore
+                        ScreenTime = (decimal)playerData.ScreenTime.TotalSeconds,
+                        IsFeaturedPlayer = playerData.ScreenTime.TotalSeconds > 60,
+                        // Store PerformanceScore in PlayerHighlights JSON
+                        PlayerHighlights = System.Text.Json.JsonSerializer.Serialize(new { PerformanceScore = playerData.PerformanceScore })
                     };
-                    
+
                     _context.FootagePlayers.Add(footagePlayer);
                 }
             }
@@ -283,7 +284,8 @@ public class StatBookService : IStatBookService
                 LastUpdated = DateTime.UtcNow,
                 IsRealTime = importResult.IsRealTime,
                 HasAdvancedMetrics = importResult.HasAdvancedMetrics,
-                FileSize = importResult.FileSize,
+                // Store FileSize in SearchableContent JSON
+                SearchableContent = System.Text.Json.JsonSerializer.Serialize(new { FileSize = importResult.FileSize }),
                 DownloadCount = 0,
                 UserRating = 0m
             };
@@ -294,21 +296,26 @@ public class StatBookService : IStatBookService
             // Import individual stat entries
             foreach (var entryData in importResult.Entries)
             {
-                var entry = new StatBookEntry
+                // Create statistics data JSON
+                var statsData = new
                 {
-                    StatBookId = statBook.Id,
-                    PlayerName = entryData.PlayerName,
-                    TeamName = entryData.TeamName,
-                    Position = entryData.Position,
-                    MatchesPlayed = entryData.MatchesPlayed,
                     Goals = entryData.Goals,
                     Assists = entryData.Assists,
                     YellowCards = entryData.YellowCards,
                     RedCards = entryData.RedCards,
-                    Rating = entryData.Rating,
-                    AdditionalStats = System.Text.Json.JsonSerializer.Serialize(entryData.AdditionalStats)
+                    Rating = entryData.Rating
                 };
-                
+
+                var entry = new StatBookEntry
+                {
+                    StatBookId = statBook.Id,
+                    EntityName = entryData.PlayerName,
+                    Position = entryData.Position,
+                    MatchesPlayed = entryData.MatchesPlayed.ToString(),
+                    StatisticsData = System.Text.Json.JsonSerializer.Serialize(statsData),
+                    PerformanceMetrics = System.Text.Json.JsonSerializer.Serialize(entryData.AdditionalStats)
+                };
+
                 _context.StatBookEntries.Add(entry);
             }
 
@@ -330,7 +337,7 @@ public class StatBookService : IStatBookService
 
         return await _context.StatBookEntries
             .Include(e => e.StatBook)
-            .Where(e => e.PlayerName == player.FullName && e.StatBook.Season == season)
+            .Where(e => e.EntityName == player.FullName && e.StatBook.Season == season)
             .OrderByDescending(e => e.StatBook.LastUpdated)
             .ToListAsync();
     }
@@ -339,8 +346,8 @@ public class StatBookService : IStatBookService
     {
         return await _context.StatBookEntries
             .Include(e => e.StatBook)
-            .Where(e => e.TeamName == teamName && e.StatBook.Season == season)
-            .OrderBy(e => e.PlayerName)
+            .Where(e => e.EntityName.Contains(teamName) && e.StatBook.Season == season)
+            .OrderBy(e => e.EntityName)
             .ToListAsync();
     }
 
@@ -356,7 +363,7 @@ public class StatBookService : IStatBookService
         {
             var latestStats = await _context.StatBookEntries
                 .Include(e => e.StatBook)
-                .Where(e => e.PlayerName == player.FullName)
+                .Where(e => e.EntityName == player.FullName)
                 .OrderByDescending(e => e.StatBook.LastUpdated)
                 .FirstOrDefaultAsync();
 
@@ -403,16 +410,26 @@ public class StatBookService : IStatBookService
 
     private decimal GetMetricValue(StatBookEntry entry, string metric)
     {
-        return metric.ToLower() switch
+        try
         {
-            "goals" => entry.Goals,
-            "assists" => entry.Assists,
-            "rating" => entry.Rating,
-            "matchesplayed" => entry.MatchesPlayed,
-            "yellowcards" => entry.YellowCards,
-            "redcards" => entry.RedCards,
-            _ => 0m
-        };
+            // Parse statistics from JSON
+            var statsData = System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, object>>(entry.StatisticsData ?? "{}");
+
+            return metric.ToLower() switch
+            {
+                "goals" => statsData != null && statsData.ContainsKey("Goals") ? Convert.ToDecimal(statsData["Goals"]) : 0m,
+                "assists" => statsData != null && statsData.ContainsKey("Assists") ? Convert.ToDecimal(statsData["Assists"]) : 0m,
+                "rating" => statsData != null && statsData.ContainsKey("Rating") ? Convert.ToDecimal(statsData["Rating"]) : 0m,
+                "matchesplayed" => int.TryParse(entry.MatchesPlayed, out var matches) ? matches : 0m,
+                "yellowcards" => statsData != null && statsData.ContainsKey("YellowCards") ? Convert.ToDecimal(statsData["YellowCards"]) : 0m,
+                "redcards" => statsData != null && statsData.ContainsKey("RedCards") ? Convert.ToDecimal(statsData["RedCards"]) : 0m,
+                _ => 0m
+            };
+        }
+        catch
+        {
+            return 0m;
+        }
     }
 }
 

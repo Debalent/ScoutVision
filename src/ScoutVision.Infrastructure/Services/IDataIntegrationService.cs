@@ -1,3 +1,7 @@
+using Microsoft.Extensions.Logging;
+using ScoutVision.Infrastructure.Data;
+using ScoutVision.Infrastructure.Messaging;
+
 namespace ScoutVision.Infrastructure.Services;
 
 /// <summary>

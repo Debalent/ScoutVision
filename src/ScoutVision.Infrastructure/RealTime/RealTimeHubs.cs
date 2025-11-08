@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.AspNetCore.Authorization;
 using System.Diagnostics;
+using Microsoft.Extensions.Logging;
 
 namespace ScoutVision.Infrastructure.RealTime;
 

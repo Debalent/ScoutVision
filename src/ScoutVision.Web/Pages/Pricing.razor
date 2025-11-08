@@ -6,32 +6,36 @@
 
 <MudPaper Class="pa-6" Elevation="2">
     <MudText Typo="Typo.h4" Class="mb-4">ScoutVision Licensing & Pricing</MudText>
-    <MudTable>
-        <HeaderContent>
-            <MudTh>Tier</MudTh>
-            <MudTh>Users</MudTh>
-            <MudTh>Price/User/Month</MudTh>
-            <MudTh>Features</MudTh>
-        </HeaderContent>
-        <RowTemplate>
-            <MudTd>Basic</MudTd>
-            <MudTd>1-5</MudTd>
-            <MudTd>$50</MudTd>
-            <MudTd>Core scouting, limited analytics</MudTd>
-        </RowTemplate>
-        <RowTemplate>
-            <MudTd>Professional</MudTd>
-            <MudTd>6-20</MudTd>
-            <MudTd>$40</MudTd>
-            <MudTd>Full analytics, transfer engine, injury module</MudTd>
-        </RowTemplate>
-        <RowTemplate>
-            <MudTd>Enterprise</MudTd>
-            <MudTd>21+</MudTd>
-            <MudTd>$30</MudTd>
-            <MudTd>All features, API, premium support</MudTd>
-        </RowTemplate>
-    </MudTable>
+    <MudSimpleTable>
+        <thead>
+            <tr>
+                <th>Tier</th>
+                <th>Users</th>
+                <th>Price/User/Month</th>
+                <th>Features</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>Basic</td>
+                <td>1-5</td>
+                <td>$50</td>
+                <td>Core scouting, limited analytics</td>
+            </tr>
+            <tr>
+                <td>Professional</td>
+                <td>6-20</td>
+                <td>$40</td>
+                <td>Full analytics, transfer engine, injury module</td>
+            </tr>
+            <tr>
+                <td>Enterprise</td>
+                <td>21+</td>
+                <td>$30</td>
+                <td>All features, API, premium support</td>
+            </tr>
+        </tbody>
+    </MudSimpleTable>
     <MudText Typo="Typo.body2" Class="mt-4">
         <b>Annual Discount:</b> 15% off for annual prepay.<br />
         <b>Custom/On-premise:</b> Contact us for perpetual licensing or white-label options.
