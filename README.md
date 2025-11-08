@@ -6,8 +6,8 @@
   # ⚽ ScoutVision Pro
   
   ### *The Complete Sports Intelligence Platform*
-  
-  **Revolutionary AI platform combining injury prevention, transfer optimization, and real-time betting intelligence—transforming how teams scout, value players, and make decisions.**
+
+  **Revolutionary AI platform combining injury prevention and transfer optimization—transforming how teams scout, value players, and make decisions.**
   
   [![.NET](https://img.shields.io/badge/.NET-8.0-512BD4?logo=dotnet)](https://dotnet.microsoft.com/)
   [![AI/ML](https://img.shields.io/badge/AI/ML-Advanced-00D4AA?logo=tensorflow)](https://tensorflow.org/)
@@ -21,9 +21,9 @@
 
 ## 🚀 Revolutionary Platform Overview
 
-ScoutVision Pro is the world's first comprehensive sports intelligence platform, combining cutting-edge AI with real-time analytics to transform every aspect of football decision-making. From preventing million-dollar injuries to optimizing transfer investments and enhancing betting accuracy, we deliver actionable insights that drive results.
+ScoutVision Pro is the world's first comprehensive sports intelligence platform, combining cutting-edge AI with real-time analytics to transform every aspect of football decision-making. From preventing million-dollar injuries to optimizing transfer investments, we deliver actionable insights that drive results.
 
-**Market Position:** First-to-market AI platform combining injury prevention, transfer intelligence, and live betting analytics in a single solution.
+**Market Position:** First-to-market AI platform combining injury prevention and transfer intelligence in a single solution.
 
 ## 🎯 Core Intelligence Modules
 
@@ -40,13 +40,6 @@ ScoutVision Pro is the world's first comprehensive sports intelligence platform,
 - **Buy/Sell/Hold Recommendations**: Strategic guidance based on value trends and market conditions
 - **Optimal Timing**: Identifies peak selling windows to maximize transfer profits
 - **ROI Impact**: Optimize decisions in $7B annual transfer market
-
-### 📊 **Real-Time Betting Intelligence**
-- **Live Probabilities**: Real-time goal, card, and event predictions during matches
-- **Fantasy Optimization**: Player performance projections and lineup recommendations
-- **Sportsbook Integration**: API feeds for enhanced odds accuracy and user engagement
-- **In-Game Analytics**: Momentum tracking, performance scoring, and risk assessment
-- **ROI Impact**: 5-15% improvement in prediction accuracy = millions in revenue
 
 ### 🎮 **3D Tactical Visualization** *(Unique IP)*
 - **Spatial Analysis**: Advanced 3D player positioning and movement visualization
@@ -72,17 +65,11 @@ ScoutVision Pro is the world's first comprehensive sports intelligence platform,
 - **Performance Analytics**: 80% reduction in video analysis time
 - **Strategic Planning**: Data-driven tactical and recruitment decisions
 
-### For Sportsbook Operators  
-- **Prediction Accuracy**: 5-15% improvement in odds precision
-- **User Engagement**: Enhanced betting experience with live insights
-- **Revenue Growth**: Millions in additional revenue from better predictions
-- **Market Edge**: Competitive advantage through superior analytics
-
-### For Fantasy Platforms
-- **Player Projections**: Real-time performance and injury risk data
-- **Lineup Optimization**: AI-powered recommendations for users
-- **Content Creation**: Automated insights and highlights generation
-- **User Retention**: Advanced analytics drive deeper engagement
+### For Scouts & Analysts
+- **Player Evaluation**: Comprehensive performance and potential analysis
+- **Market Intelligence**: Real-time transfer market insights
+- **Injury Risk Assessment**: Protect investments with predictive analytics
+- **Tactical Analysis**: Advanced 3D visualization and pattern recognition
 
 ## 🚀 API Endpoints
 
@@ -100,13 +87,6 @@ GET /api/scoutvision-pro/transfer-recommendations/{clubId}
 GET /api/scoutvision-pro/market-opportunities
 ```
 
-### Live Betting Intelligence
-```bash
-GET /api/scoutvision-pro/live-betting/{matchId}
-GET /api/scoutvision-pro/player-probabilities/{playerId}/{matchId}
-GET /api/scoutvision-pro/fantasy-projections/{matchId}
-```
-
 ### Combined Intelligence Platform
 ```bash
 GET /api/scoutvision-pro/player-intelligence/{playerId}
@@ -115,11 +95,11 @@ GET /api/scoutvision-pro/club-dashboard/{clubId}
 
 ## 🏆 Competitive Advantages
 
-- **🥇 First-to-Market**: Only platform combining injury prevention + transfer intelligence + betting analytics
+- **🥇 First-to-Market**: Only platform combining injury prevention and transfer intelligence
 - **🧠 Advanced AI**: Proprietary algorithms with 85%+ accuracy in injury prediction
 - **⚡ Real-Time Processing**: Sub-second data analysis and probability calculations
 - **🎮 Unique 3D Engine**: Patent-pending spatial visualization technology
-- **📊 Multi-Market Platform**: Serves clubs, sportsbooks, and fantasy platforms simultaneously
+- **📊 Multi-Market Platform**: Serves clubs, scouts, and sports organizations
 - **🔒 Proven Technology**: Production-ready with zero technical debt
 
 ## 💼 Strategic Value Proposition

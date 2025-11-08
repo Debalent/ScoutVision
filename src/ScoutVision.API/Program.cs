@@ -169,7 +169,6 @@ try
     builder.Services.AddScoped<IStatBookService, StatBookService>();
     builder.Services.AddScoped<IInjuryPrevention, InjuryPreventionService>();
     builder.Services.AddScoped<ITransferValuation, TransferValuationService>();
-    builder.Services.AddScoped<IBettingIntelligence, BettingIntelligenceService>();
     builder.Services.AddScoped<IDataIntegrationService, DataIntegrationService>();
     builder.Services.AddScoped<IMultiTenantService, MultiTenantService>();
     builder.Services.AddSingleton<ScoutVision.API.Services.EmailService>();
@@ -276,7 +275,6 @@ try
     // Real-time hubs
     app.MapHub<PlayerAnalyticsHub>("/api/hubs/player-analytics");
     app.MapHub<InjuryAlertHub>("/api/hubs/injury-alerts");
-    app.MapHub<BettingIntelligenceHub>("/api/hubs/betting-intelligence");
     app.MapHub<TransferValueHub>("/api/hubs/transfer-values");
 
     // Health check endpoint

@@ -13,18 +13,15 @@ namespace ScoutVision.Web.Controllers
     {
         private readonly InjuryPreventionAnalyzer _injuryAnalyzer;
         private readonly TransferValueCalculator _transferCalculator;
-        private readonly BettingDataService _bettingService;
         private readonly IPlayerService _playerService;
 
         public ScoutVisionProController(
             InjuryPreventionAnalyzer injuryAnalyzer,
             TransferValueCalculator transferCalculator,
-            BettingDataService bettingService,
             IPlayerService playerService)
         {
             _injuryAnalyzer = injuryAnalyzer;
             _transferCalculator = transferCalculator;
-            _bettingService = bettingService;
             _playerService = playerService;
         }
 
@@ -175,68 +172,6 @@ namespace ScoutVision.Web.Controllers
             }
         }
 
-        // BETTING DATA ENDPOINTS
-
-        [HttpGet("live-betting/{matchId}")]
-        public async Task<ActionResult<MatchPredictions>> GetLiveBettingData(int matchId)
-        {
-            try
-            {
-                var predictions = await _bettingService.GetLiveMatchPredictions(matchId);
-                return Ok(predictions);
-            }
-            catch (Exception ex)
-            {
-                return BadRequest($"Error retrieving live betting data: {ex.Message}");
-            }
-        }
-
-        [HttpGet("player-probabilities/{playerId}/{matchId}")]
-        public async Task<ActionResult<LiveBettingData>> GetPlayerProbabilities(int playerId, int matchId)
-        {
-            try
-            {
-                var playerData = await _bettingService.GetLivePlayerData(matchId);
-                var specificPlayer = playerData.FirstOrDefault(p => p.PlayerId == playerId);
-                
-                if (specificPlayer == null)
-                    return NotFound($"Player {playerId} not found in match {matchId}");
-
-                return Ok(specificPlayer);
-            }
-            catch (Exception ex)
-            {
-                return BadRequest($"Error retrieving player probabilities: {ex.Message}");
-            }
-        }
-
-        [HttpGet("fantasy-projections/{matchId}")]
-        public async Task<ActionResult<List<FantasyProjection>>> GetFantasyProjections(int matchId)
-        {
-            try
-            {
-                var playerData = await _bettingService.GetLivePlayerData(matchId);
-                var projections = playerData.Select(p => new FantasyProjection
-                {
-                    PlayerId = p.PlayerId,
-                    PlayerName = p.Player.Name,
-                    Position = p.Player.Position,
-                    ProjectedPoints = p.FantasyPointsProjection,
-                    GoalProbability = p.MatchGoalProbability,
-                    AssistProbability = p.AssistProbability,
-                    CleanSheetProbability = p.CleanSheetProbability,
-                    FormRating = p.FormRating,
-                    InjuryRisk = p.InjuryRisk
-                }).OrderByDescending(p => p.ProjectedPoints);
-
-                return Ok(projections);
-            }
-            catch (Exception ex)
-            {
-                return BadRequest($"Error generating fantasy projections: {ex.Message}");
-            }
-        }
-
         // COMBINED INTELLIGENCE ENDPOINTS
 
         [HttpGet("player-intelligence/{playerId}")]
@@ -256,13 +191,6 @@ namespace ScoutVision.Web.Controllers
 
                 // Get transfer valuation
                 intelligence.TransferValuation = await _transferCalculator.CalculatePlayerValue(playerId);
-
-                // Get live betting data if in a match
-                if (currentMatchId.HasValue)
-                {
-                    var liveData = await _bettingService.GetLivePlayerData(currentMatchId.Value);
-                    intelligence.LiveBettingData = liveData.FirstOrDefault(p => p.PlayerId == playerId);
-                }
 
                 // Generate combined insights
                 intelligence.CombinedInsights = GenerateCombinedInsights(intelligence);
@@ -415,26 +343,11 @@ namespace ScoutVision.Web.Controllers
                 insights.Add($"OPPORTUNITY: Rising value with high transfer interest - optimal selling conditions");
             }
 
-            // Live performance + Injury insights
-            if (intelligence.LiveBettingData != null)
-            {
-                if (intelligence.LiveBettingData.InjuryRisk > 0.7 && 
-                    intelligence.LiveBettingData.CurrentPerformanceScore > 80)
-                {
-                    insights.Add($"ALERT: Excellent performance but high in-game injury risk - consider substitution");
-                }
-
-                if (intelligence.LiveBettingData.FatigueLevel > 0.8)
-                {
-                    insights.Add($"FATIGUE WARNING: High fatigue level may impact performance and increase injury risk");
-                }
-            }
-
-            // Value + Performance insights
+            // Value insights
             var valueToPerformanceRatio = (double)(intelligence.TransferValuation.EstimatedMarketValue / 1000000);
-            if (intelligence.LiveBettingData?.CurrentPerformanceScore > 85 && valueToPerformanceRatio < 10)
+            if (valueToPerformanceRatio < 10)
             {
-                insights.Add($"UNDERVALUED STAR: Exceptional performance with modest valuation - prime acquisition target");
+                insights.Add($"POTENTIAL VALUE: Modest valuation - potential acquisition target");
             }
 
             return insights;
@@ -448,7 +361,6 @@ namespace ScoutVision.Web.Controllers
         public DateTime GeneratedAt { get; set; }
         public InjuryRiskAnalysis InjuryAnalysis { get; set; }
         public TransferValuation TransferValuation { get; set; }
-        public LiveBettingData LiveBettingData { get; set; }
         public List<string> CombinedInsights { get; set; } = new List<string>();
     }
 
@@ -481,18 +393,5 @@ namespace ScoutVision.Web.Controllers
         public decimal ValueUpside { get; set; }
         public double TransferProbability { get; set; }
         public string Recommendation { get; set; }
-    }
-
-    public class FantasyProjection
-    {
-        public int PlayerId { get; set; }
-        public string PlayerName { get; set; }
-        public string Position { get; set; }
-        public double ProjectedPoints { get; set; }
-        public double GoalProbability { get; set; }
-        public double AssistProbability { get; set; }
-        public double CleanSheetProbability { get; set; }
-        public string FormRating { get; set; }
-        public double InjuryRisk { get; set; }
     }
 }

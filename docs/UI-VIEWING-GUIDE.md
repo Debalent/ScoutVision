@@ -111,7 +111,6 @@ Base URL: https://localhost:7001/api/scoutvision-pro/
 
 GET /injury-alerts/{playerId}
 GET /transfer-recommendations/{playerId}
-GET /betting-intelligence/live/{matchId}
 GET /combined-intelligence/{playerId}
 GET /club-dashboard/{clubId}
 GET /market-opportunities

@@ -30,10 +30,9 @@ ScoutVision/
 │   ├── ScoutVision.API/            # RESTful API layer
 │   ├── ScoutVision.Web/            # Blazor frontend application
 │   └── ScoutVision.AI/             # Python AI/ML services
-├── Models/                         # New AI module models
+├── Models/                         # AI module models
 │   ├── InjuryPrevention.cs        # Injury prevention AI module
-│   ├── TransferValuation.cs       # Transfer intelligence engine  
-│   └── BettingDataService.cs      # Real-time betting predictions
+│   └── TransferValuation.cs       # Transfer intelligence engine
 ├── Controllers/
 │   └── ScoutVisionProController.cs # Unified API for all AI modules
 ├── docs/                           # Comprehensive documentation
