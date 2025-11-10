@@ -1,0 +1,19 @@
+<MudAutocomplete T="SearchResult" 
+                 Label="Search players, teams, matches..."
+                 @bind-Value="selectedResult"
+                 SearchFunc="SearchAsync"
+                 ToStringFunc="@(x => x?.DisplayText ?? "")"
+                 ShowProgressIndicator="true"
+                 Immediate="true"
+                 ResetValueOnEmptyText="true"
+                 CoerceText="true">
+    <ItemTemplate Context="result">
+        <div class="d-flex align-items-center">
+            <MudIcon Icon="@GetResultIcon(result.Type)" Class="mr-2" />
+            <div>
+                <MudText Typo="Typo.body1">@result.Title</MudText>
+                <MudText Typo="Typo.caption" Class="text-muted">@result.Subtitle</MudText>
+            </div>
+        </div>
+    </ItemTemplate>
+</MudAutocomplete>

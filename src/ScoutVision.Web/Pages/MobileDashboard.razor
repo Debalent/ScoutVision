@@ -1,0 +1,172 @@
+@page "/mobile"
+@using ScoutVision.Web.Services
+@using ScoutVision.Web.Models
+@inject IMobileAnalyticsService MobileService
+@inject IJSRuntime JSRuntime
+@implements IAsyncDisposable
+
+<PageTitle>ScoutVision Mobile</PageTitle>
+
+<div class="mobile-dashboard">
+    <!-- Header -->
+    <div class="mobile-header bg-primary text-white p-3 mb-3">
+        <div class="d-flex justify-content-between align-items-center">
+            <h4 class="mb-0">
+                <i class="bi bi-phone me-2"></i>ScoutVision
+            </h4>
+            <div class="text-end">
+                <small>Last updated</small><br>
+                <small>@dashboardData?.LastUpdated.ToString("HH:mm")</small>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Stats -->
+    <div class="quick-stats mb-4">
+        <div class="row g-2">
+            @if (dashboardData?.QuickStats != null)
+            {
+                @foreach (var stat in dashboardData.QuickStats)
+                {
+                    <div class="col-6">
+                        <div class="card border-0 shadow-sm h-100">
+                            <div class="card-body p-3 text-center">
+                                <i class="bi bi-@stat.Icon text-@stat.Color fs-2 mb-2"></i>
+                                <h5 class="card-title mb-1">@stat.Value</h5>
+                                <p class="card-text small text-muted">@stat.Title</p>
+                            </div>
+                        </div>
+                    </div>
+                }
+            }
+        </div>
+    </div>
+
+    <!-- Top Players -->
+    <div class="top-players mb-4">
+        <h5 class="mb-3">
+            <i class="bi bi-star me-2"></i>Top Players
+        </h5>
+        @if (dashboardData?.TopPlayers != null)
+        {
+            @foreach (var player in dashboardData.TopPlayers)
+            {
+                <div class="card mb-2 border-0 shadow-sm">
+                    <div class="card-body p-3">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="mb-1">@player.Name</h6>
+                                <small class="text-muted">@player.Position</small>
+                            </div>
+                            <div class="text-end">
+                                <span class="badge bg-primary">@player.OverallRating</span>
+                                <br>
+                                <small class="text-success">Form: @player.RecentForm%</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        }
+    </div>
+
+    <!-- Recent Activities -->
+    <div class="recent-activities">
+        <h5 class="mb-3">
+            <i class="bi bi-clock-history me-2"></i>Recent Activities
+        </h5>
+        @if (dashboardData?.RecentActivities != null)
+        {
+            @foreach (var activity in dashboardData.RecentActivities.Take(5))
+            {
+                <div class="card mb-2 border-0 shadow-sm">
+                    <div class="card-body p-3">
+                        <div class="d-flex justify-content-between">
+                            <span>@activity.Description</span>
+                            <small class="text-muted">@activity.Timestamp.ToString("HH:mm")</small>
+                        </div>
+                    </div>
+                </div>
+            }
+        }
+    </div>
+
+    <!-- Floating Action Button -->
+    <div class="fab">
+        <button class="btn btn-primary rounded-circle shadow" @onclick="RefreshData">
+            <i class="bi bi-arrow-clockwise"></i>
+        </button>
+    </div>
+</div>
+
+<style>
+    .mobile-dashboard {
+        max-width: 480px;
+        margin: 0 auto;
+        padding: 0 15px;
+    }
+
+    .mobile-header {
+        margin: -15px -15px 15px -15px;
+        border-radius: 0 0 15px 15px;
+    }
+
+    .fab {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        z-index: 1000;
+    }
+
+    .fab button {
+        width: 56px;
+        height: 56px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    @media (max-width: 576px) {
+        .mobile-dashboard {
+            padding: 0 10px;
+        }
+    }
+</style>
+
+@code {
+    private MobileDashboardData? dashboardData;
+    private Timer? refreshTimer;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadDashboardData();
+        
+        // Auto-refresh every 30 seconds
+        refreshTimer = new Timer(async _ => await InvokeAsync(RefreshData), null, TimeSpan.FromSeconds(30), TimeSpan.FromSeconds(30));
+    }
+
+    private async Task LoadDashboardData()
+    {
+        try
+        {
+            dashboardData = await MobileService.GetDashboardDataAsync();
+            StateHasChanged();
+        }
+        catch (Exception ex)
+        {
+            // Handle error
+            await JSRuntime.InvokeVoidAsync("console.error", $"Failed to load dashboard data: {ex.Message}");
+        }
+    }
+
+    private async Task RefreshData()
+    {
+        await LoadDashboardData();
+        await JSRuntime.InvokeVoidAsync("console.log", "Dashboard refreshed");
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        refreshTimer?.Dispose();
+    }
+}

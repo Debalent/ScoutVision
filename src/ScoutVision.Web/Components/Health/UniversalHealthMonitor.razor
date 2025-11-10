@@ -1,0 +1,296 @@
+<div class="health-monitor-dashboard">
+    <!-- Health Overview -->
+    <MudCard Elevation="2" Class="mb-4">
+        <MudCardHeader>
+            <CardHeaderContent>
+                <MudText Typo="Typo.h6">🏥 Universal Health & Injury Prevention</MudText>
+                <MudText Typo="Typo.caption">AI-powered health monitoring across all sports</MudText>
+            </CardHeaderContent>
+        </MudCardHeader>
+        <MudCardContent>
+            <MudGrid>
+                <MudItem xs="12" md="3">
+                    <div class="health-metric-card high-risk">
+                        <MudIcon Icon="Icons.Material.Filled.Warning" Size="Size.Large" />
+                        <MudText Typo="Typo.h4">@highRiskAthletes</MudText>
+                        <MudText Typo="Typo.caption">High Risk Athletes</MudText>
+                    </div>
+                </MudItem>
+                <MudItem xs="12" md="3">
+                    <div class="health-metric-card moderate-risk">
+                        <MudIcon Icon="Icons.Material.Filled.MonitorHeart" Size="Size.Large" />
+                        <MudText Typo="Typo.h4">@moderateRiskAthletes</MudText>
+                        <MudText Typo="Typo.caption">Moderate Risk</MudText>
+                    </div>
+                </MudItem>
+                <MudItem xs="12" md="3">
+                    <div class="health-metric-card low-risk">
+                        <MudIcon Icon="Icons.Material.Filled.Favorite" Size="Size.Large" />
+                        <MudText Typo="Typo.h4">@lowRiskAthletes</MudText>
+                        <MudText Typo="Typo.caption">Low Risk</MudText>
+                    </div>
+                </MudItem>
+                <MudItem xs="12" md="3">
+                    <div class="health-metric-card recovery">
+                        <MudIcon Icon="Icons.Material.Filled.Healing" Size="Size.Large" />
+                        <MudText Typo="Typo.h4">@athletesInRecovery</MudText>
+                        <MudText Typo="Typo.caption">In Recovery</MudText>
+                    </div>
+                </MudItem>
+            </MudGrid>
+        </MudCardContent>
+    </MudCard>
+    
+    <!-- Sport-Specific Injury Patterns -->
+    <MudGrid>
+        <MudItem xs="12" lg="8">
+            <MudCard Elevation="2">
+                <MudCardHeader>
+                    <CardHeaderContent>
+                        <MudText Typo="Typo.h6">📊 Injury Patterns by Sport</MudText>
+                    </CardHeaderContent>
+                </MudCardHeader>
+                <MudCardContent>
+                    <div id="injury-patterns-chart" style="height: 400px;"></div>
+                </MudCardContent>
+            </MudCard>
+        </MudItem>
+        
+        <MudItem xs="12" lg="4">
+            <MudCard Elevation="2">
+                <MudCardHeader>
+                    <CardHeaderContent>
+                        <MudText Typo="Typo.h6">🎯 Prevention Recommendations</MudText>
+                    </CardHeaderContent>
+                </MudCardHeader>
+                <MudCardContent>
+                    <MudList>
+                        @foreach (var recommendation in preventionRecommendations)
+                        {
+                            <MudListItem>
+                                <div class="d-flex align-items-start">
+                                    <MudIcon Icon="@recommendation.Icon" 
+                                             Color="@recommendation.Priority" 
+                                             Class="mr-2 mt-1" />
+                                    <div>
+                                        <MudText Typo="Typo.body2">@recommendation.Title</MudText>
+                                        <MudText Typo="Typo.caption" Class="text-muted">
+                                            @recommendation.Description
+                                        </MudText>
+                                        <MudChip Size="Size.Small" 
+                                                 Color="@recommendation.Priority" 
+                                                 Variant="Variant.Text">
+                                            @recommendation.Sport
+                                        </MudChip>
+                                    </div>
+                                </div>
+                            </MudListItem>
+                        }
+                    </MudList>
+                </MudCardContent>
+            </MudCard>
+        </MudItem>
+    </MudGrid>
+    
+    <!-- Individual Athlete Risk Assessment -->
+    <MudCard Elevation="2" Class="mt-4">
+        <MudCardHeader>
+            <CardHeaderContent>
+                <MudText Typo="Typo.h6">👤 Individual Risk Assessment</MudText>
+            </CardHeaderContent>
+            <CardHeaderActions>
+                <MudButton StartIcon="Icons.Material.Filled.PersonAdd" 
+                           OnClick="AddAthleteAssessment"
+                           Variant="Variant.Outlined">
+                    Add Assessment
+                </MudButton>
+            </CardHeaderActions>
+        </MudCardHeader>
+        <MudCardContent>
+            <MudDataGrid Items="@athleteRiskAssessments" 
+                         Filterable="true" 
+                         SortMode="SortMode.Multiple"
+                         Groupable="true">
+                <Columns>
+                    <PropertyColumn Property="x => x.AthleteName" Title="Athlete" />
+                    <PropertyColumn Property="x => x.Sport" Title="Sport" />
+                    <PropertyColumn Property="x => x.Position" Title="Position" />
+                    <TemplateColumn Title="Risk Level">
+                        <CellTemplate>
+                            <MudChip Color="@GetRiskColor(context.Item.RiskLevel)" 
+                                     Size="Size.Small">
+                                @context.Item.RiskLevel
+                            </MudChip>
+                        </CellTemplate>
+                    </TemplateColumn>
+                    <TemplateColumn Title="Risk Factors">
+                        <CellTemplate>
+                            <div class="risk-factors">
+                                @foreach (var factor in context.Item.RiskFactors.Take(3))
+                                {
+                                    <MudChip Size="Size.Small" 
+                                             Variant="Variant.Text" 
+                                             Color="Color.Warning">
+                                        @factor
+                                    </MudChip>
+                                }
+                            </div>
+                        </CellTemplate>
+                    </TemplateColumn>
+                    <PropertyColumn Property="x => x.LastAssessment" Title="Last Assessment" Format="MM/dd/yyyy" />
+                    <TemplateColumn Title="Actions">
+                        <CellTemplate>
+                            <MudButtonGroup Size="Size.Small" Variant="Variant.Text">
+                                <MudButton StartIcon="Icons.Material.Filled.Assessment"
+                                           OnClick="() => ViewDetailedAssessment(context.Item.AthleteId)">
+                                    Details
+                                </MudButton>
+                                <MudButton StartIcon="Icons.Material.Filled.FitnessCenter"
+                                           OnClick="() => CreatePreventionPlan(context.Item.AthleteId)">
+                                    Plan
+                                </MudButton>
+                            </MudButtonGroup>
+                        </CellTemplate>
+                    </TemplateColumn>
+                </Columns>
+            </MudDataGrid>
+        </MudCardContent>
+    </MudCard>
+    
+    <!-- Recovery Tracking -->
+    <MudCard Elevation="2" Class="mt-4">
+        <MudCardHeader>
+            <CardHeaderContent>
+                <MudText Typo="Typo.h6">🔄 Recovery Tracking</MudText>
+            </CardHeaderContent>
+        </MudCardHeader>
+        <MudCardContent>
+            <MudGrid>
+                @foreach (var recovery in activeRecoveries)
+                {
+                    <MudItem xs="12" md="6" lg="4">
+                        <MudCard Elevation="1" Class="recovery-card">
+                            <MudCardContent>
+                                <div class="d-flex align-items-center mb-2">
+                                    <MudAvatar Size="Size.Medium" Class="mr-3">
+                                        <MudImage Src="@recovery.AthleteImage" />
+                                    </MudAvatar>
+                                    <div>
+                                        <MudText Typo="Typo.subtitle1">@recovery.AthleteName</MudText>
+                                        <MudText Typo="Typo.caption">@recovery.InjuryType</MudText>
+                                    </div>
+                                </div>
+                                
+                                <div class="recovery-progress mb-3">
+                                    <MudText Typo="Typo.body2" Class="mb-1">Recovery Progress</MudText>
+                                    <MudProgressLinear Value="@recovery.ProgressPercentage" 
+                                                       Color="Color.Success" 
+                                                       Size="Size.Medium" />
+                                    <MudText Typo="Typo.caption" Class="mt-1">
+                                        @recovery.ProgressPercentage.ToString("F0")% Complete
+                                    </MudText>
+                                </div>
+                                
+                                <div class="recovery-timeline">
+                                    <MudText Typo="Typo.body2" Class="mb-1">Expected Return</MudText>
+                                    <MudText Typo="Typo.h6" Color="Color.Primary">
+                                        @recovery.ExpectedReturn.ToString("MMM dd, yyyy")
+                                    </MudText>
+                                </div>
+                            </MudCardContent>
+                            <MudCardActions>
+                                <MudButton Size="Size.Small" 
+                                           StartIcon="Icons.Material.Filled.Timeline"
+                                           OnClick="() => ViewRecoveryTimeline(recovery.AthleteId)">
+                                    Timeline
+                                </MudButton>
+                                <MudButton Size="Size.Small" 
+                                           StartIcon="Icons.Material.Filled.Update"
+                                           OnClick="() => UpdateRecoveryStatus(recovery.AthleteId)">
+                                    Update
+                                </MudButton>
+                            </MudCardActions>
+                        </MudCard>
+                    </MudItem>
+                }
+            </MudGrid>
+        </MudCardContent>
+    </MudCard>
+</div>
+
+<style>
+    .health-metric-card {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 20px;
+        border-radius: 12px;
+        text-align: center;
+        transition: transform 0.2s ease;
+    }
+    
+    .health-metric-card:hover {
+        transform: translateY(-2px);
+    }
+    
+    .high-risk {
+        background: linear-gradient(135deg, #ffebee, #ffcdd2);
+        color: #c62828;
+    }
+    
+    .moderate-risk {
+        background: linear-gradient(135deg, #fff3e0, #ffe0b2);
+        color: #ef6c00;
+    }
+    
+    .low-risk {
+        background: linear-gradient(135deg, #e8f5e8, #c8e6c9);
+        color: #2e7d32;
+    }
+    
+    .recovery {
+        background: linear-gradient(135deg, #e3f2fd, #bbdefb);
+        color: #1565c0;
+    }
+    
+    .recovery-card {
+        height: 100%;
+    }
+    
+    .risk-factors {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 4px;
+    }
+</style>
+
+@code {
+    private int highRiskAthletes = 12;
+    private int moderateRiskAthletes = 34;
+    private int lowRiskAthletes = 156;
+    private int athletesInRecovery = 8;
+    
+    private List<PreventionRecommendation> preventionRecommendations = new();
+    private List<AthleteRiskAssessment> athleteRiskAssessments = new();
+    private List<RecoveryTracking> activeRecoveries = new();
+    
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadHealthData();
+        await RenderInjuryPatternsChart();
+    }
+    
+    private Color GetRiskColor(string riskLevel) => riskLevel switch
+    {
+        "High" => Color.Error,
+        "Moderate" => Color.Warning,
+        "Low" => Color.Success,
+        _ => Color.Default
+    };
+    
+    public record PreventionRecommendation(string Title, string Description, string Sport, string Icon, Color Priority);
+    public record AthleteRiskAssessment(string AthleteId, string AthleteName, string Sport, string Position, 
+        string RiskLevel, List<string> RiskFactors, DateTime LastAssessment);
+    public record RecoveryTracking(string AthleteId, string AthleteName, string InjuryType, 
+        double ProgressPercentage, DateTime ExpectedReturn, string AthleteImage);
+}
