@@ -1,0 +1,17 @@
+# GitHub repository settings
+repository:
+  # Enable features for better indexing
+  has_issues: true
+  has_projects: true
+  has_wiki: true
+  
+  # Enable security features
+  vulnerability_alerts: true
+  automated_security_fixes: true
+  
+  # Enable code scanning
+  security_and_analysis:
+    secret_scanning:
+      status: enabled
+    secret_scanning_push_protection:
+      status: enabled
