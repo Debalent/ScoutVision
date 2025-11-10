@@ -3,63 +3,90 @@
 ## 🚀 Quick Start Commands
 
 ### Build and Run Web Application
+
 ```powershell
+
 cd src\ScoutVision.Web
 dotnet restore
 dotnet build
 dotnet run
-```
+
+```text
 
 Access at: `https://localhost:7001`
 
 ### Run Database Migrations
+
 ```powershell
+
 cd src\ScoutVision.Infrastructure
 dotnet ef database update --project ..\ScoutVision.Web
-```
+
+```text
 
 ### Run Tests
+
 ```powershell
+
 cd src\ScoutVision.Tests
 dotnet test
-```
+
+```text
 
 ## 📁 Project Structure
 
-```
+```text
+
 ScoutVision/
 ├── src/
 │   ├── ScoutVision.Web/              # Main Blazor application
+
 │   │   ├── Pages/
 │   │   │   ├── HybridAnalytics.razor # Hybrid analytics UI
+
 │   │   │   ├── SearchSimple.razor    # Player search
+
 │   │   │   └── UserManual.razor      # User guide
+
 │   │   ├── Services/
 │   │   │   ├── HybridAnalyticsService.cs  # Core hybrid service
+
 │   │   │   ├── LocalizationService.cs     # Multi-language
+
 │   │   │   └── ThemeService.cs            # Theme management
+
 │   │   └── Shared/
 │   │       ├── NavMenu.razor         # Navigation
+
 │   │       └── ThemeProvider.razor   # Theme provider
+
 │   ├── ScoutVision.Core/             # Domain models & DTOs
+
 │   ├── ScoutVision.Infrastructure/   # Data access
+
 │   └── ScoutVision.API/              # REST API
+
 ├── docs/
 │   ├── Hybrid-Architecture-Guide.md
 │   ├── Hybrid-Solution-Deployment.md
 │   ├── GMod-SDK-Integration.md
 │   └── Hybrid-Solution-Implementation-Summary.md
 ├── gmod-addon/                       # GMod integration (future)
+
 └── bridge-service/                   # Python/Node bridge (future)
-```
+
+```text
 
 ## 🔑 Key Files Reference
 
 ### HybridAnalyticsService.cs
+
 **Location**: `src/ScoutVision.Web/Services/HybridAnalyticsService.cs`
 
 **Key Methods**:
+
 ```csharp
+
 // Player Analysis
 Task<PlayerAnalytics> GetPlayerAnalyticsAsync(int playerId)
 
@@ -77,36 +104,49 @@ Task<GModSessionStatus> GetGModSessionStatusAsync(string sessionId)
 // Hybrid Workflows
 Task<AnalysisSession> CreateAnalysisSessionAsync(AnalysisSessionRequest request)
 Task<bool> SynchronizeWithGModAsync(string sessionId)
-```
+
+```text
 
 ### HybridAnalytics.razor
+
 **Location**: `src/ScoutVision.Web/Pages/HybridAnalytics.razor`
 
 **Route**: `/hybrid-analytics`
 
 **Key Features**:
+
 - Mode selection (Web/GMod/Hybrid)
+
 - Active session management
+
 - Quick action buttons
+
 - GMod connection status
+
 - Session creation modal
 
 ### LocalizationService.cs
+
 **Location**: `src/ScoutVision.Web/Services/LocalizationService.cs`
 
 **Hybrid Analytics Keys**:
+
 ```csharp
+
 "HybridAnalytics"            // "Hybrid Analytics"
 "NewSession"                 // "New Session"
 "HybridAnalyticsDescription" // Description text
 "3DVisualization"            // "3D Visualization"
 "SyncWithGMod"              // "Sync with GMod"
-```
+
+```text
 
 ## 🔧 Configuration
 
 ### appsettings.json
+
 ```json
+
 {
   "ConnectionStrings": {
     "DefaultConnection": "Server=localhost;Database=ScoutVision;Trusted_Connection=True;"
@@ -124,10 +164,13 @@ Task<bool> SynchronizeWithGModAsync(string sessionId)
     }
   }
 }
-```
+
+```text
 
 ### Program.cs - Register Services
+
 ```csharp
+
 // Hybrid Analytics Service
 builder.Services.AddScoped<IHybridAnalyticsService, HybridAnalyticsService>();
 
@@ -143,12 +186,15 @@ builder.Services.AddScoped<ILocalizationService, LocalizationService>();
 
 // Theme Service
 builder.Services.AddScoped<IThemeService, ThemeService>();
-```
+
+```text
 
 ## 🎯 Common Tasks
 
 ### Create New Analysis Session
+
 ```csharp
+
 var request = new AnalysisSessionRequest
 {
     MatchId = 101,
@@ -159,20 +205,26 @@ var request = new AnalysisSessionRequest
 };
 
 var session = await HybridAnalytics.CreateAnalysisSessionAsync(request);
-```
+
+```text
 
 ### Get Player Analytics
+
 ```csharp
+
 var analytics = await HybridAnalytics.GetPlayerAnalyticsAsync(playerId);
 
 // Access data
 var metrics = analytics.PerformanceMetrics;
 var patterns = analytics.MovementPatterns;
 var heatMap = analytics.HeatMapData;
-```
+
+```text
 
 ### Start GMod Session
+
 ```csharp
+
 var config = new GModSessionConfig
 {
     MatchId = 101,
@@ -182,12 +234,16 @@ var config = new GModSessionConfig
 };
 
 var started = await HybridAnalytics.StartGModSessionAsync(config);
-```
+
+```text
 
 ### Sync Data with GMod
+
 ```csharp
+
 var success = await HybridAnalytics.SynchronizeWithGModAsync(sessionId);
-```
+
+```text
 
 ## 🌍 Supported Languages
 
@@ -209,41 +265,52 @@ var success = await HybridAnalytics.SynchronizeWithGModAsync(sessionId);
 ## 🎨 Theme Management
 
 ### Get Current Theme
+
 ```csharp
+
 @inject IThemeService ThemeService
 
 var isDark = await ThemeService.GetIsDarkModeAsync();
-```
+
+```text
 
 ### Toggle Theme
+
 ```csharp
+
 await ThemeService.ToggleThemeAsync();
-```
+
+```text
 
 ## 🧪 Testing
 
 ### Unit Test Example
+
 ```csharp
+
 [Fact]
 public async Task CreateAnalysisSession_ShouldReturnSession()
 {
     // Arrange
     var service = new HybridAnalyticsService(logger, httpClient);
     var request = new AnalysisSessionRequest { MatchId = 1 };
-    
+
     // Act
     var session = await service.CreateAnalysisSessionAsync(request);
-    
+
     // Assert
     Assert.NotNull(session);
     Assert.Equal(1, session.MatchId);
 }
-```
+
+```text
 
 ## 🐛 Debugging
 
 ### Enable Detailed Logging
+
 ```json
+
 {
   "Logging": {
     "LogLevel": {
@@ -252,18 +319,24 @@ public async Task CreateAnalysisSession_ShouldReturnSession()
     }
   }
 }
-```
+
+```text
 
 ### Check GMod Connection
+
 ```csharp
+
 var status = await HybridAnalytics.GetGModSessionStatusAsync("test");
 Console.WriteLine($"GMod Status: {status.Status}");
-```
+
+```text
 
 ## 📊 Data Models
 
 ### AnalysisSession
+
 ```csharp
+
 public class AnalysisSession
 {
     public string SessionId { get; set; }
@@ -276,10 +349,13 @@ public class AnalysisSession
     public string? GModSessionId { get; set; }
     public object? WebAnalyticsData { get; set; }
 }
-```
+
+```text
 
 ### PlayerAnalytics
+
 ```csharp
+
 public class PlayerAnalytics
 {
     public int PlayerId { get; set; }
@@ -290,10 +366,13 @@ public class PlayerAnalytics
     public ComparisonData ComparisonData { get; set; }
     public List<ImprovementSuggestion> ImprovementSuggestions { get; set; }
 }
-```
+
+```text
 
 ### GModSessionConfig
+
 ```csharp
+
 public class GModSessionConfig
 {
     public string SessionId { get; set; }
@@ -303,68 +382,101 @@ public class GModSessionConfig
     public TimeRange TimeRange { get; set; }
     public string AnalysisMode { get; set; }
 }
-```
+
+```text
 
 ## 🔗 Useful Links
 
-- **Web Interface**: https://localhost:7001
-- **API Docs**: https://localhost:7000/swagger
-- **GMod Bridge**: http://localhost:8080
-- **GitHub Repo**: https://github.com/Debalent/ScoutVision
+- **Web Interface**: <https://localhost:7001>
+
+- **API Docs**: <https://localhost:7000/swagger>
+
+- **GMod Bridge**: <http://localhost:8080>
+
+- **GitHub Repo**: <https://github.com/Debalent/ScoutVision>
 
 ## 💡 Tips & Tricks
 
 ### Performance
+
 - Use async/await for all I/O operations
+
 - Enable response caching for static data
+
 - Implement pagination for large result sets
+
 - Cache frequently accessed translations
 
 ### Security
+
 - Always validate user input
+
 - Use HTTPS in production
+
 - Implement rate limiting
+
 - Enable CORS properly
+
 - Use API keys for GMod communication
 
 ### Best Practices
+
 - Follow C# naming conventions
+
 - Write unit tests for services
+
 - Document public APIs with XML comments
+
 - Use dependency injection
+
 - Handle exceptions gracefully
 
 ## 🆘 Common Issues
 
 ### Build Errors
+
 ```powershell
+
 # Clean and rebuild
+
 dotnet clean
 dotnet restore
 dotnet build
-```
+
+```text
 
 ### Database Connection Issues
+
 ```powershell
+
 # Update connection string in appsettings.json
+
 # Run migrations
+
 dotnet ef database update
-```
+
+```text
 
 ### GMod Connection Failed
+
 - Check bridge service is running on port 8080
+
 - Verify firewall settings
+
 - Confirm GMod addon is loaded
+
 - Review application logs
 
 ## 📞 Support
 
 - **Documentation**: `/docs` folder
+
 - **Issues**: GitHub Issues
+
 - **Discussions**: GitHub Discussions
 
 ---
 
-**Last Updated**: October 13, 2025  
-**Version**: 1.0.0  
+**Last Updated**: October 13, 2025
+**Version**: 1.0.0
 **Status**: Beta

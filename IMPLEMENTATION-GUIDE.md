@@ -8,7 +8,8 @@ This guide walks through the comprehensive implementation of all proposed enhanc
 
 ### Deployed Services (Docker)
 
-```
+```text
+
 Infrastructure Layer:
 ├── PostgreSQL + TimescaleDB (Time-series metrics: port 5432)
 ├── SQL Server (Transactional DB: port 1433)
@@ -28,66 +29,94 @@ Application Services:
 ├── ScoutVision Web (port 5001/8080)
 ├── ScoutVision AI (port 8000)
 └── Data Integration Service (async background worker)
-```
+
+```text
 
 ## 🔧 Quick Start
 
 ### 1. Start All Services
 
 ```powershell
+
 # From project root
+
 docker-compose -f docker-compose.yml up -d
 
 # Wait for all services to be healthy
+
 docker-compose ps
-```
+
+```text
 
 ### 2. Access Services
 
-- **API Documentation**: http://localhost/swagger
-- **Web UI**: http://localhost/
-- **Kibana (Logs)**: http://localhost/kibana
-- **Grafana (Metrics)**: http://localhost/grafana (admin/ScoutVision2024!)
-- **MinIO Console**: http://localhost/minio (scout_admin/ScoutVision2024!)
-- **Jaeger (Tracing)**: http://localhost:16686
+- **API Documentation**: <http://localhost/swagger>
+
+- **Web UI**: <http://localhost/>
+
+- **Kibana (Logs)**: <http://localhost/kibana>
+
+- **Grafana (Metrics)**: <http://localhost/grafana> (admin/ScoutVision2024!)
+
+- **MinIO Console**: <http://localhost/minio> (scout_admin/ScoutVision2024!)
+
+- **Jaeger (Tracing)**: <http://localhost:16686>
 
 ### 3. Database Setup
 
 ```powershell
+
 # Migrations run automatically on API startup
+
 # For manual migrations:
+
 dotnet ef database update --project src/ScoutVision.API
-```
+
+```text
 
 ## 🏗️ Key Features Implemented
 
 ### Phase 1: Infrastructure Foundation ✅
 
 - **✅ PostgreSQL + TimescaleDB** - Time-series database for performance metrics
+
 - **✅ Redis Cache** - Sub-millisecond caching for predictions
+
 - **✅ RabbitMQ** - Async message processing for high-volume events
+
 - **✅ Authentication (JWT)** - Secure API access with role-based authorization
+
 - **✅ Real-time WebSockets** - SignalR hubs for live data updates
 
 ### Phase 2: AI/ML Enhancement ✅
 
-**Advanced Python Dependencies Added:**
+## Advanced Python Dependencies Added:
+
 - **TensorFlow 2.15** - Deep learning models
+
 - **PyTorch 2.1** - Neural networks with GPU support
+
 - **XGBoost & LightGBM** - Gradient boosting models
+
 - **Optuna** - Hyperparameter optimization
+
 - **MLflow & Weights & Biases** - Model versioning and tracking
+
 - **OpenTelemetry** - Distributed tracing
 
-**Integrated Services:**
+## Integrated Services:
+
 - Multi-algorithm ensemble for injury prediction
+
 - Real-time model inference caching
+
 - Automated model retraining pipelines
+
 - A/B testing framework
 
 ### Phase 3: Real-Time Intelligence Hubs ✅
 
-**SignalR Hubs Implemented:**
+## SignalR Hubs Implemented:
 
 1. **PlayerAnalyticsHub** (`/api/hubs/player-analytics`)
    - Real-time player metrics
@@ -112,15 +141,20 @@ dotnet ef database update --project src/ScoutVision.API
 ### Phase 4: Enterprise Readiness ✅
 
 - **Monitoring Stack**: Prometheus + Grafana + Jaeger
+
 - **Logging Stack**: Elasticsearch + Logstash + Kibana
+
 - **Health Checks**: Database, Redis, RabbitMQ, TimeSeries
+
 - **Metrics**: OpenTelemetry with Prometheus exporter
+
 - **Load Balancing**: Nginx with WebSocket support
+
 - **Object Storage**: MinIO for video/media files
 
 ### Phase 5: Multi-Tenant Support ✅
 
-**Package Tiers:**
+## Package Tiers:
 
 1. **Scout Package** ($499/month)
    - Scouting + Analytics
@@ -147,55 +181,84 @@ dotnet ef database update --project src/ScoutVision.API
 
 ### Phase 6: Data Integration ✅
 
-**External Data Source Integration:**
+## External Data Source Integration:
+
 - StatsBomb API
+
 - Wyscout API
+
 - SofaScore API
+
 - Transfermarkt scraping
+
 - Wearable GPS/IMU data
+
 - Betting odds feeds (Betfair, Pinnacle)
 
-**Data Pipeline Features:**
+## Data Pipeline Features:
+
 - Automatic sync scheduling
+
 - Error handling and retry logic
+
 - Data validation and cleaning
+
 - Real-time event publishing
 
 ## 📊 Monitoring & Observability
 
 ### Prometheus Metrics
 
-```
+```text
+
 - Request latency
+
 - Error rates by endpoint
+
 - Database query performance
+
 - Redis hit/miss ratios
+
 - RabbitMQ queue depths
+
 - Real-time broadcast latency
+
 - ML model inference time
-```
+
+```text
 
 ### Grafana Dashboards
 
 Pre-configured dashboards for:
+
 - Application Performance (API response times, error rates)
+
 - Database Performance (query times, connection pools)
+
 - Infrastructure Health (memory, CPU, disk)
+
 - Real-time Hub Performance (connection count, message throughput)
+
 - ML Model Performance (inference time, prediction accuracy)
 
 ### Jaeger Distributed Tracing
 
 - End-to-end request tracing
+
 - Service-to-service latency analysis
+
 - Error root cause analysis
+
 - Performance bottleneck identification
 
 ### ELK Stack Logging
 
 - All logs indexed in Elasticsearch
+
 - Kibana dashboards for log analysis
+
 - Real-time alerting on errors
+
 - Retention: 30 days (configurable)
 
 ## 🔒 Security Features
@@ -203,18 +266,24 @@ Pre-configured dashboards for:
 ### Authentication & Authorization
 
 ```csharp
+
 // JWT-based authentication
 // Supported roles: Admin, Coach, Analyst, Viewer
 // Multi-tenancy with tenant isolation
 // WebSocket-compatible token passing
-```
+
+```text
 
 ### Data Protection
 
 - Encrypted connections (TLS 1.2+)
+
 - Redis data protection
+
 - Database connection encryption
+
 - API key rotation support
+
 - Rate limiting by tenant
 
 ## 📈 Performance Targets
@@ -232,7 +301,8 @@ Pre-configured dashboards for:
 
 ### Real-Time Match Prediction Flow
 
-```
+```text
+
 Match Feed (SofaScore)
         ↓
 [Data Integration Service]
@@ -248,11 +318,13 @@ Match Feed (SofaScore)
 [BettingIntelligenceHub] → [WebSocket Clients]
         ↓
 [Elasticsearch/Logging]
-```
+
+```text
 
 ### Injury Prevention Flow
 
-```
+```text
+
 Wearable Devices + Video
         ↓
 [AI Service] (MediaPipe + TensorFlow)
@@ -266,11 +338,13 @@ Wearable Devices + Video
 [InjuryAlertHub] → [Coach/Medical Staff]
         ↓
 [Alert Acknowledgment]
-```
+
+```text
 
 ### Transfer Valuation Flow
 
-```
+```text
+
 Player Performance Data
         ↓
 [Transfer Valuation Service]
@@ -284,55 +358,77 @@ Player Performance Data
 [TransferValueHub] → [Scouts/Directors]
         ↓
 [Historical Tracking]
-```
+
+```text
 
 ## 🧪 Testing & QA
 
 ### Unit Tests
+
 ```powershell
+
 # Run all tests
+
 dotnet test
 
 # Run specific test project
+
 dotnet test src/ScoutVision.API.Tests
 
 # Generate coverage report
+
 dotnet test /p:CollectCoverage=true
-```
+
+```text
 
 ### Integration Tests
+
 ```powershell
+
 # Tests use Docker containers
+
 docker-compose -f docker-compose.test.yml up
-```
+
+```text
 
 ### Performance Tests
+
 ```powershell
+
 # Load testing with k6
+
 k6 run tests/performance/real-time-load.js
 
 # Expected: 1000 concurrent connections, <1s latency
-```
+
+```text
 
 ## 📋 Migration from v1 to v2
 
 ### Database Migration
 
 ```powershell
+
 # Backup existing database
+
 docker exec scoutvision-db /opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P ScoutVision2024! -Q "BACKUP DATABASE [ScoutVisionDB] TO DISK = '/var/opt/mssql/backup/ScoutVisionDB.bak'"
 
 # Run Entity Framework migrations
+
 dotnet ef database update
 
 # Verify both DB connections
-```
+
+```text
 
 ### API Compatibility
 
 - All v1 endpoints remain functional
+
 - New v2 endpoints alongside v1
+
 - Gradual migration recommended
+
 - Swagger shows deprecation notices
 
 ## 🚀 Deployment to Production
@@ -340,126 +436,189 @@ dotnet ef database update
 ### Prerequisites
 
 - Docker & Docker Compose
+
 - Kubernetes cluster (optional, manifests included)
+
 - SSL certificates
+
 - Environment secrets management
 
 ### Production Checklist
 
-```
+```text
+
 Infrastructure:
+
 - [ ] Configure external databases (RDS, CloudSQL, etc.)
+
 - [ ] Set up CDN for static assets
+
 - [ ] Configure DNS and SSL certificates
+
 - [ ] Enable VPC/security groups
+
 - [ ] Set up backup schedules
+
 - [ ] Configure log retention policies
+
 - [ ] Enable monitoring alerts
 
 Application:
+
 - [ ] Update JWT secret (min 64 characters)
+
 - [ ] Configure external API keys (StatsBomb, Wyscout, etc.)
+
 - [ ] Set up CI/CD pipeline
+
 - [ ] Configure container registry (Docker Hub, ECR, etc.)
+
 - [ ] Test failover scenarios
+
 - [ ] Load testing (1000+ concurrent users)
+
 - [ ] Security scanning (SAST, DAST)
-```
+
+```text
 
 ### Kubernetes Deployment
 
 ```powershell
+
 # Apply manifests
+
 kubectl apply -f k8s/
 
 # Verify all pods running
+
 kubectl get pods -n scoutvision
 
 # Check services
+
 kubectl get svc -n scoutvision
-```
+
+```text
 
 ## 📞 Support & Troubleshooting
 
 ### Common Issues
 
-**Container won't start:**
+## Container won't start:
+
 ```powershell
+
 # Check logs
+
 docker logs scoutvision-api
 
 # Verify database connection
-docker exec scoutvision-api curl http://db:1433
-```
 
-**Redis connection errors:**
+docker exec scoutvision-api curl <http://db:1433>
+
+```text
+
+## Redis connection errors:
+
 ```powershell
+
 # Clear Redis
+
 docker exec scoutvision-redis redis-cli FLUSHALL
 
 # Verify connectivity
-docker exec scoutvision-api redis-cli -h redis ping
-```
 
-**WebSocket connection issues:**
-```
+docker exec scoutvision-api redis-cli -h redis ping
+
+```text
+
+## WebSocket connection issues:
+
+```text
+
 # Check Nginx configuration
+
 docker exec scoutvision-nginx cat /etc/nginx/nginx.conf
 
 # Verify SignalR hub routing
-curl -v http://localhost/api/hubs/player-analytics/negotiate
-```
+
+curl -v <http://localhost/api/hubs/player-analytics/negotiate>
+
+```text
 
 ## 📚 API Documentation
 
 ### Swagger UI
+
 Available at: `http://localhost/swagger`
 
 ### OpenAPI Spec
+
 Available at: `http://localhost/swagger/v1/swagger.json`
 
 ## 🎯 Next Steps for 90-Day Plan
 
 ### Week 1-2: Testing & QA
+
 - [ ] Load testing with 1000+ concurrent users
+
 - [ ] Security audit and penetration testing
+
 - [ ] Multi-tenant isolation verification
+
 - [ ] Data sync testing with live feeds
 
 ### Week 3-4: Pilot Customer Setup
+
 - [ ] High school partner onboarding
+
 - [ ] Professional club pilot launch
+
 - [ ] Betting operator integration testing
+
 - [ ] ROI documentation
 
 ### Week 5-8: Buyer Due Diligence
+
 - [ ] Technical documentation review
+
 - [ ] Architecture deep dives
+
 - [ ] Performance benchmarking
+
 - [ ] Security compliance verification
 
 ### Week 9-12: Final Optimization
+
 - [ ] Performance tuning
+
 - [ ] Cost optimization
+
 - [ ] Scalability stress testing
+
 - [ ] Final deployment readiness
 
 ## 💼 Business Metrics Dashboard
 
 The Grafana dashboard includes:
+
 - **Revenue**: API calls per month, active users by package
+
 - **Performance**: P95 latency by module, uptime percentage
+
 - **Engagement**: Real-time connections, data sync frequency
+
 - **Health**: Error rates, alert frequency, system metrics
 
 ## 📞 Contacts
 
 - **Technical Issues**: infrastructure@scoutvision.local
+
 - **Product Questions**: product@scoutvision.local
+
 - **Deployment Support**: devops@scoutvision.local
 
 ---
 
-**Version**: 2.0.0  
-**Last Updated**: October 19, 2025  
+**Version**: 2.0.0
+**Last Updated**: October 19, 2025
 **Status**: Production Ready ✅

@@ -8,7 +8,8 @@ Complete testing suite for validating platform readiness for 90-day exit.
 
 ### Test Categories
 
-```
+```text
+
 tests/
 ├── unit/
 │   ├── AuthServiceTests.cs          (9 test cases)
@@ -21,7 +22,8 @@ tests/
 └── performance/
     ├── PerformanceTests.cs          (20 test cases)
     └── LoadTests.k6.js              (Stress testing)
-```
+
+```text
 
 **Total Test Cases**: 78+ comprehensive tests
 
@@ -46,9 +48,12 @@ tests/
 | GenerateToken_TokenContains UserIdClaim | Claims validation | Token contains user ID claim |
 
 **Run Tests**:
+
 ```bash
+
 dotnet test tests/unit/AuthServiceTests.cs
-```
+
+```text
 
 **Expected Output**: ✅ All 9 tests passing (< 100ms total)
 
@@ -72,9 +77,12 @@ dotnet test tests/unit/AuthServiceTests.cs
 | GetAsync_WithComplexObject | Serialization | Object deserialized correctly |
 
 **Run Tests**:
+
 ```bash
+
 dotnet test tests/unit/CacheServiceTests.cs
-```
+
+```text
 
 **Expected Output**: ✅ All 10 tests passing (< 50ms total)
 
@@ -89,28 +97,42 @@ dotnet test tests/unit/CacheServiceTests.cs
 Tests SignalR hub functionality for real-time updates:
 
 #### PlayerAnalyticsHub (3 tests)
+
 - Group membership management
+
 - Metrics broadcasting to specific club
+
 - Multi-user metrics streaming
 
 #### InjuryAlertHub (2 tests)
+
 - High-priority alert broadcasting
+
 - Coach group assignment
 
 #### BettingIntelligenceHub (3 tests)
+
 - Match prediction broadcasting
+
 - Player event probability updates
+
 - Sub-100ms latency validation
 
 #### TransferValueHub (3 tests)
+
 - Player valuation updates
+
 - Market trend distribution
+
 - Multi-client broadcasting
 
 **Run Tests**:
+
 ```bash
+
 dotnet test tests/integration/RealTimeHubTests.cs
-```
+
+```text
 
 **Expected Output**: ✅ All 11 tests passing (< 200ms total)
 
@@ -131,9 +153,12 @@ Validates all infrastructure dependencies:
 | Elasticsearch | Cluster health | Green status |
 
 **Run Tests**:
+
 ```bash
+
 dotnet test tests/integration/HealthCheckTests.cs
-```
+
+```text
 
 **Expected Output**: ✅ All 12 tests passing with healthy status
 
@@ -146,30 +171,48 @@ dotnet test tests/integration/HealthCheckTests.cs
 Validates external data source connectivity:
 
 #### External APIs
+
 - StatsBomb API connectivity
+
 - Wyscout API connectivity
+
 - SofaScore live data
+
 - Transfermarkt market values
+
 - Betfair odds feed
+
 - Pinnacle odds feed
 
 #### Data Pipeline
+
 - Error handling and retries
+
 - Data validation before storage
+
 - Deduplication logic
+
 - Real-time streaming frequency
+
 - Webhook processing order
+
 - Failed webhook retries
 
 #### Data Quality
+
 - Realistic stat bounds validation
+
 - Injury prediction calibration
+
 - Market value consistency
 
 **Run Tests**:
+
 ```bash
+
 dotnet test tests/integration/DataIntegrationTests.cs
-```
+
+```text
 
 **Expected Output**: ✅ All 16 tests passing
 
@@ -188,16 +231,22 @@ dotnet test tests/integration/DataIntegrationTests.cs
 | Betting Predictions | <1000ms P95 | Redis cache | 95th percentile |
 
 **Test**:
+
 ```bash
+
 dotnet test tests/performance/PerformanceTests.cs -c Release
-```
+
+```text
 
 **Success Criteria**:
-```
+
+```text
+
 ✅ PlayerAnalytics_BroadcastLatency_ShouldBeBelowTarget (P95 < 100ms)
 ✅ InjuryAlert_BroadcastLatency_ShouldBeBelowTarget (P95 < 1000ms)
 ✅ BettingPrediction_UpdateLatency_ShouldBeBelowTarget (P95 < 1000ms)
-```
+
+```text
 
 ---
 
@@ -211,9 +260,12 @@ dotnet test tests/performance/PerformanceTests.cs -c Release
 | Redis Latency | <10ms P99 | Redis |
 
 **Test**:
+
 ```bash
+
 dotnet test tests/performance/PerformanceTests.cs::ThroughputTests -c Release
-```
+
+```text
 
 ---
 
@@ -226,9 +278,12 @@ dotnet test tests/performance/PerformanceTests.cs::ThroughputTests -c Release
 | Message Queue Workers | 50+ concurrent | RabbitMQ |
 
 **Test**:
+
 ```bash
+
 dotnet test tests/performance/PerformanceTests.cs::ConcurrencyTests -c Release
-```
+
+```text
 
 ---
 
@@ -245,30 +300,42 @@ dotnet test tests/performance/PerformanceTests.cs::ConcurrencyTests -c Release
 ## 📦 Running Full Test Suite
 
 ### Unit Tests Only
+
 ```bash
+
 dotnet test tests/unit/ --no-build
-```
+
+```text
 
 **Expected**: ~1 second, 19 tests passing
 
 ### Integration Tests Only
+
 ```bash
+
 dotnet test tests/integration/ --no-build
-```
+
+```text
 
 **Expected**: ~5 seconds, 39 tests passing
 
 ### Performance Tests Only
+
 ```bash
+
 dotnet test tests/performance/ --no-build -c Release
-```
+
+```text
 
 **Expected**: ~30 seconds, 20 tests passing
 
 ### All Tests
+
 ```bash
+
 dotnet test tests/ --no-build -c Release
-```
+
+```text
 
 **Expected**: ~40 seconds, 78+ tests passing
 
@@ -279,14 +346,21 @@ dotnet test tests/ --no-build -c Release
 Generate coverage report:
 
 ```bash
+
 dotnet test tests/ /p:CollectCoverage=true /p:CoverageFormat=opencover /p:Exclude="[*.Tests]*"
-```
+
+```text
 
 **Target Coverage**:
+
 - Authentication: 95%+
+
 - Caching: 90%+
+
 - Real-time: 85%+
+
 - Data integration: 80%+
+
 - **Overall**: 85%+
 
 ---
@@ -298,13 +372,19 @@ dotnet test tests/ /p:CollectCoverage=true /p:CoverageFormat=opencover /p:Exclud
 **File**: `tests/performance/load-test.k6.js` (to be created)
 
 ```bash
+
 k6 run tests/performance/load-test.k6.js
-```
+
+```text
 
 **Scenarios**:
+
 1. **Normal Load**: 100 concurrent users
+
 2. **Peak Load**: 1,000 concurrent users
+
 3. **Stress Test**: 5,000 concurrent users
+
 4. **Soak Test**: 500 users for 30 minutes
 
 ---
@@ -312,27 +392,43 @@ k6 run tests/performance/load-test.k6.js
 ## ✅ Pre-Launch Validation Checklist
 
 ### Week 1: Basic Functionality
+
 - [ ] Unit tests all passing
+
 - [ ] Authentication flows working
+
 - [ ] Cache responding under 10ms
+
 - [ ] Database connectivity verified
 
 ### Week 2: Integration Tests
+
 - [ ] All services healthy
+
 - [ ] Real-time hubs connecting
+
 - [ ] Data integration working
+
 - [ ] Message broker processing
 
 ### Week 3: Performance Tests
+
 - [ ] Latency targets met
+
 - [ ] Throughput targets achieved
+
 - [ ] Concurrency limits validated
+
 - [ ] Cache hit ratio >80%
 
 ### Week 4: Load Testing
+
 - [ ] 1,000 concurrent users stable
+
 - [ ] 10,000 WebSocket connections healthy
+
 - [ ] No memory leaks (24h soak test)
+
 - [ ] Error rate <0.1%
 
 ---
@@ -341,7 +437,8 @@ k6 run tests/performance/load-test.k6.js
 
 Create a dashboard showing:
 
-```
+```text
+
 LATENCY METRICS
 ├── API Response Time (p50, p95, p99)
 ├── Database Query Time
@@ -365,7 +462,8 @@ ERROR METRICS
 ├── Failed Connections %
 ├── Timeout Count
 └── Retry Count
-```
+
+```text
 
 ---
 
@@ -379,10 +477,13 @@ ERROR METRICS
 ### Cache Tests Failing
 
 **Cause**: Redis not running
-**Solution**: 
+**Solution**:
+
 ```bash
+
 docker-compose up redis -d
-```
+
+```text
 
 ### Real-Time Hub Tests Failing
 
@@ -398,31 +499,46 @@ docker-compose up redis -d
 
 **Cause**: External APIs not configured
 **Solution**: Set environment variables:
+
 ```bash
+
 STATSBOMB_API_KEY=xxx
 WYSCOUT_API_KEY=xxx
-```
+
+```text
 
 ---
 
 ## 📈 Success Metrics
 
 ### For Buyer Confidence
+
 - **Test Pass Rate**: 100% (78/78 tests)
+
 - **Code Coverage**: >85%
+
 - **Performance SLA Met**: 100%
+
 - **System Uptime**: >99.5%
 
 ### For Production Readiness
+
 - **Latency P95**: <1000ms for all operations
+
 - **Cache Hit Ratio**: >80%
+
 - **Error Rate**: <0.1%
+
 - **Concurrent Users**: 10,000+
 
 ### For 90-Day Exit
+
 - **Pilot Customer Validation**: All features working
+
 - **Technical Due Diligence**: Ready for inspection
+
 - **Performance Guarantees**: Documented and proven
+
 - **Scalability Proof**: Load tests demonstrate capacity
 
 ---
@@ -430,43 +546,61 @@ WYSCOUT_API_KEY=xxx
 ## 📞 Test Support
 
 ### Running Specific Test
+
 ```bash
+
 dotnet test --filter "FullyQualifiedName~AuthServiceTests.GenerateToken_WithValidUser"
-```
+
+```text
 
 ### Verbose Output
+
 ```bash
+
 dotnet test -v d (diagnostic)
-```
+
+```text
 
 ### Parallel Execution
+
 ```bash
+
 dotnet test -m:4 (use 4 cores)
-```
+
+```text
 
 ### Custom Configuration
+
 ```bash
+
 dotnet test --configuration Release --framework net8.0
-```
+
+```text
 
 ---
 
-**Last Updated**: October 19, 2025  
-**Test Framework**: xUnit 2.4+  
-**Total Tests**: 78+  
-**Estimated Runtime**: ~45 seconds  
-**Coverage Target**: 85%+  
+**Last Updated**: October 19, 2025
+**Test Framework**: xUnit 2.4+
+**Total Tests**: 78+
+**Estimated Runtime**: ~45 seconds
+**Coverage Target**: 85%+
 
 ---
 
 ## Next Steps
 
 1. ✅ Run all unit tests: `dotnet test tests/unit/`
+
 2. ✅ Run integration tests: `dotnet test tests/integration/`
+
 3. ✅ Run performance tests: `dotnet test tests/performance/ -c Release`
+
 4. ✅ Generate coverage report
+
 5. ✅ Document any failures
+
 6. ✅ Address failing tests
+
 7. ✅ Prepare for buyer technical audit
 
 **Expected Timeline**: 2-3 days to 100% pass rate

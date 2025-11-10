@@ -12,7 +12,9 @@ The ScoutVision API provides comprehensive access to all platform features inclu
 All API endpoints require authentication using JWT tokens.
 
 ### Login
+
 ```http
+
 POST /auth/login
 Content-Type: application/json
 
@@ -20,10 +22,13 @@ Content-Type: application/json
   "email": "scout@example.com",
   "password": "secure_password"
 }
-```
+
+```text
 
 **Response**:
+
 ```json
+
 {
   "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
   "expires": "2024-01-01T12:00:00Z",
@@ -33,26 +38,38 @@ Content-Type: application/json
     "role": "Scout"
   }
 }
-```
+
+```text
 
 ## Players
 
 ### List Players
+
 ```http
+
 GET /api/players?page=1&pageSize=10&search=johnson
 Authorization: Bearer {token}
-```
+
+```text
 
 **Query Parameters**:
+
 - `page` (int): Page number (default: 1)
+
 - `pageSize` (int): Items per page (default: 10, max: 100)
+
 - `search` (string): Search term for player names
+
 - `position` (string): Filter by position
+
 - `team` (string): Filter by current team
+
 - `priority` (enum): Filter by scouting priority (Low, Medium, High, Critical)
 
 **Response**:
+
 ```json
+
 {
   "data": [
     {
@@ -75,16 +92,22 @@ Authorization: Bearer {token}
     "pageSize": 10
   }
 }
-```
+
+```text
 
 ### Get Player Details
+
 ```http
+
 GET /api/players/{id}
 Authorization: Bearer {token}
-```
+
+```text
 
 **Response**:
+
 ```json
+
 {
   "id": 1,
   "firstName": "Marcus",
@@ -114,13 +137,18 @@ Authorization: Bearer {token}
   },
   "tags": [
     { "name": "Fast", "color": "#FF5722" },
+
     { "name": "Clinical Finisher", "color": "#4CAF50" }
+
   ]
 }
-```
+
+```text
 
 ### Create Player
+
 ```http
+
 POST /api/players
 Authorization: Bearer {token}
 Content-Type: application/json
@@ -137,12 +165,15 @@ Content-Type: application/json
   "weight": 58.0,
   "biography": "Dynamic midfielder with exceptional vision and passing range..."
 }
-```
+
+```text
 
 ## Video Analysis
 
 ### Submit Video for Analysis
+
 ```http
+
 POST /api/video-analysis
 Authorization: Bearer {token}
 Content-Type: application/json
@@ -154,26 +185,35 @@ Content-Type: application/json
   "analysisType": "Comprehensive",
   "matchContext": "League match, home venue, wet conditions"
 }
-```
+
+```text
 
 **Response**:
+
 ```json
+
 {
   "analysisId": 123,
   "status": "Processing",
   "estimatedCompletionTime": "2024-01-01T10:45:00Z",
   "message": "Video analysis started. You'll be notified when complete."
 }
-```
+
+```text
 
 ### Get Analysis Results
+
 ```http
+
 GET /api/video-analysis/{analysisId}/results
 Authorization: Bearer {token}
-```
+
+```text
 
 **Response**:
+
 ```json
+
 {
   "id": 123,
   "playerId": 1,
@@ -217,12 +257,15 @@ Authorization: Bearer {token}
     ]
   }
 }
-```
+
+```text
 
 ## Talent Predictions
 
 ### Generate Talent Prediction
+
 ```http
+
 POST /api/talent-predictions
 Authorization: Bearer {token}
 Content-Type: application/json
@@ -233,10 +276,13 @@ Content-Type: application/json
   "includeMindsetProfile": true,
   "predictionHorizon": "5_years"
 }
-```
+
+```text
 
 **Response**:
+
 ```json
+
 {
   "predictionId": 456,
   "playerId": 1,
@@ -272,12 +318,15 @@ Content-Type: application/json
     ]
   }
 }
-```
+
+```text
 
 ## Scouting Reports
 
 ### Submit Scouting Report
+
 ```http
+
 POST /api/scouting-reports
 Authorization: Bearer {token}
 Content-Type: application/json
@@ -299,13 +348,15 @@ Content-Type: application/json
   "recommendForAcquisition": true,
   "recommendationLevel": "Immediate"
 }
-```
+
+```text
 
 ## Error Handling
 
 The API uses standard HTTP status codes and returns detailed error information:
 
 ```json
+
 {
   "error": {
     "code": "VALIDATION_ERROR",
@@ -320,38 +371,55 @@ The API uses standard HTTP status codes and returns detailed error information:
   "timestamp": "2024-01-01T12:00:00Z",
   "path": "/api/players"
 }
-```
+
+```text
 
 ### Status Codes
+
 - `200` - Success
+
 - `201` - Created
+
 - `400` - Bad Request
-- `401` - Unauthorized  
+
+- `401` - Unauthorized
+
 - `403` - Forbidden
+
 - `404` - Not Found
+
 - `422` - Validation Error
+
 - `500` - Internal Server Error
 
 ## Rate Limiting
 
 API requests are rate-limited per user:
+
 - **Standard users**: 100 requests per minute
+
 - **Premium users**: 500 requests per minute
+
 - **Enterprise users**: 2000 requests per minute
 
 Rate limit headers are included in responses:
+
 ```http
+
 X-RateLimit-Limit: 100
 X-RateLimit-Remaining: 87
 X-RateLimit-Reset: 1641024000
-```
+
+```text
 
 ## Webhooks
 
 Subscribe to real-time events:
 
 ### Video Analysis Complete
+
 ```json
+
 {
   "event": "video_analysis.completed",
   "data": {
@@ -361,12 +429,15 @@ Subscribe to real-time events:
     "completedAt": "2024-01-01T10:43:22Z"
   }
 }
-```
+
+```text
 
 ### New Talent Prediction
+
 ```json
+
 {
-  "event": "talent_prediction.generated", 
+  "event": "talent_prediction.generated",
   "data": {
     "predictionId": 456,
     "playerId": 1,
@@ -374,4 +445,5 @@ Subscribe to real-time events:
     "confidence": "High"
   }
 }
-```
+
+```text

@@ -2,7 +2,8 @@
 
 ## System Architecture Diagram
 
-```
+```text
+
 ┌─────────────────────────────────────────────────────────────────────────────┐
 │                         ScoutVision Hybrid Platform                          │
 └─────────────────────────────────────────────────────────────────────────────┘
@@ -128,12 +129,15 @@
 │  └─────────────────────────────────────────────────────────────────────┘│
 │                                                                          │
 └──────────────────────────────────────────────────────────────────────────┘
-```
+
+```text
 
 ## Data Flow Diagram
 
 ### Web Analytics Flow
-```
+
+```text
+
 User ──┐
        ├─► Web Browser ──► Blazor Component ──► HybridAnalyticsService
        │                                              │
@@ -144,10 +148,13 @@ User ──┐
        │                                              ▼
        └◄─────────────────────────────────────── SQL Server
                     (Results displayed)
-```
+
+```text
 
 ### Hybrid Analytics Flow
-```
+
+```text
+
 User ──► Web Browser ──► Create Hybrid Session
                                  │
                                  ├─► HybridAnalyticsService
@@ -169,10 +176,13 @@ User ──► Web Browser ──► Create Hybrid Session
                                           │
 User ◄───────────────────────────────────┘
        (View in Web + GMod simultaneously)
-```
+
+```text
 
 ### GMod Visualization Flow
-```
+
+```text
+
 GMod Client ──► cl_init.lua ──► Request Data ──► HTTP Client
                                                       │
                                                       ▼
@@ -198,28 +208,37 @@ cl_visualizer.lua ◄─── Process Data ◄─── Return Results ─┘
          └─► Display Formations
                   │
          Player sees 3D Visualization
-```
+
+```text
 
 ## Component Interaction Matrix
 
-```
+```text
+
 ┌──────────────────┬──────────┬──────────┬──────────┬──────────┐
 │    Component     │   Web    │  Bridge  │   GMod   │    DB    │
 ├──────────────────┼──────────┼──────────┼──────────┼──────────┤
 │ Web Application  │    -     │   HTTP   │    -     │  Direct  │
+
 ├──────────────────┼──────────┼──────────┼──────────┼──────────┤
 │ Bridge Service   │   HTTP   │    -     │   HTTP   │    -     │
+
 ├──────────────────┼──────────┼──────────┼──────────┼──────────┤
 │ GMod Addon       │    -     │   HTTP   │    -     │    -     │
+
 ├──────────────────┼──────────┼──────────┼──────────┼──────────┤
 │ Database         │  Direct  │    -     │    -     │    -     │
+
 └──────────────────┴──────────┴──────────┴──────────┴──────────┘
-```
+
+```text
 
 ## Deployment Topology
 
 ### Development Environment
-```
+
+```text
+
 ┌────────────────────────────────────────┐
 │         Developer Workstation           │
 │  ┌───────────────────────────────────┐ │
@@ -239,10 +258,13 @@ cl_visualizer.lua ◄─── Process Data ◄─── Return Results ─┘
 │  │  GMod Client/Server               │ │
 │  └───────────────────────────────────┘ │
 └────────────────────────────────────────┘
-```
+
+```text
 
 ### Production Environment
-```
+
+```text
+
 ┌──────────────────────────────────────────────────────────┐
 │                    Load Balancer                          │
 └─────────────┬────────────────────────────────┬───────────┘
@@ -274,11 +296,13 @@ cl_visualizer.lua ◄─── Process Data ◄─── Return Results ─┘
               │   ─────────────────     │
               │   Multiple Instances    │
               └─────────────────────────┘
-```
+
+```text
 
 ## Security Architecture
 
-```
+```text
+
 ┌─────────────────────────────────────────────────────────┐
 │                    Security Layers                       │
 ├─────────────────────────────────────────────────────────┤
@@ -319,11 +343,13 @@ cl_visualizer.lua ◄─── Process Data ◄─── Return Results ─┘
 │  │  • Anomaly Detection                           │    │
 │  └────────────────────────────────────────────────┘    │
 └─────────────────────────────────────────────────────────┘
-```
+
+```text
 
 ## Technology Stack Visualization
 
-```
+```text
+
 ┌─────────────────────────────────────────────────────────┐
 │                  Frontend Technologies                   │
 ├─────────────────────────────────────────────────────────┤
@@ -334,6 +360,7 @@ cl_visualizer.lua ◄─── Process Data ◄─── Return Results ─┘
 │                  Backend Technologies                    │
 ├─────────────────────────────────────────────────────────┤
 │  .NET 8.0 │ C# 12 │ ASP.NET Core │ Entity Framework    │
+
 └─────────────────────────────────────────────────────────┘
 
 ┌─────────────────────────────────────────────────────────┐
@@ -353,10 +380,11 @@ cl_visualizer.lua ◄─── Process Data ◄─── Return Results ─┘
 ├─────────────────────────────────────────────────────────┤
 │  Git │ Docker │ Azure DevOps │ GitHub Actions          │
 └─────────────────────────────────────────────────────────┘
-```
+
+```text
 
 ---
 
-**Document Version**: 1.0  
-**Last Updated**: October 13, 2025  
+**Document Version**: 1.0
+**Last Updated**: October 13, 2025
 **Status**: Current Architecture
