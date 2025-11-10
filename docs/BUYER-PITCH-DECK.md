@@ -1,7 +1,7 @@
 # ScoutVision Buyer Pitch Deck
 
 ## 1. Platform Overview
-- ScoutVision: AI-powered SaaS for scouting, injury prevention, transfer valuation, and betting analytics
+- ScoutVision: AI-powered SaaS for scouting, injury prevention, and transfer valuation
 - Unified dashboard, customer portal, and automated billing
 - Secure, scalable, and easy to integrate
 
@@ -9,12 +9,12 @@
 - Real-time player analytics and predictions
 - Injury risk scoring and prevention
 - Transfer value engine for market insights
-- Betting intelligence API for odds and events
+- Transfer intelligence API for odds and events
 - Automated Stripe payments, tax/VAT, trials, coupons, and admin dashboard
 
 ## 3. Benefits for Buyers
 - Increase team performance and reduce injury risk
-- Make smarter transfer and betting decisions
+- Make smarter transfer decisions
 - Save time with automated workflows and billing
 - Flexible pricing and easy onboarding
 
@@ -24,7 +24,7 @@
 - API endpoints for easy integration
 
 ## 5. Customer Success Stories
-- Early pilots with clubs, analysts, and betting platforms
+- Early pilots with clubs and analysts
 - Testimonials and demo results
 
 ## 6. Acquisition Rationale

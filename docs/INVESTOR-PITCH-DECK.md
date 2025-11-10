@@ -1,14 +1,14 @@
 # ScoutVision Investor Pitch Deck
 
 ## 1. Executive Summary
-- ScoutVision is an AI-powered sports intelligence SaaS platform for scouting, injury prevention, transfer valuation, and betting analytics.
+- ScoutVision is an AI-powered sports intelligence SaaS platform for scouting, injury prevention, and transfer valuation.
 - Built on .NET 8, Blazor, SQL Server, and MudBlazor UI, with Stripe payments and automated billing.
 - Ready for enterprise scale, with robust role-based access, per-seat pricing, and customer portal.
 
 ## 2. Market Opportunity
 - Global sports analytics market: $4B+ and growing
-- Target customers: clubs, coaches, analysts, betting companies, sports tech platforms
-- Unique value: unified platform for scouting, injury prevention, and betting intelligence
+- Target customers: clubs, coaches, analysts, sports tech platforms
+- Unique value: unified platform for scouting, injury prevention, and transfer intelligence
 
 ## 3. Product Overview
 - Real-time analytics, predictive AI, and actionable insights
@@ -26,7 +26,7 @@
 - Ready for scale and acquisition
 
 ## 6. Competitive Advantage
-- End-to-end solution (scouting, injury, betting)
+- End-to-end solution (scouting, injury, transfer intelligence)
 - Modern tech stack, rapid feature rollout
 - Investor-ready codebase and documentation
 

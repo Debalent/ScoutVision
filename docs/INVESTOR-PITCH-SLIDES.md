@@ -7,14 +7,14 @@ AI-Powered Sports Intelligence SaaS
 
 ---
 ## Slide 2: Executive Summary
-- Unified platform for scouting, injury prevention, transfer valuation, and betting analytics
+- Unified platform for scouting, injury prevention, and transfer valuation
 - Modern SaaS, ready for scale and acquisition
 
 ---
 ## Slide 3: Market Opportunity
 ![Market Growth](https://raw.githubusercontent.com/Debalent/ScoutVision/main/assets/market-growth.png)
 - $4B+ sports analytics market
-- Target: clubs, coaches, analysts, betting companies
+- Target: clubs, coaches, analysts, sports tech platforms
 
 ---
 ## Slide 4: Product Overview

@@ -13,7 +13,7 @@ AI-Powered Sports Intelligence SaaS
 ---
 ## Slide 3: Key Features
 ![Features](https://raw.githubusercontent.com/Debalent/ScoutVision/main/assets/features.png)
-- Real-time analytics, injury prevention, transfer value, betting intelligence
+- Real-time analytics, injury prevention, transfer value intelligence
 
 ---
 ## Slide 4: Benefits for Buyers
@@ -28,7 +28,7 @@ AI-Powered Sports Intelligence SaaS
 ---
 ## Slide 6: Customer Success Stories
 ![Testimonials](https://raw.githubusercontent.com/Debalent/ScoutVision/main/assets/testimonials.png)
-- Pilots with clubs, analysts, betting platforms
+- Pilots with clubs and analysts
 
 ---
 ## Slide 7: Acquisition Rationale

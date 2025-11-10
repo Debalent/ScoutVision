@@ -41,7 +41,6 @@ public class TenantPackage
     public int MaxPlayers { get; set; }
     public bool IncludesInjuryPrevention { get; set; }
     public bool IncludesTransferValuation { get; set; }
-    public bool IncludesBettingIntelligence { get; set; }
     public bool IncludesHighSchoolPackage { get; set; }
     public bool IncludesCoachingFeedback { get; set; }
     public int ApiCallsPerMonth { get; set; }
@@ -167,7 +166,6 @@ public class MultiTenantService : IMultiTenantService
             MaxPlayers = 200,
             IncludesInjuryPrevention = false,
             IncludesTransferValuation = false,
-            IncludesBettingIntelligence = false,
             IncludesHighSchoolPackage = false,
             IncludesCoachingFeedback = false,
             ApiCallsPerMonth = 10000,
@@ -187,14 +185,12 @@ public class MultiTenantService : IMultiTenantService
                 "Analytics", 
                 "InjuryPrevention", 
                 "TransferValuation", 
-                "BettingIntelligence",
                 "CoachingFeedback" 
             },
             MaxUsers = 100,
             MaxPlayers = 10000,
             IncludesInjuryPrevention = true,
             IncludesTransferValuation = true,
-            IncludesBettingIntelligence = true,
             IncludesHighSchoolPackage = true,
             IncludesCoachingFeedback = true,
             ApiCallsPerMonth = 1000000,
@@ -219,7 +215,6 @@ public class MultiTenantService : IMultiTenantService
             MaxPlayers = 300,
             IncludesInjuryPrevention = true,
             IncludesTransferValuation = false,
-            IncludesBettingIntelligence = false,
             IncludesHighSchoolPackage = true,
             IncludesCoachingFeedback = true,
             ApiCallsPerMonth = 50000,

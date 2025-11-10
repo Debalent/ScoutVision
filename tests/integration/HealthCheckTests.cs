@@ -193,20 +193,7 @@ namespace ScoutVision.Tests.Integration
             Assert.InRange(finalValue, 10_000_000, 100_000_000);
         }
 
-        /// <summary>
-        /// Test: Betting prediction probabilities sum to 1.0
-        /// </summary>
-        [Fact]
-        public void BettingPrediction_Probabilities_ShouldSum ToOne()
-        {
-            var homeWinProb = 0.52;
-            var drawProb = 0.25;
-            var awayWinProb = 0.23;
 
-            var totalProb = homeWinProb + drawProb + awayWinProb;
-
-            Assert.Equal(1.0, totalProb, 2); // Allow 0.01 tolerance for rounding
-        }
     }
 
     public class ConcurrencyAndIsolationTests
