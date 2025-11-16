@@ -40,27 +40,27 @@
                         <MudSelect T="string" @bind-Value="BillingCycle" Label="Billing Cycle" 
                                  Variant="Variant.Outlined" FullWidth="true" Class="mb-4"
                                  OnSelectionChanged="RecalculatePricing">
-                            <MudSelectItem T="string" Value="monthly">Monthly</MudSelectItem>
-                            <MudSelectItem T="string" Value="annual">Annual (15% discount)</MudSelectItem>
+                            <MudSelectItem T="string" Value="@("monthly")">Monthly</MudSelectItem>
+                            <MudSelectItem T="string" Value="@("annual")">Annual (15% discount)</MudSelectItem>
                         </MudSelect>
                         
                         <MudSelect T="string" @bind-Value="SelectedRegion" Label="Region" 
                                  Variant="Variant.Outlined" FullWidth="true" Class="mb-4"
                                  OnSelectionChanged="RecalculatePricing">
-                            <MudSelectItem T="string" Value="US">🇺🇸 United States</MudSelectItem>
-                            <MudSelectItem T="string" Value="EU">🇪🇺 European Union</MudSelectItem>
-                            <MudSelectItem T="string" Value="UK">🇬🇧 United Kingdom</MudSelectItem>
-                            <MudSelectItem T="string" Value="Other">🌍 Other Countries</MudSelectItem>
+                            <MudSelectItem T="string" Value="@("US")">🇺🇸 United States</MudSelectItem>
+                            <MudSelectItem T="string" Value="@("EU")">🇪🇺 European Union</MudSelectItem>
+                            <MudSelectItem T="string" Value="@("UK")">🇬🇧 United Kingdom</MudSelectItem>
+                            <MudSelectItem T="string" Value="@("Other")">🌍 Other Countries</MudSelectItem>
                         </MudSelect>
                         
                         <MudText Typo="Typo.subtitle2" Class="mb-2">Add-on Modules</MudText>
                         
                         @foreach (var addon in AvailableAddons)
                         {
-                            <MudCheckBox @bind-Checked="addon.IsSelected" 
-                                       Label="@($"{addon.Name} (+{addon.Price:C}/user/month)")"
-                                       Color="Color.Primary" Class="mb-2"
-                                       OnCheckedChanged="RecalculatePricing" />
+                            <MudCheckBox @bind-Value="addon.IsSelected" 
+                                       Label="@($"{addon.Name} (+{addon.Price:C}/user/month))")"
+                                       Color="Color.Primary" Class="mb-2" 
+                                       @bind-Value:after="RecalculatePricing" />
                         }
                     </MudCardContent>
                 </MudCard>
@@ -131,7 +131,7 @@
                             <MudListItem>
                                 <div class="d-flex justify-space-between w-100">
                                     <MudText Typo="Typo.h6" Color="Color.Primary">
-                                        <strong>Total (@BillingCycle.Capitalize())</strong>
+                                        <strong>Total (@(BillingCycle.Substring(0, 1).ToUpper() + BillingCycle.Substring(1)))</strong>
                                     </MudText>
                                     <MudText Typo="Typo.h6" Color="Color.Primary">
                                         <strong>@TotalCost.ToString("C")</strong>

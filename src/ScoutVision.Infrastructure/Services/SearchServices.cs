@@ -68,7 +68,7 @@ public class FootageAnalysisService : IFootageAnalysisService
             var analysisResult = await response.Content.ReadFromJsonAsync<VideoAnalysisResponse>();
 
             // Update metadata with analysis results
-            metadata.Duration = analysisResult.Duration;
+            metadata.Duration = analysisResult?.Duration ?? TimeSpan.Zero;
             metadata.Quality = analysisResult.Quality;
             // Store FileSize in AnalysisMetadata JSON
             var analysisMetadata = new { FileSize = analysisResult.FileSize, AnalysisCompletedAt = DateTime.UtcNow };
@@ -209,7 +209,7 @@ public class FootageAnalysisService : IFootageAnalysisService
                         footage.RelevanceScore = score;
                     break;
                 case "keywords":
-                    footage.Keywords = kvp.Value.ToString();
+                    footage.Keywords = kvp.Value?.ToString() ?? string.Empty;
                     break;
             }
         }

@@ -10,7 +10,7 @@
     <MudForm @ref="_form">
         <MudTextField @bind-Value="OrgId" Label="Organization ID" Required="true" />
         <MudNumericField @bind-Value="UserCount" Label="User Count" Min="1" Max="1000" Required="true" />
-        <MudSwitch @bind-Checked="IsAnnual" Color="Color.Primary" Label="Annual Billing" />
+        <MudSwitch @bind-Value="IsAnnual" Color="Color.Primary" Label="Annual Billing" />
         <MudButton Variant="Variant.Filled" Color="Color.Success" OnClick="GenerateInvoice">Generate Invoice</MudButton>
     </MudForm>
     @if (Invoice != null)
@@ -43,7 +43,7 @@
 </MudPaper>
 
 @code {
-    private MudForm _form;
+    private MudForm? _form;
     public string OrgId { get; set; } = string.Empty;
     public int UserCount { get; set; } = 1;
     public bool IsAnnual { get; set; } = false;

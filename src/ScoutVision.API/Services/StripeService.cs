@@ -18,7 +18,7 @@ namespace ScoutVision.API.Services
         Task<Stripe.Invoice> CreateInvoiceAsync(string customerId, Dictionary<string, string>? metadata = null);
         Task<StripeList<Stripe.Invoice>> GetInvoicesAsync(string customerId, int limit = 10);
         Task<Session> CreateCheckoutSessionAsync(string customerId, string priceId, string successUrl, string cancelUrl, string mode = "subscription");
-        Task<Coupon> CreateCouponAsync(string couponId, decimal percentOff, int? durationInMonths = null);
+        Task<Stripe.Coupon> CreateCouponAsync(string couponId, decimal percentOff, int? durationInMonths = null);
         Task<PromotionCode> CreatePromotionCodeAsync(string couponId, string code);
         Task<bool> ValidateWebhookSignatureAsync(string payload, string signature);
     }
@@ -209,7 +209,7 @@ namespace ScoutVision.API.Services
             return await service.CreateAsync(options);
         }
 
-        public async Task<Coupon> CreateCouponAsync(string couponId, decimal percentOff, int? durationInMonths = null)
+        public async Task<Stripe.Coupon> CreateCouponAsync(string couponId, decimal percentOff, int? durationInMonths = null)
         {
             var options = new CouponCreateOptions
             {
@@ -219,7 +219,7 @@ namespace ScoutVision.API.Services
                 DurationInMonths = durationInMonths
             };
 
-            var service = new CouponService();
+            var service = new Stripe.CouponService();
             return await service.CreateAsync(options);
         }
 

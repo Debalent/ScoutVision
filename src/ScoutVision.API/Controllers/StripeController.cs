@@ -9,10 +9,10 @@ namespace ScoutVision.API.Controllers
     [Route("api/[controller]")]
     public class StripeController : ControllerBase
     {
-        private readonly StripeService _stripeService;
-        public StripeController(IConfiguration config)
+        private readonly IStripeService _stripeService;
+        public StripeController(IStripeService stripeService)
         {
-            _stripeService = new StripeService(config);
+            _stripeService = stripeService;
         }
 
         [HttpPost("create-payment-intent")]

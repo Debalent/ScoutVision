@@ -230,7 +230,7 @@ public class AnalyticsController : ControllerBase
     {
         // Get position averages for comparison
         var player = await _context.Players.FindAsync(playerId);
-        if (player == null) return null;
+        if (player == null) return new { message = "Player not found" };
 
         var positionAverages = await _context.PlayerAnalytics
             .Where(pa => pa.Player.Position == player.Position && pa.Competition == competition)
