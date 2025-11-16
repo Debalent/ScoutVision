@@ -1,6 +1,5 @@
 @page "/admin-billing-dashboard"
 @inject HttpClient Http
-@using ApexCharts
 @using MudBlazor
 
 <PageTitle>Admin Billing Dashboard - ScoutVision</PageTitle>
@@ -39,9 +38,9 @@
                     <div class="d-flex justify-space-between align-center">
                         <div>
                             <MudText Typo="Typo.body2" Color="Color.Secondary">Monthly Revenue</MudText>
-                            <MudText Typo="Typo.h5">@RevenueMetrics.MonthlyRevenue.ToString("C")</MudText>
-                            <MudText Typo="Typo.body2" Color="@GetTrendColor(RevenueMetrics.MonthlyGrowth)">
-                                @GetTrendIcon(RevenueMetrics.MonthlyGrowth) @RevenueMetrics.MonthlyGrowth.ToString("+0.0%;-0.0%;0%")
+                            <MudText Typo="Typo.h5">@Revenue.MonthlyRevenue.ToString("C")</MudText>
+                            <MudText Typo="Typo.body2" Color="@GetTrendColor(Revenue.MonthlyGrowth)">
+                                @GetTrendIcon(Revenue.MonthlyGrowth) @Revenue.MonthlyGrowth.ToString("+0.0%;-0.0%;0%")
                             </MudText>
                         </div>
                         <MudIcon Icon="Icons.Material.Filled.TrendingUp" Size="Size.Large" Color="Color.Success" />
@@ -56,9 +55,9 @@
                     <div class="d-flex justify-space-between align-center">
                         <div>
                             <MudText Typo="Typo.body2" Color="Color.Secondary">Active Subscriptions</MudText>
-                            <MudText Typo="Typo.h5">@SubscriptionMetrics.ActiveCount</MudText>
-                            <MudText Typo="Typo.body2" Color="@GetTrendColor(SubscriptionMetrics.GrowthRate)">
-                                @GetTrendIcon(SubscriptionMetrics.GrowthRate) @SubscriptionMetrics.GrowthRate.ToString("+0.0%;-0.0%;0%")
+                            <MudText Typo="Typo.h5">@Subscriptions.ActiveCount.ToString("N0")</MudText>
+                            <MudText Typo="Typo.body2" Color="@GetTrendColor(Subscriptions.GrowthRate)">
+                                @GetTrendIcon(Subscriptions.GrowthRate) @Subscriptions.GrowthRate.ToString("+0.0%;-0.0%;0%")
                             </MudText>
                         </div>
                         <MudIcon Icon="Icons.Material.Filled.People" Size="Size.Large" Color="Color.Primary" />
@@ -73,9 +72,9 @@
                     <div class="d-flex justify-space-between align-center">
                         <div>
                             <MudText Typo="Typo.body2" Color="Color.Secondary">Churn Rate</MudText>
-                            <MudText Typo="Typo.h5">@ChurnMetrics.MonthlyChurnRate.ToString("0.0%")</MudText>
-                            <MudText Typo="Typo.body2" Color="@GetTrendColor(-ChurnMetrics.ChurnTrend)">
-                                @GetTrendIcon(-ChurnMetrics.ChurnTrend) @ChurnMetrics.ChurnTrend.ToString("+0.0%;-0.0%;0%")
+                            <MudText Typo="Typo.h5">@Churn.MonthlyChurnRate.ToString("P2")</MudText>
+                            <MudText Typo="Typo.body2" Color="@GetTrendColor(Churn.ChurnTrend)">
+                                @GetTrendIcon(Churn.ChurnTrend) @Churn.ChurnTrend.ToString("+0.0%;-0.0%;0%")
                             </MudText>
                         </div>
                         <MudIcon Icon="Icons.Material.Filled.ExitToApp" Size="Size.Large" Color="Color.Warning" />
@@ -90,9 +89,9 @@
                     <div class="d-flex justify-space-between align-center">
                         <div>
                             <MudText Typo="Typo.body2" Color="Color.Secondary">Average Revenue Per User</MudText>
-                            <MudText Typo="Typo.h5">@RevenueMetrics.ARPU.ToString("C")</MudText>
-                            <MudText Typo="Typo.body2" Color="@GetTrendColor(RevenueMetrics.ARPUGrowth)">
-                                @GetTrendIcon(RevenueMetrics.ARPUGrowth) @RevenueMetrics.ARPUGrowth.ToString("+0.0%;-0.0%;0%")
+                            <MudText Typo="Typo.h5">@Revenue.ARPU.ToString("C")</MudText>
+                            <MudText Typo="Typo.body2" Color="@GetTrendColor(Revenue.ARPUGrowth)">
+                                @GetTrendIcon(Revenue.ARPUGrowth) @Revenue.ARPUGrowth.ToString("+0.0%;-0.0%;0%")
                             </MudText>
                         </div>
                         <MudIcon Icon="Icons.Material.Filled.AttachMoney" Size="Size.Large" Color="Color.Info" />
@@ -177,9 +176,9 @@
 @code {
     private bool _loading = false;
     
-    public RevenueMetrics RevenueMetrics { get; set; } = new();
-    public SubscriptionMetrics SubscriptionMetrics { get; set; } = new();
-    public ChurnMetrics ChurnMetrics { get; set; } = new();
+    public RevenueMetrics Revenue { get; set; } = new();
+    public SubscriptionMetrics Subscriptions { get; set; } = new();
+    public ChurnMetrics Churn { get; set; } = new();
     
     public List<Transaction> RecentTransactions { get; set; } = new();
     public List<TopCustomer> TopCustomers { get; set; } = new();
@@ -204,7 +203,7 @@
         // Simulate API calls - replace with actual API endpoints
         await Task.Delay(1000);
         
-        RevenueMetrics = new RevenueMetrics
+        Revenue = new RevenueMetrics
         {
             MonthlyRevenue = 125000m,
             MonthlyGrowth = 0.15m,
@@ -212,13 +211,13 @@
             ARPUGrowth = 0.08m
         };
         
-        SubscriptionMetrics = new SubscriptionMetrics
+        Subscriptions = new SubscriptionMetrics
         {
             ActiveCount = 450,
             GrowthRate = 0.12m
         };
         
-        ChurnMetrics = new ChurnMetrics
+        Churn = new ChurnMetrics
         {
             MonthlyChurnRate = 0.045m,
             ChurnTrend = -0.01m

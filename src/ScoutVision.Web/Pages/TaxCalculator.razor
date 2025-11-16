@@ -65,8 +65,8 @@
                     
                     <MudItem xs="12" md="6">
                         <MudSelect T="string" @bind-Value="CustomerType" Label="Customer Type" Variant="Variant.Outlined" FullWidth="true">
-                            <MudSelectItem T="string" Value="business">Business</MudSelectItem>
-                            <MudSelectItem T="string" Value="individual">Individual</MudSelectItem>
+                            <MudSelectItem T="string" Value="@("business")">Business</MudSelectItem>
+                            <MudSelectItem T="string" Value="@("individual")">Individual</MudSelectItem>
                         </MudSelect>
                     </MudItem>
                     
@@ -122,7 +122,7 @@
                         <MudListItem>
                             <div class="d-flex justify-space-between w-100">
                                 <MudText><strong>Subtotal</strong></MudText>
-                                <MudText><strong>@TaxResult.Subtotal.ToString("C")</MudText>
+                                <MudText><strong>@TaxResult.Subtotal.ToString("C")</strong></MudText>
                             </div>
                         </MudListItem>
                         

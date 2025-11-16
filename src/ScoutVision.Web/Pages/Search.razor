@@ -13,7 +13,7 @@
                                   Variant="Variant.Outlined" 
                                   Adornment="Adornment.Start" 
                                   AdornmentIcon="Icons.Material.Filled.Search"
-                                  OnKeyPress="OnSearchKeyPress"
+                                  OnKeyDown="OnSearchKeyPress"
                                   FullWidth="true"
                                   Class="search-input" />
                 </MudItem>
@@ -109,10 +109,10 @@
                             </MudSelect>
                         </MudItem>
                         <MudItem xs="12" md="3">
-                            <MudSwitch @bind-Checked="highlightsOnly" Label="Highlights Only" Color="Color.Primary" />
+                            <MudSwitch @bind-Value="highlightsOnly" Label="Highlights Only" Color="Color.Primary" />
                         </MudItem>
                         <MudItem xs="12" md="3">
-                            <MudSwitch @bind-Checked="fullMatchOnly" Label="Full Matches Only" Color="Color.Primary" />
+                            <MudSwitch @bind-Value="fullMatchOnly" Label="Full Matches Only" Color="Color.Primary" />
                         </MudItem>
                     }
                 </MudGrid>

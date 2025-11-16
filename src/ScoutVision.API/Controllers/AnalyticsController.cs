@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using ScoutVision.Core.Analytics;
+using ScoutVision.Core.Enums;
 using ScoutVision.Infrastructure.Data;
 using Swashbuckle.AspNetCore.Annotations;
 

@@ -28,8 +28,7 @@ Log.Logger = new LoggerConfiguration()
     .WriteTo.Elasticsearch(new ElasticsearchSinkOptions(new Uri("http://elasticsearch:9200"))
     {
         AutoRegisterTemplate = true,
-        IndexFormat = "scoutvision-{0:yyyy.MM.dd}",
-        BufferCleanPayload = true,
+        IndexFormat = "scoutvision-{0:yyyy.MM.dd}"
     })
     .CreateLogger();
 
@@ -93,7 +92,8 @@ try
     builder.Services.AddSingleton(redisConnection);
     builder.Services.AddStackExchangeRedisCache(options =>
     {
-        options.ConnectionFactory = () => Task.FromResult<IConnectionMultiplexer>(redisConnection);
+        options.Configuration = builder.Configuration.GetConnectionString("Redis__ConnectionString") ?? "redis:6379";
+        options.InstanceName = "ScoutVision";
     });
     builder.Services.AddSingleton<ICacheService, RedisCacheService>();
 
@@ -170,10 +170,12 @@ try
     builder.Services.AddScoped<ISearchService, SearchService>();
     builder.Services.AddScoped<IFootageAnalysisService, FootageAnalysisService>();
     builder.Services.AddScoped<IStatBookService, StatBookService>();
-    builder.Services.AddScoped<IInjuryPrevention, InjuryPreventionService>();
-    builder.Services.AddScoped<ITransferValuation, TransferValuationService>();
+    // TODO: Implement missing services
+    // builder.Services.AddScoped<IInjuryPrevention, InjuryPreventionService>();
+    // builder.Services.AddScoped<ITransferValuation, TransferValuationService>();
     builder.Services.AddScoped<IDataIntegrationService, DataIntegrationService>();
     builder.Services.AddScoped<IMultiTenantService, MultiTenantService>();
+    builder.Services.AddScoped<ITaxCalculationService, TaxCalculationService>();
     builder.Services.AddSingleton<ScoutVision.API.Services.EmailService>();
 
     // TODO: Implement concrete service classes for the following interfaces
@@ -256,7 +258,8 @@ try
         .AddCheck<RabbitMQHealthCheck>("RabbitMQ")
         .AddCheck<TimeSeriesHealthCheck>("TimeSeries");
 
-    builder.Services.AddPrometheusMetrics();
+    // TODO: Add Prometheus package reference
+    // builder.Services.AddPrometheusMetrics();
 
     var app = builder.Build();
 
@@ -306,8 +309,8 @@ try
         ResponseWriter = HealthCheckResponseWriter.WriteResponse
     });
 
-    // Metrics endpoint
-    app.MapMetrics();
+    // TODO: Add Prometheus package reference
+    // app.MapMetrics();
 
     // Database migration
     using (var scope = app.Services.CreateScope())

@@ -3,6 +3,8 @@ using Microsoft.Extensions.Logging;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Globalization;
+using ScoutVision.Core.DTOs;
+using ScoutVision.Infrastructure.Services;
 
 namespace ScoutVision.API.Controllers
 {
