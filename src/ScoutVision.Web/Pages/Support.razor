@@ -1,0 +1,268 @@
+@page "/support"
+@using MudBlazor
+
+<PageTitle>Support Center - ScoutVision</PageTitle>
+
+<MudContainer MaxWidth="MaxWidth.Large" Class="my-4">
+    <!-- Header -->
+    <MudPaper Class="pa-6 mb-4" Elevation="2">
+        <MudText Typo="Typo.h3" Align="Align.Center" Class="mb-2">
+            <MudIcon Icon="Icons.Material.Filled.Support" Class="mr-2 mb-1" />
+            Support Center
+        </MudText>
+        <MudText Typo="Typo.body1" Align="Align.Center" Color="Color.Secondary">
+            Get help with ScoutVision - we're here to support your success
+        </MudText>
+    </MudPaper>
+
+    <!-- Quick Actions -->
+    <MudGrid Class="mb-6">
+        <MudItem xs="12" sm="6" md="3">
+            <MudCard Class="cursor-pointer hover-card" @onclick="OpenLiveChat">
+                <MudCardContent Class="text-center pa-6">
+                    <MudIcon Icon="Icons.Material.Filled.Chat" Size="Size.Large" Color="Color.Primary" Class="mb-3" />
+                    <MudText Typo="Typo.h6" Class="mb-2">Live Chat</MudText>
+                    <MudText Typo="Typo.body2" Color="Color.Secondary">Get instant help from our support team</MudText>
+                    <MudChip Size="Size.Small" Color="Color.Success" Class="mt-2">Online Now</MudChip>
+                </MudCardContent>
+            </MudCard>
+        </MudItem>
+        
+        <MudItem xs="12" sm="6" md="3">
+            <MudCard Class="cursor-pointer hover-card" @onclick="CreateTicket">
+                <MudCardContent Class="text-center pa-6">
+                    <MudIcon Icon="Icons.Material.Filled.ConfirmationNumber" Size="Size.Large" Color="Color.Info" Class="mb-3" />
+                    <MudText Typo="Typo.h6" Class="mb-2">Create Ticket</MudText>
+                    <MudText Typo="Typo.body2" Color="Color.Secondary">Submit a detailed support request</MudText>
+                    <MudChip Size="Size.Small" Color="Color.Info" Class="mt-2">24h Response</MudChip>
+                </MudCardContent>
+            </MudCard>
+        </MudItem>
+        
+        <MudItem xs="12" sm="6" md="3">
+            <MudCard Class="cursor-pointer hover-card" @onclick="OpenDocumentation">
+                <MudCardContent Class="text-center pa-6">
+                    <MudIcon Icon="Icons.Material.Filled.MenuBook" Size="Size.Large" Color="Color.Warning" Class="mb-3" />
+                    <MudText Typo="Typo.h6" Class="mb-2">Documentation</MudText>
+                    <MudText Typo="Typo.body2" Color="Color.Secondary">Browse guides and tutorials</MudText>
+                    <MudChip Size="Size.Small" Color="Color.Warning" Class="mt-2">Self-Service</MudChip>
+                </MudCardContent>
+            </MudCard>
+        </MudItem>
+        
+        <MudItem xs="12" sm="6" md="3">
+            <MudCard Class="cursor-pointer hover-card" @onclick="ScheduleCall">
+                <MudCardContent Class="text-center pa-6">
+                    <MudIcon Icon="Icons.Material.Filled.VideoCall" Size="Size.Large" Color="Color.Success" Class="mb-3" />
+                    <MudText Typo="Typo.h6" Class="mb-2">Schedule Call</MudText>
+                    <MudText Typo="Typo.body2" Color="Color.Secondary">Book a one-on-one session</MudText>
+                    <MudChip Size="Size.Small" Color="Color.Success" Class="mt-2">Premium Support</MudChip>
+                </MudCardContent>
+            </MudCard>
+        </MudItem>
+    </MudGrid>
+
+    <!-- Contact Information -->
+    <MudPaper Class="pa-6 mb-4" Elevation="1">
+        <MudText Typo="Typo.h5" Class="mb-4">
+            <MudIcon Icon="Icons.Material.Filled.ContactSupport" Class="mr-2 mb-1" />
+            Contact Information
+        </MudText>
+        <MudGrid>
+            <MudItem xs="12" md="4">
+                <div class="contact-card">
+                    <MudIcon Icon="Icons.Material.Filled.Email" Color="Color.Primary" Class="mb-2" />
+                    <MudText Typo="Typo.h6">Email Support</MudText>
+                    <MudText Typo="Typo.body2" Class="mb-2">support@scoutvision.com</MudText>
+                    <MudText Typo="Typo.caption" Color="Color.Secondary">Response within 4 hours</MudText>
+                </div>
+            </MudItem>
+            <MudItem xs="12" md="4">
+                <div class="contact-card">
+                    <MudIcon Icon="Icons.Material.Filled.CreditCard" Color="Color.Info" Class="mb-2" />
+                    <MudText Typo="Typo.h6">Billing Support</MudText>
+                    <MudText Typo="Typo.body2" Class="mb-2">billing@scoutvision.com</MudText>
+                    <MudText Typo="Typo.caption" Color="Color.Secondary">Response within 2 hours</MudText>
+                </div>
+            </MudItem>
+            <MudItem xs="12" md="4">
+                <div class="contact-card">
+                    <MudIcon Icon="Icons.Material.Filled.BugReport" Color="Color.Warning" Class="mb-2" />
+                    <MudText Typo="Typo.h6">Technical Issues</MudText>
+                    <MudText Typo="Typo.body2" Class="mb-2">tech@scoutvision.com</MudText>
+                    <MudText Typo="Typo.caption" Color="Color.Secondary">Priority response</MudText>
+                </div>
+            </MudItem>
+        </MudGrid>
+    </MudPaper>
+
+    <!-- FAQ Section -->
+    <MudPaper Class="pa-6 mb-4" Elevation="1">
+        <MudText Typo="Typo.h5" Class="mb-4">
+            <MudIcon Icon="Icons.Material.Filled.QuestionAnswer" Class="mr-2 mb-1" />
+            Frequently Asked Questions
+        </MudText>
+        
+        <MudExpansionPanels Elevation="0">
+            <MudExpansionPanel Text="How do I start my free trial?">
+                <MudText Typo="Typo.body2">
+                    Simply click the "Start Free Trial" button on our pricing page. No credit card required. 
+                    You'll have full access to all Professional features for 14 days.
+                </MudText>
+            </MudExpansionPanel>
+            
+            <MudExpansionPanel Text="Can I change my subscription plan?">
+                <MudText Typo="Typo.body2">
+                    Yes! You can upgrade or downgrade your plan anytime from your billing settings. 
+                    Changes take effect immediately, and we'll prorate the billing accordingly.
+                </MudText>
+            </MudExpansionPanel>
+            
+            <MudExpansionPanel Text="How do I cancel my subscription?">
+                <MudText Typo="Typo.body2">
+                    You can cancel anytime from your customer portal. Your subscription will remain active 
+                    until the end of your current billing period, and you won't be charged again.
+                </MudText>
+            </MudExpansionPanel>
+            
+            <MudExpansionPanel Text="Is my data secure?">
+                <MudText Typo="Typo.body2">
+                    Absolutely. We use enterprise-grade security measures including AES-256 encryption, 
+                    regular security audits, and comply with GDPR and other data protection regulations.
+                </MudText>
+            </MudExpansionPanel>
+            
+            <MudExpansionPanel Text="Do you offer custom integrations?">
+                <MudText Typo="Typo.body2">
+                    Yes, our Enterprise plan includes custom integrations and API access. 
+                    Contact our sales team to discuss your specific integration needs.
+                </MudText>
+            </MudExpansionPanel>
+        </MudExpansionPanels>
+    </MudPaper>
+
+    <!-- Support Hours -->
+    <MudPaper Class="pa-6 mb-4" Elevation="1">
+        <MudText Typo="Typo.h5" Class="mb-4">
+            <MudIcon Icon="Icons.Material.Filled.AccessTime" Class="mr-2 mb-1" />
+            Support Hours
+        </MudText>
+        <MudGrid>
+            <MudItem xs="12" md="6">
+                <MudList>
+                    <MudListItem Icon="Icons.Material.Filled.Circle" IconColor="Color.Success">
+                        <MudText><strong>Live Chat:</strong> 24/7 for Premium customers</MudText>
+                    </MudListItem>
+                    <MudListItem Icon="Icons.Material.Filled.Circle" IconColor="Color.Primary">
+                        <MudText><strong>Email Support:</strong> 24/7 response within 4 hours</MudText>
+                    </MudListItem>
+                    <MudListItem Icon="Icons.Material.Filled.Circle" IconColor="Color.Info">
+                        <MudText><strong>Phone Support:</strong> Mon-Fri, 9 AM - 6 PM UTC</MudText>
+                    </MudListItem>
+                </MudList>
+            </MudItem>
+            <MudItem xs="12" md="6">
+                <MudList>
+                    <MudListItem Icon="Icons.Material.Filled.Circle" IconColor="Color.Warning">
+                        <MudText><strong>Emergency Support:</strong> 24/7 for critical issues</MudText>
+                    </MudListItem>
+                    <MudListItem Icon="Icons.Material.Filled.Circle" IconColor="Color.Secondary">
+                        <MudText><strong>Community Forum:</strong> Always available</MudText>
+                    </MudListItem>
+                    <MudListItem Icon="Icons.Material.Filled.Circle" IconColor="Color.Dark">
+                        <MudText><strong>Knowledge Base:</strong> 24/7 self-service</MudText>
+                    </MudListItem>
+                </MudList>
+            </MudItem>
+        </MudGrid>
+    </MudPaper>
+
+    <!-- Resources -->
+    <MudPaper Class="pa-6" Elevation="1">
+        <MudText Typo="Typo.h5" Class="mb-4">
+            <MudIcon Icon="Icons.Material.Filled.LibraryBooks" Class="mr-2 mb-1" />
+            Helpful Resources
+        </MudText>
+        <MudGrid>
+            <MudItem xs="12" sm="6" md="3">
+                <MudButton Variant="Variant.Outlined" 
+                           FullWidth="true" 
+                           StartIcon="Icons.Material.Filled.PlayCircle"
+                           Href="/getting-started">
+                    Getting Started Guide
+                </MudButton>
+            </MudItem>
+            <MudItem xs="12" sm="6" md="3">
+                <MudButton Variant="Variant.Outlined" 
+                           FullWidth="true" 
+                           StartIcon="Icons.Material.Filled.VideoLibrary"
+                           Href="/video-tutorials">
+                    Video Tutorials
+                </MudButton>
+            </MudItem>
+            <MudItem xs="12" sm="6" md="3">
+                <MudButton Variant="Variant.Outlined" 
+                           FullWidth="true" 
+                           StartIcon="Icons.Material.Filled.Code"
+                           Href="/api-docs">
+                    API Documentation
+                </MudButton>
+            </MudItem>
+            <MudItem xs="12" sm="6" md="3">
+                <MudButton Variant="Variant.Outlined" 
+                           FullWidth="true" 
+                           StartIcon="Icons.Material.Filled.Forum"
+                           Href="/community">
+                    Community Forum
+                </MudButton>
+            </MudItem>
+        </MudGrid>
+    </MudPaper>
+</MudContainer>
+
+@code {
+    private void OpenLiveChat()
+    {
+        // TODO: Integrate with live chat service (Intercom, Zendesk Chat, etc.)
+        // For now, just redirect to email
+        NavigationManager.NavigateTo("mailto:support@scoutvision.com");
+    }
+
+    private void CreateTicket()
+    {
+        // TODO: Navigate to support ticket creation form
+        NavigationManager.NavigateTo("mailto:support@scoutvision.com");
+    }
+
+    private void OpenDocumentation()
+    {
+        // TODO: Navigate to documentation site
+        NavigationManager.NavigateTo("/user-manual");
+    }
+
+    private void ScheduleCall()
+    {
+        // TODO: Integrate with scheduling service (Calendly, etc.)
+        NavigationManager.NavigateTo("mailto:support@scoutvision.com?subject=Schedule Support Call");
+    }
+}
+
+<style>
+    .cursor-pointer {
+        cursor: pointer;
+    }
+    
+    .hover-card {
+        transition: all 0.2s ease-in-out;
+    }
+    
+    .hover-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+    }
+    
+    .contact-card {
+        text-align: center;
+        padding: 16px;
+    }
+</style>

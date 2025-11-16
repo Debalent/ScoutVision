@@ -1,0 +1,115 @@
+@page "/terms"
+@using MudBlazor
+
+<PageTitle>Terms of Service - ScoutVision</PageTitle>
+
+<MudContainer MaxWidth="MaxWidth.Large" Class="my-8">
+    <MudPaper Class="pa-8" Elevation="2">
+        <MudText Typo="Typo.h3" Class="mb-6" Align="Align.Center">
+            Terms of Service
+        </MudText>
+        
+        <MudText Typo="Typo.body2" Color="Color.Secondary" Class="mb-6" Align="Align.Center">
+            Last updated: November 16, 2025
+        </MudText>
+
+        <MudDivider Class="my-6" />
+
+        <MudText Typo="Typo.h5" Class="mb-4">1. Acceptance of Terms</MudText>
+        <MudText Typo="Typo.body1" Class="mb-6">
+            By accessing and using ScoutVision ("Service"), you accept and agree to be bound by the terms and provision of this agreement. 
+            If you do not agree to abide by the above, please do not use this service.
+        </MudText>
+
+        <MudText Typo="Typo.h5" Class="mb-4">2. Service Description</MudText>
+        <MudText Typo="Typo.body1" Class="mb-6">
+            ScoutVision is a comprehensive sports intelligence platform that provides player analytics, injury prevention insights, 
+            transfer valuation tools, and performance tracking capabilities for football teams, scouts, and sports professionals.
+        </MudText>
+
+        <MudText Typo="Typo.h5" Class="mb-4">3. Subscription and Billing</MudText>
+        <MudText Typo="Typo.body1" Class="mb-4">
+            <strong>Subscription Plans:</strong> ScoutVision offers multiple subscription tiers (Starter, Professional, Enterprise) 
+            with different features and pricing.
+        </MudText>
+        <MudText Typo="Typo.body1" Class="mb-4">
+            <strong>Billing:</strong> Subscriptions are billed monthly or annually in advance. All fees are non-refundable except 
+            as required by law or as specifically permitted in our refund policy.
+        </MudText>
+        <MudText Typo="Typo.body1" Class="mb-4">
+            <strong>Free Trial:</strong> New users may be eligible for a 14-day free trial. No payment method is required during 
+            the trial period.
+        </MudText>
+        <MudText Typo="Typo.body1" Class="mb-6">
+            <strong>Automatic Renewal:</strong> Subscriptions automatically renew unless cancelled before the renewal date. 
+            You can cancel anytime through your account settings.
+        </MudText>
+
+        <MudText Typo="Typo.h5" Class="mb-4">4. Acceptable Use</MudText>
+        <MudText Typo="Typo.body1" Class="mb-4">
+            You agree to use ScoutVision only for lawful purposes and in accordance with these Terms. You agree not to:
+        </MudText>
+        <MudList Class="mb-6">
+            <MudListItem Icon="Icons.Material.Filled.Block" Text="Use the service for any illegal or unauthorized purpose" />
+            <MudListItem Icon="Icons.Material.Filled.Block" Text="Violate any laws in your jurisdiction" />
+            <MudListItem Icon="Icons.Material.Filled.Block" Text="Share your account credentials with unauthorized parties" />
+            <MudListItem Icon="Icons.Material.Filled.Block" Text="Attempt to gain unauthorized access to our systems" />
+            <MudListItem Icon="Icons.Material.Filled.Block" Text="Use the service to harass, abuse, or harm another person" />
+        </MudList>
+
+        <MudText Typo="Typo.h5" Class="mb-4">5. Data and Privacy</MudText>
+        <MudText Typo="Typo.body1" Class="mb-4">
+            Your privacy is important to us. Please review our Privacy Policy, which also governs your use of the Service, 
+            to understand our practices.
+        </MudText>
+        <MudText Typo="Typo.body1" Class="mb-6">
+            You retain ownership of any data you submit to ScoutVision. We may use aggregated, anonymized data to improve 
+            our services and for analytical purposes.
+        </MudText>
+
+        <MudText Typo="Typo.h5" Class="mb-4">6. Intellectual Property</MudText>
+        <MudText Typo="Typo.body1" Class="mb-6">
+            The Service and its original content, features, and functionality are and will remain the exclusive property of 
+            ScoutVision and its licensors. The Service is protected by copyright, trademark, and other laws.
+        </MudText>
+
+        <MudText Typo="Typo.h5" Class="mb-4">7. Termination</MudText>
+        <MudText Typo="Typo.body1" Class="mb-6">
+            We may terminate or suspend your account and bar access to the Service immediately, without prior notice or liability, 
+            under our sole discretion, for any reason whatsoever, including without limitation if you breach the Terms.
+        </MudText>
+
+        <MudText Typo="Typo.h5" Class="mb-4">8. Limitation of Liability</MudText>
+        <MudText Typo="Typo.body1" Class="mb-6">
+            In no event shall ScoutVision, nor its directors, employees, partners, agents, suppliers, or affiliates, be liable 
+            for any indirect, incidental, special, consequential, or punitive damages, including without limitation, loss of 
+            profits, data, use, goodwill, or other intangible losses.
+        </MudText>
+
+        <MudText Typo="Typo.h5" Class="mb-4">9. Contact Information</MudText>
+        <MudText Typo="Typo.body1" Class="mb-6">
+            Questions about the Terms of Service should be sent to us at legal@scoutvision.com.
+        </MudText>
+
+        <MudDivider Class="my-6" />
+
+        <MudGrid Class="mt-6">
+            <MudItem xs="12" md="6">
+                <MudButton Variant="Variant.Outlined" 
+                           Color="Color.Primary" 
+                           FullWidth="true"
+                           Href="/privacy">
+                    Privacy Policy
+                </MudButton>
+            </MudItem>
+            <MudItem xs="12" md="6">
+                <MudButton Variant="Variant.Outlined" 
+                           Color="Color.Secondary" 
+                           FullWidth="true"
+                           Href="/refund-policy">
+                    Refund Policy
+                </MudButton>
+            </MudItem>
+        </MudGrid>
+    </MudPaper>
+</MudContainer>

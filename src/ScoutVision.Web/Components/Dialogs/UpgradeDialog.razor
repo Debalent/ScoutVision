@@ -1,0 +1,105 @@
+@using MudBlazor
+
+<MudDialog>
+    <DialogContent>
+        <MudText Typo="Typo.h6" Class="mb-4">Choose Your New Plan</MudText>
+        
+        <MudGrid>
+            <MudItem xs="12" md="4">
+                <MudCard Class="@GetCardClass("starter")" @onclick="() => SelectPlan("starter")">
+                    <MudCardContent>
+                        <MudText Typo="Typo.h6" Align="Align.Center">Starter</MudText>
+                        <MudText Typo="Typo.h4" Align="Align.Center" Class="my-2">$99/mo</MudText>
+                        <MudText Typo="Typo.body2" Align="Align.Center">Perfect for small teams</MudText>
+                        <MudDivider Class="my-3" />
+                        <MudList Dense="true">
+                            <MudListItem Icon="Icons.Material.Filled.Check" Text="50 Players" />
+                            <MudListItem Icon="Icons.Material.Filled.Check" Text="Basic Analytics" />
+                            <MudListItem Icon="Icons.Material.Filled.Check" Text="5GB Storage" />
+                        </MudList>
+                    </MudCardContent>
+                </MudCard>
+            </MudItem>
+            
+            <MudItem xs="12" md="4">
+                <MudCard Class="@GetCardClass("professional")" @onclick="() => SelectPlan("professional")">
+                    <MudCardContent>
+                        <MudText Typo="Typo.h6" Align="Align.Center">Professional</MudText>
+                        <MudText Typo="Typo.h4" Align="Align.Center" Class="my-2">$299/mo</MudText>
+                        <MudText Typo="Typo.body2" Align="Align.Center">Most popular choice</MudText>
+                        <MudDivider Class="my-3" />
+                        <MudList Dense="true">
+                            <MudListItem Icon="Icons.Material.Filled.Check" Text="100 Players" />
+                            <MudListItem Icon="Icons.Material.Filled.Check" Text="Advanced Analytics" />
+                            <MudListItem Icon="Icons.Material.Filled.Check" Text="AI Insights" />
+                            <MudListItem Icon="Icons.Material.Filled.Check" Text="10GB Storage" />
+                        </MudList>
+                    </MudCardContent>
+                </MudCard>
+            </MudItem>
+            
+            <MudItem xs="12" md="4">
+                <MudCard Class="@GetCardClass("enterprise")" @onclick="() => SelectPlan("enterprise")">
+                    <MudCardContent>
+                        <MudText Typo="Typo.h6" Align="Align.Center">Enterprise</MudText>
+                        <MudText Typo="Typo.h4" Align="Align.Center" Class="my-2">$999/mo</MudText>
+                        <MudText Typo="Typo.body2" Align="Align.Center">For large organizations</MudText>
+                        <MudDivider Class="my-3" />
+                        <MudList Dense="true">
+                            <MudListItem Icon="Icons.Material.Filled.Check" Text="Unlimited Players" />
+                            <MudListItem Icon="Icons.Material.Filled.Check" Text="All Features" />
+                            <MudListItem Icon="Icons.Material.Filled.Check" Text="Priority Support" />
+                            <MudListItem Icon="Icons.Material.Filled.Check" Text="100GB Storage" />
+                        </MudList>
+                    </MudCardContent>
+                </MudCard>
+            </MudItem>
+        </MudGrid>
+
+        @if (!string.IsNullOrEmpty(SelectedPlan))
+        {
+            <MudAlert Severity="Severity.Info" Class="mt-4">
+                <MudText>You selected the <strong>@SelectedPlan.ToUpper()</strong> plan. 
+                Your new subscription will be prorated and take effect immediately.</MudText>
+            </MudAlert>
+        }
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Cancel">Cancel</MudButton>
+        <MudButton Color="Color.Primary" Variant="Variant.Filled" OnClick="Submit" Disabled="@string.IsNullOrEmpty(SelectedPlan)">
+            Upgrade to @(SelectedPlan?.ToUpper() ?? "")
+        </MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter] MudDialogInstance MudDialog { get; set; } = null!;
+
+    public string SelectedPlan { get; set; } = "";
+
+    void SelectPlan(string plan)
+    {
+        SelectedPlan = plan;
+        StateHasChanged();
+    }
+
+    string GetCardClass(string plan)
+    {
+        var baseClass = "cursor-pointer transition-all";
+        if (plan == SelectedPlan)
+            return baseClass + " mud-elevation-8 border-2 border-primary";
+        return baseClass + " mud-elevation-2 hover:mud-elevation-4";
+    }
+
+    void Submit() => MudDialog.Close(DialogResult.Ok(SelectedPlan));
+    void Cancel() => MudDialog.Cancel();
+}
+
+<style>
+    .cursor-pointer {
+        cursor: pointer;
+    }
+    .transition-all {
+        transition: all 0.2s ease-in-out;
+    }
+</style>

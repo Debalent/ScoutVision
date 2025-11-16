@@ -2,50 +2,392 @@
 @using System.Net.Http.Json
 @inject HttpClient Http
 @using MudBlazor
+@inject IDialogService DialogService
+@inject ISnackbar Snackbar
 
-<PageTitle>Customer Portal</PageTitle>
+<PageTitle>Customer Portal - ScoutVision</PageTitle>
 
-<MudPaper Class="pa-6" Elevation="2">
-    <MudText Typo="Typo.h4" Class="mb-4">Your Billing Portal</MudText>
-    <MudText Typo="Typo.body1" Class="mb-2">View your invoices, payment history, and manage your subscription.</MudText>
-    <MudTable Items="@Invoices">
-        <HeaderContent>
-            <MudTh>Invoice #</MudTh>
-            <MudTh>Amount</MudTh>
-            <MudTh>Date</MudTh>
-            <MudTh>Status</MudTh>
-        </HeaderContent>
-        <RowTemplate>
-            <MudTd>@context.InvoiceId</MudTd>
-            <MudTd>@context.Amount.ToString("C")</MudTd>
-            <MudTd>@context.InvoiceDate.ToShortDateString()</MudTd>
-            <MudTd>@context.Status</MudTd>
-        </RowTemplate>
-    </MudTable>
-    <MudDivider Class="my-4" />
-    <MudText Typo="Typo.h6">Subscription Management</MudText>
-    <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="UpgradeSubscription">Upgrade</MudButton>
-    <MudButton Variant="Variant.Outlined" Color="Color.Error" OnClick="CancelSubscription">Cancel</MudButton>
-</MudPaper>
+<MudContainer MaxWidth="MaxWidth.Large" Class="my-4">
+    <MudPaper Class="pa-6 mb-4" Elevation="2">
+        <MudGrid>
+            <MudItem xs="12" md="8">
+                <MudText Typo="Typo.h4" Class="mb-2">
+                    <MudIcon Icon="Icons.Material.Filled.AccountCircle" Class="mr-2 mb-1" />
+                    Customer Portal
+                </MudText>
+                <MudText Typo="Typo.body1" Color="Color.Secondary">
+                    Manage your subscription, view billing history, and download invoices
+                </MudText>
+            </MudItem>
+            <MudItem xs="12" md="4" Class="d-flex justify-end align-center">
+                <MudChip Color="@GetSubscriptionColor()" Variant="Variant.Filled" Size="Size.Large">
+                    @CurrentSubscription.PlanName
+                </MudChip>
+            </MudItem>
+        </MudGrid>
+    </MudPaper>
+
+    <!-- Subscription Overview -->
+    <MudPaper Class="pa-6 mb-4" Elevation="1">
+        <MudText Typo="Typo.h5" Class="mb-4">
+            <MudIcon Icon="Icons.Material.Filled.Subscriptions" Class="mr-2 mb-1" />
+            Current Subscription
+        </MudText>
+        <MudGrid>
+            <MudItem xs="12" md="3">
+                <MudStatCard Title="Plan" Value="@CurrentSubscription.PlanName" />
+            </MudItem>
+            <MudItem xs="12" md="3">
+                <MudStatCard Title="Monthly Cost" Value="@CurrentSubscription.Amount.ToString("C")" />
+            </MudItem>
+            <MudItem xs="12" md="3">
+                <MudStatCard Title="Next Billing" Value="@CurrentSubscription.NextBillingDate.ToShortDateString()" />
+            </MudItem>
+            <MudItem xs="12" md="3">
+                <MudStatCard Title="Status" Value="@CurrentSubscription.Status" />
+            </MudItem>
+        </MudGrid>
+        <MudDivider Class="my-4" />
+        <MudButtonGroup>
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" StartIcon="Icons.Material.Filled.Upgrade" OnClick="UpgradeSubscription">
+                Upgrade Plan
+            </MudButton>
+            <MudButton Variant="Variant.Outlined" Color="Color.Secondary" StartIcon="Icons.Material.Filled.Edit" OnClick="UpdatePaymentMethod">
+                Update Payment
+            </MudButton>
+            <MudButton Variant="Variant.Outlined" Color="Color.Warning" StartIcon="Icons.Material.Filled.Pause" OnClick="PauseSubscription">
+                Pause Subscription
+            </MudButton>
+            <MudButton Variant="Variant.Outlined" Color="Color.Error" StartIcon="Icons.Material.Filled.Cancel" OnClick="CancelSubscription">
+                Cancel
+            </MudButton>
+        </MudButtonGroup>
+    </MudPaper>
+
+    <!-- Billing History -->
+    <MudPaper Class="pa-6 mb-4" Elevation="1">
+        <MudText Typo="Typo.h5" Class="mb-4">
+            <MudIcon Icon="Icons.Material.Filled.Receipt" Class="mr-2 mb-1" />
+            Billing History
+        </MudText>
+        
+        <MudTable Items="@Invoices" Hover="true" Striped="true" Loading="@_loading" LoadingProgressColor="Color.Info">
+            <HeaderContent>
+                <MudTh>Invoice</MudTh>
+                <MudTh>Description</MudTh>
+                <MudTh>Amount</MudTh>
+                <MudTh>Date</MudTh>
+                <MudTh>Status</MudTh>
+                <MudTh>Actions</MudTh>
+            </HeaderContent>
+            <RowTemplate>
+                <MudTd DataLabel="Invoice">
+                    <MudText Typo="Typo.body2">@context.InvoiceId</MudText>
+                </MudTd>
+                <MudTd DataLabel="Description">
+                    <MudText Typo="Typo.body2">@context.Description</MudText>
+                </MudTd>
+                <MudTd DataLabel="Amount">
+                    <MudText Typo="Typo.body2" Style="font-weight: 600;">@context.Amount.ToString("C")</MudText>
+                </MudTd>
+                <MudTd DataLabel="Date">
+                    <MudText Typo="Typo.body2">@context.InvoiceDate.ToShortDateString()</MudText>
+                </MudTd>
+                <MudTd DataLabel="Status">
+                    <MudChip Color="@GetStatusColor(context.Status)" Size="Size.Small" Variant="Variant.Filled">
+                        @context.Status
+                    </MudChip>
+                </MudTd>
+                <MudTd DataLabel="Actions">
+                    <MudButtonGroup Size="Size.Small">
+                        <MudIconButton Icon="Icons.Material.Filled.Download" 
+                                     Color="Color.Primary" 
+                                     OnClick="() => DownloadInvoice(context.InvoiceId)"
+                                     Title="Download PDF" />
+                        @if (context.Status == "Due")
+                        {
+                            <MudIconButton Icon="Icons.Material.Filled.Payment" 
+                                         Color="Color.Success" 
+                                         OnClick="() => PayInvoice(context.InvoiceId)"
+                                         Title="Pay Now" />
+                        }
+                    </MudButtonGroup>
+                </MudTd>
+            </RowTemplate>
+            <PagerContent>
+                <MudTablePager />
+            </PagerContent>
+        </MudTable>
+    </MudPaper>
+
+    <!-- Payment Methods -->
+    <MudPaper Class="pa-6 mb-4" Elevation="1">
+        <MudText Typo="Typo.h5" Class="mb-4">
+            <MudIcon Icon="Icons.Material.Filled.CreditCard" Class="mr-2 mb-1" />
+            Payment Methods
+        </MudText>
+        <MudGrid>
+            @foreach (var method in PaymentMethods)
+            {
+                <MudItem xs="12" md="6" lg="4">
+                    <MudCard>
+                        <MudCardContent>
+                            <div class="d-flex justify-space-between align-center">
+                                <div class="d-flex align-center">
+                                    <MudIcon Icon="@GetCardIcon(method.Brand)" Class="mr-2" />
+                                    <div>
+                                        <MudText Typo="Typo.body1">•••• •••• •••• @method.Last4</MudText>
+                                        <MudText Typo="Typo.body2" Color="Color.Secondary">@method.Brand • @method.ExpMonth/@method.ExpYear</MudText>
+                                    </div>
+                                </div>
+                                @if (method.IsDefault)
+                                {
+                                    <MudChip Size="Size.Small" Color="Color.Success">Default</MudChip>
+                                }
+                            </div>
+                        </MudCardContent>
+                        <MudCardActions>
+                            @if (!method.IsDefault)
+                            {
+                                <MudButton Size="Size.Small" OnClick="() => SetDefaultPaymentMethod(method.Id)">Set Default</MudButton>
+                            }
+                            <MudButton Size="Size.Small" Color="Color.Error" OnClick="() => RemovePaymentMethod(method.Id)">Remove</MudButton>
+                        </MudCardActions>
+                    </MudCard>
+                </MudItem>
+            }
+            <MudItem xs="12" md="6" lg="4">
+                <MudCard Class="d-flex align-center justify-center" Style="min-height: 140px; border: 2px dashed var(--mud-palette-divider);">
+                    <MudCardContent>
+                        <MudButton Variant="Variant.Text" StartIcon="Icons.Material.Filled.Add" OnClick="AddPaymentMethod">
+                            Add Payment Method
+                        </MudButton>
+                    </MudCardContent>
+                </MudCard>
+            </MudItem>
+        </MudGrid>
+    </MudPaper>
+
+    <!-- Usage Statistics -->
+    <MudPaper Class="pa-6" Elevation="1">
+        <MudText Typo="Typo.h5" Class="mb-4">
+            <MudIcon Icon="Icons.Material.Filled.Analytics" Class="mr-2 mb-1" />
+            Usage Overview
+        </MudText>
+        <MudGrid>
+            <MudItem xs="12" md="4">
+                <MudProgressLinear Color="Color.Primary" Value="@UsageStats.PlayersUsed" Max="@UsageStats.PlayersLimit" Class="mb-2" />
+                <MudText Typo="Typo.body2">Players: @UsageStats.PlayersUsed / @UsageStats.PlayersLimit</MudText>
+            </MudItem>
+            <MudItem xs="12" md="4">
+                <MudProgressLinear Color="Color.Secondary" Value="@UsageStats.AnalysesUsed" Max="@UsageStats.AnalysesLimit" Class="mb-2" />
+                <MudText Typo="Typo.body2">Analyses: @UsageStats.AnalysesUsed / @UsageStats.AnalysesLimit</MudText>
+            </MudItem>
+            <MudItem xs="12" md="4">
+                <MudProgressLinear Color="Color.Info" Value="@UsageStats.StorageUsed" Max="@UsageStats.StorageLimit" Class="mb-2" />
+                <MudText Typo="Typo.body2">Storage: @UsageStats.StorageUsed GB / @UsageStats.StorageLimit GB</MudText>
+            </MudItem>
+        </MudGrid>
+    </MudPaper>
+</MudContainer>
 
 @code {
+    private bool _loading = false;
+
     public List<Invoice> Invoices { get; set; } = new();
+    public List<PaymentMethod> PaymentMethods { get; set; } = new();
+    public Subscription CurrentSubscription { get; set; } = new();
+    public UsageStatistics UsageStats { get; set; } = new();
+
     public class Invoice
     {
         public string InvoiceId { get; set; } = string.Empty;
+        public string Description { get; set; } = string.Empty;
         public decimal Amount { get; set; }
         public DateTime InvoiceDate { get; set; }
         public string Status { get; set; } = "Paid";
     }
+
+    public class PaymentMethod
+    {
+        public string Id { get; set; } = string.Empty;
+        public string Brand { get; set; } = string.Empty;
+        public string Last4 { get; set; } = string.Empty;
+        public int ExpMonth { get; set; }
+        public int ExpYear { get; set; }
+        public bool IsDefault { get; set; }
+    }
+
+    public class Subscription
+    {
+        public string PlanName { get; set; } = "Professional";
+        public decimal Amount { get; set; } = 299.99m;
+        public DateTime NextBillingDate { get; set; } = DateTime.UtcNow.AddDays(15);
+        public string Status { get; set; } = "Active";
+    }
+
+    public class UsageStatistics
+    {
+        public int PlayersUsed { get; set; } = 75;
+        public int PlayersLimit { get; set; } = 100;
+        public int AnalysesUsed { get; set; } = 450;
+        public int AnalysesLimit { get; set; } = 500;
+        public double StorageUsed { get; set; } = 8.5;
+        public double StorageLimit { get; set; } = 10.0;
+    }
+
     protected override async Task OnInitializedAsync()
     {
-        // TODO: Replace with API call to fetch invoices
+        _loading = true;
+        
+        // Simulate API calls
+        await Task.Delay(500);
+        
         Invoices = new List<Invoice>
         {
-            new Invoice { InvoiceId = "INV-1001", Amount = 200, InvoiceDate = DateTime.UtcNow.AddDays(-30), Status = "Paid" },
-            new Invoice { InvoiceId = "INV-1002", Amount = 200, InvoiceDate = DateTime.UtcNow.AddDays(-1), Status = "Due" }
+            new Invoice { InvoiceId = "INV-1003", Description = "ScoutVision Professional - November 2025", Amount = 299.99m, InvoiceDate = DateTime.UtcNow.AddDays(-5), Status = "Paid" },
+            new Invoice { InvoiceId = "INV-1002", Description = "ScoutVision Professional - October 2025", Amount = 299.99m, InvoiceDate = DateTime.UtcNow.AddDays(-35), Status = "Paid" },
+            new Invoice { InvoiceId = "INV-1001", Description = "ScoutVision Professional - September 2025", Amount = 299.99m, InvoiceDate = DateTime.UtcNow.AddDays(-65), Status = "Paid" },
+            new Invoice { InvoiceId = "INV-1004", Description = "Additional Analytics Package", Amount = 99.99m, InvoiceDate = DateTime.UtcNow.AddDays(-1), Status = "Due" }
+        };
+
+        PaymentMethods = new List<PaymentMethod>
+        {
+            new PaymentMethod { Id = "pm_1", Brand = "Visa", Last4 = "4242", ExpMonth = 12, ExpYear = 2026, IsDefault = true },
+            new PaymentMethod { Id = "pm_2", Brand = "Mastercard", Last4 = "5555", ExpMonth = 8, ExpYear = 2025, IsDefault = false }
+        };
+
+        UsageStats = new UsageStatistics();
+        CurrentSubscription = new Subscription();
+        
+        _loading = false;
+    }
+
+    private Color GetSubscriptionColor()
+    {
+        return CurrentSubscription.Status switch
+        {
+            "Active" => Color.Success,
+            "Past Due" => Color.Warning,
+            "Cancelled" => Color.Error,
+            _ => Color.Default
         };
     }
-    private void UpgradeSubscription() { /* TODO: Implement upgrade logic */ }
-    private void CancelSubscription() { /* TODO: Implement cancel logic */ }
+
+    private Color GetStatusColor(string status)
+    {
+        return status switch
+        {
+            "Paid" => Color.Success,
+            "Due" => Color.Warning,
+            "Overdue" => Color.Error,
+            _ => Color.Default
+        };
+    }
+
+    private string GetCardIcon(string brand)
+    {
+        return brand.ToLower() switch
+        {
+            "visa" => Icons.Material.Filled.CreditCard,
+            "mastercard" => Icons.Material.Filled.CreditCard,
+            "amex" => Icons.Material.Filled.CreditCard,
+            _ => Icons.Material.Filled.Payment
+        };
+    }
+
+    private async Task UpgradeSubscription()
+    {
+        var parameters = new DialogParameters<UpgradeDialog>();
+        var dialog = await DialogService.ShowAsync<UpgradeDialog>("Upgrade Subscription", parameters);
+        var result = await dialog.Result;
+
+        if (!result.Canceled)
+        {
+            Snackbar.Add("Subscription upgrade initiated!", Severity.Success);
+        }
+    }
+
+    private async Task UpdatePaymentMethod()
+    {
+        Snackbar.Add("Redirecting to payment method update...", Severity.Info);
+        // TODO: Implement Stripe Checkout for payment method update
+    }
+
+    private async Task PauseSubscription()
+    {
+        bool? result = await DialogService.ShowMessageBox(
+            "Pause Subscription",
+            "Are you sure you want to pause your subscription? You can reactivate it at any time.",
+            yesText: "Pause", cancelText: "Cancel");
+
+        if (result == true)
+        {
+            Snackbar.Add("Subscription paused successfully.", Severity.Warning);
+            CurrentSubscription.Status = "Paused";
+        }
+    }
+
+    private async Task CancelSubscription()
+    {
+        bool? result = await DialogService.ShowMessageBox(
+            "Cancel Subscription",
+            "Are you sure you want to cancel your subscription? This action cannot be undone and you will lose access to all premium features.",
+            yesText: "Cancel Subscription", cancelText: "Keep Subscription");
+
+        if (result == true)
+        {
+            Snackbar.Add("Subscription cancelled. We're sorry to see you go!", Severity.Error);
+            CurrentSubscription.Status = "Cancelled";
+        }
+    }
+
+    private async Task DownloadInvoice(string invoiceId)
+    {
+        Snackbar.Add($"Downloading invoice {invoiceId}...", Severity.Info);
+        // TODO: Implement PDF download
+    }
+
+    private async Task PayInvoice(string invoiceId)
+    {
+        Snackbar.Add($"Redirecting to payment for invoice {invoiceId}...", Severity.Info);
+        // TODO: Implement Stripe Checkout for invoice payment
+    }
+
+    private async Task AddPaymentMethod()
+    {
+        Snackbar.Add("Redirecting to add payment method...", Severity.Info);
+        // TODO: Implement Stripe Setup Intent for adding payment methods
+    }
+
+    private async Task SetDefaultPaymentMethod(string methodId)
+    {
+        foreach (var method in PaymentMethods)
+        {
+            method.IsDefault = method.Id == methodId;
+        }
+        Snackbar.Add("Default payment method updated.", Severity.Success);
+    }
+
+    private async Task RemovePaymentMethod(string methodId)
+    {
+        bool? result = await DialogService.ShowMessageBox(
+            "Remove Payment Method",
+            "Are you sure you want to remove this payment method?",
+            yesText: "Remove", cancelText: "Cancel");
+
+        if (result == true)
+        {
+            PaymentMethods.RemoveAll(m => m.Id == methodId);
+            Snackbar.Add("Payment method removed.", Severity.Success);
+        }
+    }
 }
+
+@* Upgrade Dialog Component (would be in a separate file) *@
+<style>
+    .mud-stat-card {
+        text-align: center;
+        padding: 16px;
+    }
+</style>

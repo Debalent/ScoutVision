@@ -1,53 +1,463 @@
 @page "/pricing"
 @using System.Globalization
 @using MudBlazor
+@using System.Net.Http.Json
+@inject HttpClient Http
+@inject ISnackbar Snackbar
+@inject NavigationManager Navigation
 
-<PageTitle>ScoutVision Pricing</PageTitle>
+<PageTitle>ScoutVision Pricing - Interactive Calculator</PageTitle>
 
-<MudPaper Class="pa-6" Elevation="2">
-    <MudText Typo="Typo.h4" Class="mb-4">ScoutVision Licensing & Pricing</MudText>
-    <MudSimpleTable>
-        <thead>
-            <tr>
-                <th>Tier</th>
-                <th>Users</th>
-                <th>Price/User/Month</th>
-                <th>Features</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr>
-                <td>Basic</td>
-                <td>1-5</td>
-                <td>$50</td>
-                <td>Core scouting, limited analytics</td>
-            </tr>
-            <tr>
-                <td>Professional</td>
-                <td>6-20</td>
-                <td>$40</td>
-                <td>Full analytics, transfer engine, injury module</td>
-            </tr>
-            <tr>
-                <td>Enterprise</td>
-                <td>21+</td>
-                <td>$30</td>
-                <td>All features, API, premium support</td>
-            </tr>
-        </tbody>
-    </MudSimpleTable>
-    <MudText Typo="Typo.body2" Class="mt-4">
-        <b>Annual Discount:</b> 15% off for annual prepay.<br />
-        <b>Custom/On-premise:</b> Contact us for perpetual licensing or white-label options.
+<MudContainer MaxWidth="MaxWidth.Large" Class="my-4">
+    <!-- Header Section -->
+    <MudText Typo="Typo.h3" Align="Align.Center" Class="mb-2">
+        <MudIcon Icon="Icons.Material.Filled.Analytics" Class="mr-2 mb-1" />
+        ScoutVision Pricing
     </MudText>
-</MudPaper>
+    <MudText Typo="Typo.h6" Align="Align.Center" Color="Color.Secondary" Class="mb-6">
+        Professional sports analytics and scouting platform
+    </MudText>
+
+    <!-- Interactive Calculator Section -->
+    <MudPaper Class="pa-6 mb-6" Elevation="3">
+        <MudText Typo="Typo.h5" Class="mb-4">
+            <MudIcon Icon="Icons.Material.Filled.Calculate" Class="mr-2" />
+            Interactive Pricing Calculator
+        </MudText>
+        
+        <MudGrid>
+            <!-- Configuration Controls -->
+            <MudItem xs="12" lg="4">
+                <MudCard>
+                    <MudCardContent>
+                        <MudText Typo="Typo.h6" Class="mb-4">Configuration</MudText>
+                        
+                        <MudNumericField @bind-Value="UserCount" Label="Number of Users" 
+                                       Variant="Variant.Outlined" Min="1" Max="500" 
+                                       FullWidth="true" Class="mb-4"
+                                       OnValueChanged="RecalculatePricing" />
+                        
+                        <MudSelect T="string" @bind-Value="BillingCycle" Label="Billing Cycle" 
+                                 Variant="Variant.Outlined" FullWidth="true" Class="mb-4"
+                                 OnSelectionChanged="RecalculatePricing">
+                            <MudSelectItem T="string" Value="monthly">Monthly</MudSelectItem>
+                            <MudSelectItem T="string" Value="annual">Annual (15% discount)</MudSelectItem>
+                        </MudSelect>
+                        
+                        <MudSelect T="string" @bind-Value="SelectedRegion" Label="Region" 
+                                 Variant="Variant.Outlined" FullWidth="true" Class="mb-4"
+                                 OnSelectionChanged="RecalculatePricing">
+                            <MudSelectItem T="string" Value="US">🇺🇸 United States</MudSelectItem>
+                            <MudSelectItem T="string" Value="EU">🇪🇺 European Union</MudSelectItem>
+                            <MudSelectItem T="string" Value="UK">🇬🇧 United Kingdom</MudSelectItem>
+                            <MudSelectItem T="string" Value="Other">🌍 Other Countries</MudSelectItem>
+                        </MudSelect>
+                        
+                        <MudText Typo="Typo.subtitle2" Class="mb-2">Add-on Modules</MudText>
+                        
+                        @foreach (var addon in AvailableAddons)
+                        {
+                            <MudCheckBox @bind-Checked="addon.IsSelected" 
+                                       Label="@($"{addon.Name} (+{addon.Price:C}/user/month)")"
+                                       Color="Color.Primary" Class="mb-2"
+                                       OnCheckedChanged="RecalculatePricing" />
+                        }
+                    </MudCardContent>
+                </MudCard>
+            </MudItem>
+            
+            <!-- Real-time Cost Display -->
+            <MudItem xs="12" lg="4">
+                <MudCard>
+                    <MudCardContent>
+                        <MudText Typo="Typo.h6" Class="mb-4">Cost Breakdown</MudText>
+                        
+                        <MudList>
+                            <MudListItem>
+                                <div class="d-flex justify-space-between w-100">
+                                    <MudText>Base Plan (@GetCurrentTier())</MudText>
+                                    <MudText>@BasePrice.ToString("C")</MudText>
+                                </div>
+                            </MudListItem>
+                            
+                            <MudListItem>
+                                <div class="d-flex justify-space-between w-100">
+                                    <MudText>Users (@UserCount)</MudText>
+                                    <MudText>@(UserCount * GetPerSeatPrice(UserCount)).ToString("C")</MudText>
+                                </div>
+                            </MudListItem>
+                            
+                            @foreach (var addon in AvailableAddons.Where(a => a.IsSelected))
+                            {
+                                <MudListItem>
+                                    <div class="d-flex justify-space-between w-100">
+                                        <MudText>@addon.Name</MudText>
+                                        <MudText>@((addon.Price * UserCount)).ToString("C")</MudText>
+                                    </div>
+                                </MudListItem>
+                            }
+                            
+                            <MudDivider Class="my-2" />
+                            
+                            <MudListItem>
+                                <div class="d-flex justify-space-between w-100">
+                                    <MudText><strong>Subtotal (Monthly)</strong></MudText>
+                                    <MudText><strong>@MonthlySubtotal.ToString("C")</strong></MudText>
+                                </div>
+                            </MudListItem>
+                            
+                            @if (BillingCycle == "annual")
+                            {
+                                <MudListItem>
+                                    <div class="d-flex justify-space-between w-100">
+                                        <MudText Color="Color.Success">Annual Discount (15%)</MudText>
+                                        <MudText Color="Color.Success">-@((MonthlySubtotal * 12 * 0.15m)).ToString("C")</MudText>
+                                    </div>
+                                </MudListItem>
+                            }
+                            
+                            @if (EstimatedTax > 0)
+                            {
+                                <MudListItem>
+                                    <div class="d-flex justify-space-between w-100">
+                                        <MudText>Estimated Tax</MudText>
+                                        <MudText>@EstimatedTax.ToString("C")</MudText>
+                                    </div>
+                                </MudListItem>
+                            }
+                            
+                            <MudDivider Class="my-2" />
+                            
+                            <MudListItem>
+                                <div class="d-flex justify-space-between w-100">
+                                    <MudText Typo="Typo.h6" Color="Color.Primary">
+                                        <strong>Total (@BillingCycle.Capitalize())</strong>
+                                    </MudText>
+                                    <MudText Typo="Typo.h6" Color="Color.Primary">
+                                        <strong>@TotalCost.ToString("C")</strong>
+                                    </MudText>
+                                </div>
+                            </MudListItem>
+                            
+                            @if (BillingCycle == "annual")
+                            {
+                                <MudListItem>
+                                    <div class="d-flex justify-space-between w-100">
+                                        <MudText Color="Color.Secondary">Effective Monthly</MudText>
+                                        <MudText Color="Color.Secondary">@(TotalCost / 12).ToString("C")</MudText>
+                                    </div>
+                                </MudListItem>
+                            }
+                        </MudList>
+                    </MudCardContent>
+                </MudCard>
+            </MudItem>
+            
+            <!-- Savings & Comparison -->
+            <MudItem xs="12" lg="4">
+                <MudCard>
+                    <MudCardContent>
+                        <MudText Typo="Typo.h6" Class="mb-4">Savings Analysis</MudText>
+                        
+                        @if (BillingCycle == "annual")
+                        {
+                            <MudAlert Severity="Severity.Success" Dense="true" Class="mb-3">
+                                <MudText><strong>Annual Savings:</strong> @AnnualSavings.ToString("C")</MudText>
+                                <MudText Typo="Typo.body2">You save @((AnnualSavings / (MonthlySubtotal * 12)) * 100):F1% with annual billing</MudText>
+                            </MudAlert>
+                        }
+                        
+                        <MudText Typo="Typo.subtitle2" Class="mb-2">ROI Calculator</MudText>
+                        <MudTextField @bind-Value="TeamBudgetInput" Label="Annual Team Budget" 
+                                    Variant="Variant.Outlined" FullWidth="true" Class="mb-2"
+                                    Placeholder="e.g., 5000000" />
+                        
+                        @if (TeamBudget > 0)
+                        {
+                            <MudText Typo="Typo.body2" Class="mb-2">
+                                ScoutVision cost: @((TotalCost / TeamBudget) * 100):F3% of team budget
+                            </MudText>
+                            <MudProgressLinear Value="@Math.Min((double)((TotalCost / TeamBudget) * 100), 100)" 
+                                             Color="Color.Primary" Size="Size.Medium" Class="mb-3" />
+                        }
+                        
+                        <MudText Typo="Typo.subtitle2" Class="mb-2">Competitor Comparison</MudText>
+                        <MudList Dense="true">
+                            <MudListItem>
+                                <div class="d-flex justify-space-between w-100">
+                                    <MudText>ScoutVision</MudText>
+                                    <MudText Color="Color.Success">@(MonthlySubtotal / UserCount).ToString("C")/user</MudText>
+                                </div>
+                            </MudListItem>
+                            <MudListItem>
+                                <div class="d-flex justify-space-between w-100">
+                                    <MudText>Competitor A</MudText>
+                                    <MudText>@((MonthlySubtotal / UserCount) * 1.3m).ToString("C")/user</MudText>
+                                </div>
+                            </MudListItem>
+                            <MudListItem>
+                                <div class="d-flex justify-space-between w-100">
+                                    <MudText>Competitor B</MudText>
+                                    <MudText>@((MonthlySubtotal / UserCount) * 1.15m).ToString("C")/user</MudText>
+                                </div>
+                            </MudListItem>
+                        </MudList>
+                        
+                        <MudButton Variant="Variant.Filled" Color="Color.Primary" 
+                                 FullWidth="true" Class="mt-4" StartIcon="Icons.Material.Filled.ShoppingCart"
+                                 OnClick="StartTrial">
+                            Start Free Trial
+                        </MudButton>
+                        
+                        <MudButton Variant="Variant.Outlined" Color="Color.Secondary" 
+                                 FullWidth="true" Class="mt-2" StartIcon="Icons.Material.Filled.ContactSupport"
+                                 OnClick="ContactSales">
+                            Contact Sales
+                        </MudButton>
+                    </MudCardContent>
+                </MudCard>
+            </MudItem>
+        </MudGrid>
+    </MudPaper>
+
+    <!-- Plan Comparison Table -->
+    <MudPaper Class="pa-6 mb-6" Elevation="2">
+        <MudText Typo="Typo.h5" Class="mb-4">Plan Comparison</MudText>
+        
+        <MudTable Items="PlanTiers" Hover="true" Breakpoint="Breakpoint.Sm">
+            <HeaderContent>
+                <MudTh>Tier</MudTh>
+                <MudTh>User Range</MudTh>
+                <MudTh>Price per User</MudTh>
+                <MudTh>Core Features</MudTh>
+                <MudTh>Analytics</MudTh>
+                <MudTh>Support</MudTh>
+                <MudTh>API Access</MudTh>
+            </HeaderContent>
+            <RowTemplate>
+                <MudTd DataLabel="Tier">
+                    <MudChip Color="@GetTierColor(context.Name)" Size="Size.Small">@context.Name</MudChip>
+                </MudTd>
+                <MudTd DataLabel="Users">@context.UserRange</MudTd>
+                <MudTd DataLabel="Price">@context.PricePerUser.ToString("C")</MudTd>
+                <MudTd DataLabel="Features">
+                    @foreach (var feature in context.CoreFeatures)
+                    {
+                        <MudIcon Icon="Icons.Material.Filled.Check" Color="Color.Success" Size="Size.Small" />
+                        <MudText Typo="Typo.body2" Style="display: inline;">@feature</MudText><br />
+                    }
+                </MudTd>
+                <MudTd DataLabel="Analytics">@context.AnalyticsLevel</MudTd>
+                <MudTd DataLabel="Support">@context.SupportLevel</MudTd>
+                <MudTd DataLabel="API">
+                    @if (context.HasApiAccess)
+                    {
+                        <MudIcon Icon="Icons.Material.Filled.Check" Color="Color.Success" />
+                    }
+                    else
+                    {
+                        <MudIcon Icon="Icons.Material.Filled.Close" Color="Color.Error" />
+                    }
+                </MudTd>
+            </RowTemplate>
+        </MudTable>
+    </MudPaper>
+
+    <!-- FAQ Section -->
+    <MudPaper Class="pa-6" Elevation="1">
+        <MudText Typo="Typo.h5" Class="mb-4">Frequently Asked Questions</MudText>
+        
+        <MudExpansionPanels>
+            <MudExpansionPanel Text="What's included in the free trial?">
+                <MudText>
+                    Our 14-day free trial includes full access to all features for up to 5 users. 
+                    You can explore our complete analytics suite, scouting tools, and reporting capabilities.
+                </MudText>
+            </MudExpansionPanel>
+            
+            <MudExpansionPanel Text="Can I change my plan later?">
+                <MudText>
+                    Yes! You can upgrade or downgrade your plan at any time. 
+                    Changes take effect immediately, and we'll prorate any billing adjustments.
+                </MudText>
+            </MudExpansionPanel>
+            
+            <MudExpansionPanel Text="What payment methods do you accept?">
+                <MudText>
+                    We accept all major credit cards, bank transfers for enterprise accounts, 
+                    and offer invoice billing for annual subscriptions over $10,000.
+                </MudText>
+            </MudExpansionPanel>
+            
+            <MudExpansionPanel Text="Is there a setup fee?">
+                <MudText>
+                    No setup fees! We include onboarding, data migration assistance, 
+                    and training as part of your subscription.
+                </MudText>
+            </MudExpansionPanel>
+        </MudExpansionPanels>
+    </MudPaper>
+</MudContainer>
 
 @code {
+    private int UserCount = 5;
+    private string BillingCycle = "monthly";
+    private string SelectedRegion = "US";
+    private decimal BasePrice = 199m;
+    private string TeamBudgetInput = "";
+    
+    private decimal MonthlySubtotal => CalculateMonthlySubtotal();
+    private decimal EstimatedTax => CalculateEstimatedTax();
+    private decimal TotalCost => CalculateTotalCost();
+    private decimal AnnualSavings => MonthlySubtotal * 12 * 0.15m;
+    private decimal TeamBudget => decimal.TryParse(TeamBudgetInput, out var budget) ? budget : 0;
+
+    private readonly List<AddonModule> AvailableAddons = new()
+    {
+        new() { Name = "Advanced Analytics", Price = 10m, IsSelected = false },
+        new() { Name = "Transfer Engine", Price = 15m, IsSelected = false },
+        new() { Name = "Injury Tracking", Price = 8m, IsSelected = false },
+        new() { Name = "Video Analysis", Price = 12m, IsSelected = false },
+        new() { Name = "API Access", Price = 20m, IsSelected = false }
+    };
+
+    private readonly List<PlanTier> PlanTiers = new()
+    {
+        new()
+        {
+            Name = "Starter",
+            UserRange = "1-5",
+            PricePerUser = 50m,
+            CoreFeatures = new[] { "Basic Scouting", "Player Database", "Simple Reports" },
+            AnalyticsLevel = "Basic",
+            SupportLevel = "Email",
+            HasApiAccess = false
+        },
+        new()
+        {
+            Name = "Professional",
+            UserRange = "6-20",
+            PricePerUser = 40m,
+            CoreFeatures = new[] { "Full Scouting Suite", "Advanced Analytics", "Custom Reports", "Data Export" },
+            AnalyticsLevel = "Advanced",
+            SupportLevel = "Email + Chat",
+            HasApiAccess = true
+        },
+        new()
+        {
+            Name = "Enterprise",
+            UserRange = "21+",
+            PricePerUser = 30m,
+            CoreFeatures = new[] { "All Features", "White-label Options", "Custom Integrations", "Dedicated Support" },
+            AnalyticsLevel = "Enterprise",
+            SupportLevel = "24/7 Phone + Dedicated Manager",
+            HasApiAccess = true
+        }
+    };
+
     public static decimal GetPerSeatPrice(int userCount)
     {
         if (userCount <= 5) return 50;
         if (userCount <= 20) return 40;
         return 30;
     }
+    
     public static decimal GetAnnualDiscount(decimal monthlyPrice) => monthlyPrice * 12 * 0.85m;
+
+    private string GetCurrentTier()
+    {
+        if (UserCount <= 5) return "Starter";
+        if (UserCount <= 20) return "Professional";
+        return "Enterprise";
+    }
+
+    private decimal CalculateMonthlySubtotal()
+    {
+        var baseCost = UserCount * GetPerSeatPrice(UserCount);
+        var addonCost = AvailableAddons.Where(a => a.IsSelected).Sum(a => a.Price * UserCount);
+        return baseCost + addonCost;
+    }
+
+    private decimal CalculateEstimatedTax()
+    {
+        var taxRate = SelectedRegion switch
+        {
+            "US" => 0.08m,
+            "EU" => 0.20m,
+            "UK" => 0.20m,
+            _ => 0.05m
+        };
+        return MonthlySubtotal * taxRate;
+    }
+
+    private decimal CalculateTotalCost()
+    {
+        var subtotal = MonthlySubtotal;
+        var tax = EstimatedTax;
+        
+        if (BillingCycle == "annual")
+        {
+            // Apply annual discount before tax
+            var annualSubtotal = (subtotal * 12 * 0.85m);
+            var annualTax = (tax * 12 * 0.85m);
+            return annualSubtotal + annualTax;
+        }
+        
+        return subtotal + tax;
+    }
+
+    private Color GetTierColor(string tierName)
+    {
+        return tierName switch
+        {
+            "Starter" => Color.Info,
+            "Professional" => Color.Primary,
+            "Enterprise" => Color.Success,
+            _ => Color.Default
+        };
+    }
+
+    private async Task RecalculatePricing()
+    {
+        StateHasChanged();
+    }
+
+    private async Task StartTrial()
+    {
+        Snackbar.Add("Redirecting to free trial signup...", Severity.Success);
+        Navigation.NavigateTo("/trial");
+    }
+
+    private async Task ContactSales()
+    {
+        Snackbar.Add("Redirecting to sales contact form...", Severity.Info);
+        Navigation.NavigateTo("/contact-sales");
+    }
+
+    public class AddonModule
+    {
+        public string Name { get; set; } = "";
+        public decimal Price { get; set; }
+        public bool IsSelected { get; set; }
+    }
+
+    public class PlanTier
+    {
+        public string Name { get; set; } = "";
+        public string UserRange { get; set; } = "";
+        public decimal PricePerUser { get; set; }
+        public string[] CoreFeatures { get; set; } = Array.Empty<string>();
+        public string AnalyticsLevel { get; set; } = "";
+        public string SupportLevel { get; set; } = "";
+        public bool HasApiAccess { get; set; }
+    }
+}
+
+public static class StringExtensions
+{
+    public static string Capitalize(this string input)
+    {
+        if (string.IsNullOrEmpty(input)) return input;
+        return char.ToUpper(input[0]) + input[1..];
+    }
 }

@@ -1,51 +1,317 @@
 @page "/admin-billing-dashboard"
 @inject HttpClient Http
+@using ApexCharts
+@using MudBlazor
 
-<MudPaper Class="pa-4" Elevation="2">
-    <MudText Typo="Typo.h5">Admin Billing Dashboard</MudText>
-    <MudTable Items="_stats" Hover="true">
-        <HeaderContent>
-            <MudTh>Metric</MudTh>
-            <MudTh>Value</MudTh>
-        </HeaderContent>
-        <RowTemplate>
-            <MudTd>@context.Metric</MudTd>
-            <MudTd>@context.Value</MudTd>
-        </RowTemplate>
-    </MudTable>
-    <MudButton OnClick="Refresh" Color="Color.Primary">Refresh</MudButton>
-</MudPaper>
+<PageTitle>Admin Billing Dashboard - ScoutVision</PageTitle>
+
+<MudContainer MaxWidth="MaxWidth.ExtraLarge" Class="my-4">
+    <!-- Header -->
+    <MudPaper Class="pa-6 mb-4" Elevation="2">
+        <MudGrid AlignItems="Center">
+            <MudItem xs="12" md="8">
+                <MudText Typo="Typo.h4" Class="mb-2">
+                    <MudIcon Icon="Icons.Material.Filled.Analytics" Class="mr-2 mb-1" />
+                    Billing Dashboard
+                </MudText>
+                <MudText Typo="Typo.body1" Color="Color.Secondary">
+                    Revenue analytics, subscription metrics, and customer insights
+                </MudText>
+            </MudItem>
+            <MudItem xs="12" md="4" Class="d-flex justify-end">
+                <MudButtonGroup>
+                    <MudButton StartIcon="Icons.Material.Filled.Refresh" OnClick="RefreshData" Disabled="@_loading">
+                        @if (_loading) { <MudProgressCircular Size="Size.Small" /> } else { "Refresh" }
+                    </MudButton>
+                    <MudButton StartIcon="Icons.Material.Filled.GetApp" OnClick="ExportData">
+                        Export
+                    </MudButton>
+                </MudButtonGroup>
+            </MudItem>
+        </MudGrid>
+    </MudPaper>
+
+    <!-- Key Metrics Cards -->
+    <MudGrid Class="mb-4">
+        <MudItem xs="12" sm="6" md="3">
+            <MudCard>
+                <MudCardContent>
+                    <div class="d-flex justify-space-between align-center">
+                        <div>
+                            <MudText Typo="Typo.body2" Color="Color.Secondary">Monthly Revenue</MudText>
+                            <MudText Typo="Typo.h5">@RevenueMetrics.MonthlyRevenue.ToString("C")</MudText>
+                            <MudText Typo="Typo.body2" Color="@GetTrendColor(RevenueMetrics.MonthlyGrowth)">
+                                @GetTrendIcon(RevenueMetrics.MonthlyGrowth) @RevenueMetrics.MonthlyGrowth.ToString("+0.0%;-0.0%;0%")
+                            </MudText>
+                        </div>
+                        <MudIcon Icon="Icons.Material.Filled.TrendingUp" Size="Size.Large" Color="Color.Success" />
+                    </div>
+                </MudCardContent>
+            </MudCard>
+        </MudItem>
+        
+        <MudItem xs="12" sm="6" md="3">
+            <MudCard>
+                <MudCardContent>
+                    <div class="d-flex justify-space-between align-center">
+                        <div>
+                            <MudText Typo="Typo.body2" Color="Color.Secondary">Active Subscriptions</MudText>
+                            <MudText Typo="Typo.h5">@SubscriptionMetrics.ActiveCount</MudText>
+                            <MudText Typo="Typo.body2" Color="@GetTrendColor(SubscriptionMetrics.GrowthRate)">
+                                @GetTrendIcon(SubscriptionMetrics.GrowthRate) @SubscriptionMetrics.GrowthRate.ToString("+0.0%;-0.0%;0%")
+                            </MudText>
+                        </div>
+                        <MudIcon Icon="Icons.Material.Filled.People" Size="Size.Large" Color="Color.Primary" />
+                    </div>
+                </MudCardContent>
+            </MudCard>
+        </MudItem>
+        
+        <MudItem xs="12" sm="6" md="3">
+            <MudCard>
+                <MudCardContent>
+                    <div class="d-flex justify-space-between align-center">
+                        <div>
+                            <MudText Typo="Typo.body2" Color="Color.Secondary">Churn Rate</MudText>
+                            <MudText Typo="Typo.h5">@ChurnMetrics.MonthlyChurnRate.ToString("0.0%")</MudText>
+                            <MudText Typo="Typo.body2" Color="@GetTrendColor(-ChurnMetrics.ChurnTrend)">
+                                @GetTrendIcon(-ChurnMetrics.ChurnTrend) @ChurnMetrics.ChurnTrend.ToString("+0.0%;-0.0%;0%")
+                            </MudText>
+                        </div>
+                        <MudIcon Icon="Icons.Material.Filled.ExitToApp" Size="Size.Large" Color="Color.Warning" />
+                    </div>
+                </MudCardContent>
+            </MudCard>
+        </MudItem>
+        
+        <MudItem xs="12" sm="6" md="3">
+            <MudCard>
+                <MudCardContent>
+                    <div class="d-flex justify-space-between align-center">
+                        <div>
+                            <MudText Typo="Typo.body2" Color="Color.Secondary">Average Revenue Per User</MudText>
+                            <MudText Typo="Typo.h5">@RevenueMetrics.ARPU.ToString("C")</MudText>
+                            <MudText Typo="Typo.body2" Color="@GetTrendColor(RevenueMetrics.ARPUGrowth)">
+                                @GetTrendIcon(RevenueMetrics.ARPUGrowth) @RevenueMetrics.ARPUGrowth.ToString("+0.0%;-0.0%;0%")
+                            </MudText>
+                        </div>
+                        <MudIcon Icon="Icons.Material.Filled.AttachMoney" Size="Size.Large" Color="Color.Info" />
+                    </div>
+                </MudCardContent>
+            </MudCard>
+        </MudItem>
+    </MudGrid>
+
+    <!-- Charts Row -->
+    <MudGrid Class="mb-4">
+        <MudItem xs="12" md="8">
+            <MudPaper Class="pa-4" Elevation="1">
+                <MudText Typo="Typo.h6" Class="mb-4">Revenue Trends</MudText>
+                <div id="revenue-chart" style="height: 350px;">
+                    <!-- Revenue chart would be rendered here -->
+                    <MudSkeleton Height="350px" Animation="Animation.Wave" />
+                </div>
+            </MudPaper>
+        </MudItem>
+        
+        <MudItem xs="12" md="4">
+            <MudPaper Class="pa-4" Elevation="1">
+                <MudText Typo="Typo.h6" Class="mb-4">Subscription Plans</MudText>
+                <div id="plans-chart" style="height: 350px;">
+                    <!-- Plans distribution chart -->
+                    <MudChart ChartType="ChartType.Donut" 
+                             InputData="@PlanDistributionData" 
+                             InputLabels="@PlanDistributionLabels"
+                             Width="300px" Height="300px" />
+                </div>
+            </MudPaper>
+        </MudItem>
+    </MudGrid>
+
+    <!-- Data Tables -->
+    <MudGrid>
+        <MudItem xs="12" md="6">
+            <MudPaper Class="pa-4" Elevation="1">
+                <MudText Typo="Typo.h6" Class="mb-4">Recent Transactions</MudText>
+                <MudTable Items="@RecentTransactions" Hover="true" Dense="true" Loading="@_loading">
+                    <HeaderContent>
+                        <MudTh>Customer</MudTh>
+                        <MudTh>Amount</MudTh>
+                        <MudTh>Status</MudTh>
+                        <MudTh>Date</MudTh>
+                    </HeaderContent>
+                    <RowTemplate>
+                        <MudTd>@context.CustomerName</MudTd>
+                        <MudTd>@context.Amount.ToString("C")</MudTd>
+                        <MudTd>
+                            <MudChip Size="Size.Small" Color="@GetStatusColor(context.Status)">@context.Status</MudChip>
+                        </MudTd>
+                        <MudTd>@context.Date.ToString("MMM dd")</MudTd>
+                    </RowTemplate>
+                </MudTable>
+            </MudPaper>
+        </MudItem>
+        
+        <MudItem xs="12" md="6">
+            <MudPaper Class="pa-4" Elevation="1">
+                <MudText Typo="Typo.h6" Class="mb-4">Top Customers</MudText>
+                <MudTable Items="@TopCustomers" Hover="true" Dense="true" Loading="@_loading">
+                    <HeaderContent>
+                        <MudTh>Customer</MudTh>
+                        <MudTh>Plan</MudTh>
+                        <MudTh>LTV</MudTh>
+                        <MudTh>Since</MudTh>
+                    </HeaderContent>
+                    <RowTemplate>
+                        <MudTd>@context.Name</MudTd>
+                        <MudTd>@context.Plan</MudTd>
+                        <MudTd>@context.LifetimeValue.ToString("C")</MudTd>
+                        <MudTd>@context.CustomerSince.ToString("MMM yyyy")</MudTd>
+                    </RowTemplate>
+                </MudTable>
+            </MudPaper>
+        </MudItem>
+    </MudGrid>
+</MudContainer>
 
 @code {
-    List<BillingStat> _stats = new();
+    private bool _loading = false;
+    
+    public RevenueMetrics RevenueMetrics { get; set; } = new();
+    public SubscriptionMetrics SubscriptionMetrics { get; set; } = new();
+    public ChurnMetrics ChurnMetrics { get; set; } = new();
+    
+    public List<Transaction> RecentTransactions { get; set; } = new();
+    public List<TopCustomer> TopCustomers { get; set; } = new();
+    
+    public double[] PlanDistributionData = { 45, 35, 20 };
+    public string[] PlanDistributionLabels = { "Professional", "Enterprise", "Starter" };
 
     protected override async Task OnInitializedAsync()
     {
-        await LoadStats();
+        await LoadDashboardData();
     }
 
-    async Task Refresh()
+    private async Task RefreshData()
     {
-        await LoadStats();
+        _loading = true;
+        await LoadDashboardData();
+        _loading = false;
     }
 
-    async Task LoadStats()
+    private async Task LoadDashboardData()
     {
-        var response = await Http.GetAsync("/api/admin/billing/stats");
-        if (response.IsSuccessStatusCode)
+        // Simulate API calls - replace with actual API endpoints
+        await Task.Delay(1000);
+        
+        RevenueMetrics = new RevenueMetrics
         {
-            var stats = await response.Content.ReadFromJsonAsync<List<BillingStat>>();
-            _stats = stats ?? new();
-        }
-        else
+            MonthlyRevenue = 125000m,
+            MonthlyGrowth = 0.15m,
+            ARPU = 285m,
+            ARPUGrowth = 0.08m
+        };
+        
+        SubscriptionMetrics = new SubscriptionMetrics
         {
-            _stats = new();
-        }
+            ActiveCount = 450,
+            GrowthRate = 0.12m
+        };
+        
+        ChurnMetrics = new ChurnMetrics
+        {
+            MonthlyChurnRate = 0.045m,
+            ChurnTrend = -0.01m
+        };
+        
+        RecentTransactions = GenerateRecentTransactions();
+        TopCustomers = GenerateTopCustomers();
     }
 
-    public class BillingStat
+    private List<Transaction> GenerateRecentTransactions()
     {
-        public string Metric { get; set; }
-        public string Value { get; set; }
+        return new List<Transaction>
+        {
+            new() { CustomerName = "FC Barcelona", Amount = 999m, Status = "Paid", Date = DateTime.Now.AddDays(-1) },
+            new() { CustomerName = "Manchester United", Amount = 499m, Status = "Paid", Date = DateTime.Now.AddDays(-2) },
+            new() { CustomerName = "Real Madrid", Amount = 999m, Status = "Pending", Date = DateTime.Now.AddDays(-3) },
+            new() { CustomerName = "Liverpool FC", Amount = 299m, Status = "Paid", Date = DateTime.Now.AddDays(-4) },
+            new() { CustomerName = "Chelsea FC", Amount = 499m, Status = "Failed", Date = DateTime.Now.AddDays(-5) }
+        };
+    }
+
+    private List<TopCustomer> GenerateTopCustomers()
+    {
+        return new List<TopCustomer>
+        {
+            new() { Name = "FC Barcelona", Plan = "Enterprise", LifetimeValue = 12000m, CustomerSince = DateTime.Now.AddYears(-2) },
+            new() { Name = "Manchester United", Plan = "Professional", LifetimeValue = 8500m, CustomerSince = DateTime.Now.AddMonths(-18) },
+            new() { Name = "Real Madrid", Plan = "Enterprise", LifetimeValue = 11000m, CustomerSince = DateTime.Now.AddYears(-1) },
+            new() { Name = "Liverpool FC", Plan = "Professional", LifetimeValue = 6200m, CustomerSince = DateTime.Now.AddMonths(-8) },
+            new() { Name = "Bayern Munich", Plan = "Enterprise", LifetimeValue = 9800m, CustomerSince = DateTime.Now.AddMonths(-14) }
+        };
+    }
+
+    private Color GetTrendColor(decimal trend)
+    {
+        return trend > 0 ? Color.Success : trend < 0 ? Color.Error : Color.Default;
+    }
+
+    private string GetTrendIcon(decimal trend)
+    {
+        return trend > 0 ? "↗" : trend < 0 ? "↘" : "→";
+    }
+
+    private Color GetStatusColor(string status)
+    {
+        return status.ToLower() switch
+        {
+            "paid" => Color.Success,
+            "pending" => Color.Warning,
+            "failed" => Color.Error,
+            _ => Color.Default
+        };
+    }
+
+    private async Task ExportData()
+    {
+        // TODO: Implement data export functionality
+        await Task.Delay(100);
+    }
+
+    public class RevenueMetrics
+    {
+        public decimal MonthlyRevenue { get; set; }
+        public decimal MonthlyGrowth { get; set; }
+        public decimal ARPU { get; set; }
+        public decimal ARPUGrowth { get; set; }
+    }
+
+    public class SubscriptionMetrics
+    {
+        public int ActiveCount { get; set; }
+        public decimal GrowthRate { get; set; }
+    }
+
+    public class ChurnMetrics
+    {
+        public decimal MonthlyChurnRate { get; set; }
+        public decimal ChurnTrend { get; set; }
+    }
+
+    public class Transaction
+    {
+        public string CustomerName { get; set; } = "";
+        public decimal Amount { get; set; }
+        public string Status { get; set; } = "";
+        public DateTime Date { get; set; }
+    }
+
+    public class TopCustomer
+    {
+        public string Name { get; set; } = "";
+        public string Plan { get; set; } = "";
+        public decimal LifetimeValue { get; set; }
+        public DateTime CustomerSince { get; set; }
     }
 }

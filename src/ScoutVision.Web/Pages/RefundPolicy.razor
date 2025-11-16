@@ -1,0 +1,155 @@
+@page "/refund-policy"
+@using MudBlazor
+
+<PageTitle>Refund Policy - ScoutVision</PageTitle>
+
+<MudContainer MaxWidth="MaxWidth.Large" Class="my-8">
+    <MudPaper Class="pa-8" Elevation="2">
+        <MudText Typo="Typo.h3" Class="mb-6" Align="Align.Center">
+            Refund Policy
+        </MudText>
+        
+        <MudText Typo="Typo.body2" Color="Color.Secondary" Class="mb-6" Align="Align.Center">
+            Last updated: November 16, 2025
+        </MudText>
+
+        <MudDivider Class="my-6" />
+
+        <MudAlert Severity="Severity.Info" Class="mb-6">
+            <MudText Typo="Typo.body1">
+                We want you to be completely satisfied with ScoutVision. This policy outlines when and how refunds are processed.
+            </MudText>
+        </MudAlert>
+
+        <MudText Typo="Typo.h5" Class="mb-4">14-Day Money-Back Guarantee</MudText>
+        <MudText Typo="Typo.body1" Class="mb-6">
+            We offer a 14-day money-back guarantee for all new subscriptions. If you're not satisfied with ScoutVision 
+            within the first 14 days of your paid subscription, we'll provide a full refund of your first payment.
+        </MudText>
+
+        <MudText Typo="Typo.h5" Class="mb-4">Refund Eligibility</MudText>
+        <MudText Typo="Typo.body1" Class="mb-4">
+            You may be eligible for a refund under the following circumstances:
+        </MudText>
+        <MudList Class="mb-6">
+            <MudListItem Icon="Icons.Material.Filled.CheckCircle" Text="Request made within 14 days of initial payment" />
+            <MudListItem Icon="Icons.Material.Filled.CheckCircle" Text="Technical issues preventing service use that we cannot resolve" />
+            <MudListItem Icon="Icons.Material.Filled.CheckCircle" Text="Duplicate charges or billing errors" />
+            <MudListItem Icon="Icons.Material.Filled.CheckCircle" Text="Service downtime exceeding our 99.9% uptime guarantee" />
+        </MudList>
+
+        <MudText Typo="Typo.h5" Class="mb-4">Non-Refundable Scenarios</MudText>
+        <MudText Typo="Typo.body1" Class="mb-4">
+            Refunds will not be provided in the following cases:
+        </MudText>
+        <MudList Class="mb-6">
+            <MudListItem Icon="Icons.Material.Filled.Cancel" Text="Requests made after the 14-day guarantee period" />
+            <MudListItem Icon="Icons.Material.Filled.Cancel" Text="Partial usage refunds for monthly or annual subscriptions" />
+            <MudListItem Icon="Icons.Material.Filled.Cancel" Text="Refunds for additional services or add-ons" />
+            <MudListItem Icon="Icons.Material.Filled.Cancel" Text="Account termination due to Terms of Service violations" />
+            <MudListItem Icon="Icons.Material.Filled.Cancel" Text="Change of mind after the guarantee period has expired" />
+        </MudList>
+
+        <MudText Typo="Typo.h5" Class="mb-4">How to Request a Refund</MudText>
+        <MudText Typo="Typo.body1" Class="mb-4">
+            To request a refund, please follow these steps:
+        </MudText>
+        <MudTimeline>
+            <MudTimelineItem Color="Color.Primary" Size="Size.Small">
+                <MudText Typo="Typo.h6">1. Contact Support</MudText>
+                <MudText Typo="Typo.body2">
+                    Email our support team at <strong>billing@scoutvision.com</strong> with your refund request
+                </MudText>
+            </MudTimelineItem>
+            <MudTimelineItem Color="Color.Primary" Size="Size.Small">
+                <MudText Typo="Typo.h6">2. Provide Information</MudText>
+                <MudText Typo="Typo.body2">
+                    Include your account email, subscription details, and reason for the refund request
+                </MudText>
+            </MudTimelineItem>
+            <MudTimelineItem Color="Color.Primary" Size="Size.Small">
+                <MudText Typo="Typo.h6">3. Review Process</MudText>
+                <MudText Typo="Typo.body2">
+                    We'll review your request within 2-3 business days and respond with our decision
+                </MudText>
+            </MudTimelineItem>
+            <MudTimelineItem Color="Color.Success" Size="Size.Small">
+                <MudText Typo="Typo.h6">4. Processing</MudText>
+                <MudText Typo="Typo.body2">
+                    If approved, refunds are processed within 5-7 business days to your original payment method
+                </MudText>
+            </MudTimelineItem>
+        </MudTimeline>
+
+        <MudText Typo="Typo.h5" Class="mb-4 mt-6">Prorated Refunds</MudText>
+        <MudText Typo="Typo.body1" Class="mb-6">
+            For annual subscriptions downgraded to monthly plans, we provide prorated credits that can be applied 
+            to future billing cycles. Cash refunds for downgrades are not available except within the initial 14-day period.
+        </MudText>
+
+        <MudText Typo="Typo.h5" Class="mb-4">Chargebacks</MudText>
+        <MudText Typo="Typo.body1" Class="mb-6">
+            Please contact us directly before initiating a chargeback with your bank or credit card company. 
+            Chargebacks may result in immediate account suspension and additional fees.
+        </MudText>
+
+        <MudText Typo="Typo.h5" Class="mb-4">Contact Support</MudText>
+        <MudText Typo="Typo.body1" Class="mb-4">
+            For refund requests or billing questions, contact us:
+        </MudText>
+        <MudGrid Class="mb-6">
+            <MudItem xs="12" md="4">
+                <MudPaper Class="pa-4" Elevation="1">
+                    <MudText Typo="Typo.h6" Class="mb-2">
+                        <MudIcon Icon="Icons.Material.Filled.Email" Class="mr-2" />
+                        Email Support
+                    </MudText>
+                    <MudText Typo="Typo.body2">billing@scoutvision.com</MudText>
+                    <MudText Typo="Typo.caption" Color="Color.Secondary">Response within 24 hours</MudText>
+                </MudPaper>
+            </MudItem>
+            <MudItem xs="12" md="4">
+                <MudPaper Class="pa-4" Elevation="1">
+                    <MudText Typo="Typo.h6" Class="mb-2">
+                        <MudIcon Icon="Icons.Material.Filled.Chat" Class="mr-2" />
+                        Live Chat
+                    </MudText>
+                    <MudText Typo="Typo.body2">Available in your dashboard</MudText>
+                    <MudText Typo="Typo.caption" Color="Color.Secondary">Mon-Fri, 9 AM - 6 PM UTC</MudText>
+                </MudPaper>
+            </MudItem>
+            <MudItem xs="12" md="4">
+                <MudPaper Class="pa-4" Elevation="1">
+                    <MudText Typo="Typo.h6" Class="mb-2">
+                        <MudIcon Icon="Icons.Material.Filled.Help" Class="mr-2" />
+                        Help Center
+                    </MudText>
+                    <MudText Typo="Typo.body2">help.scoutvision.com</MudText>
+                    <MudText Typo="Typo.caption" Color="Color.Secondary">Self-service options</MudText>
+                </MudPaper>
+            </MudItem>
+        </MudGrid>
+
+        <MudDivider Class="my-6" />
+
+        <MudGrid>
+            <MudItem xs="12" md="6">
+                <MudButton Variant="Variant.Filled" 
+                           Color="Color.Primary" 
+                           FullWidth="true"
+                           Href="mailto:billing@scoutvision.com"
+                           StartIcon="Icons.Material.Filled.Email">
+                    Request Refund
+                </MudButton>
+            </MudItem>
+            <MudItem xs="12" md="6">
+                <MudButton Variant="Variant.Outlined" 
+                           Color="Color.Secondary" 
+                           FullWidth="true"
+                           Href="/terms">
+                    Terms of Service
+                </MudButton>
+            </MudItem>
+        </MudGrid>
+    </MudPaper>
+</MudContainer>

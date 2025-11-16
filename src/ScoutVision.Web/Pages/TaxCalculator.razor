@@ -1,45 +1,397 @@
 @page "/tax-calculator"
+@using System.Net.Http.Json
 @inject HttpClient Http
+@inject ISnackbar Snackbar
 
-<MudPaper Class="pa-4" Elevation="2">
-    <MudText Typo="Typo.h5">Pricing & Tax Calculator</MudText>
-    <MudTextField @bind-Value="Seats" Label="Number of Seats" Variant="Variant.Outlined" />
-    <MudSelect T="string" @bind-Value="Country" Label="Country" Variant="Variant.Outlined">
-        <MudSelectItem T="string" Value="@("US")">United States</MudSelectItem>
-        <MudSelectItem T="string" Value="@("UK")">United Kingdom</MudSelectItem>
-        <MudSelectItem T="string" Value="@("DE")">Germany</MudSelectItem>
-        <MudSelectItem T="string" Value="@("FR")">France</MudSelectItem>
-        <MudSelectItem T="string" Value="@("IN")">India</MudSelectItem>
-        <MudSelectItem T="string" Value="@("Other")">Other</MudSelectItem>
-    </MudSelect>
-    <MudButton OnClick="Calculate" Color="Color.Primary">Calculate</MudButton>
-    <MudText>@Result</MudText>
-</MudPaper>
+<PageTitle>Tax Calculator - ScoutVision</PageTitle>
+
+<MudContainer MaxWidth="MaxWidth.Large" Class="my-4">
+    <MudText Typo="Typo.h3" Class="mb-4">
+        <MudIcon Icon="Icons.Material.Filled.Calculate" Class="mr-2 mb-1" />
+        Pricing & Tax Calculator
+    </MudText>
+    
+    <MudText Typo="Typo.body1" Color="Color.Secondary" Class="mb-6">
+        Calculate your ScoutVision subscription cost including applicable taxes for your location
+    </MudText>
+
+    <MudGrid>
+        <!-- Input Section -->
+        <MudItem xs="12" lg="8">
+            <MudPaper Class="pa-6" Elevation="2">
+                <MudText Typo="Typo.h5" Class="mb-4">Configuration</MudText>
+                
+                <MudGrid>
+                    <MudItem xs="12" md="6">
+                        <MudSelect T="string" @bind-Value="SelectedPlan" Label="Subscription Plan" Variant="Variant.Outlined" FullWidth="true">
+                            @foreach (var plan in SubscriptionPlans)
+                            {
+                                <MudSelectItem T="string" Value="@plan.Key">@plan.Value.Name - @plan.Value.Price.ToString("C")/month</MudSelectItem>
+                            }
+                        </MudSelect>
+                    </MudItem>
+                    
+                    <MudItem xs="12" md="6">
+                        <MudNumericField @bind-Value="UserSeats" Label="Number of Users" Variant="Variant.Outlined" 
+                                       Min="1" Max="1000" FullWidth="true" />
+                    </MudItem>
+                    
+                    <MudItem xs="12" md="6">
+                        <MudSelect T="string" @bind-Value="SelectedCountry" Label="Country" Variant="Variant.Outlined" 
+                                 FullWidth="true" OnSelectionChanged="OnCountryChanged">
+                            @foreach (var country in Countries)
+                            {
+                                <MudSelectItem T="string" Value="@country.Code">
+                                    <div class="d-flex align-center">
+                                        <MudText Class="mr-2">@country.Flag</MudText>
+                                        <MudText>@country.Name</MudText>
+                                    </div>
+                                </MudSelectItem>
+                            }
+                        </MudSelect>
+                    </MudItem>
+                    
+                    @if (SelectedCountry == "US")
+                    {
+                        <MudItem xs="12" md="6">
+                            <MudSelect T="string" @bind-Value="SelectedState" Label="State" Variant="Variant.Outlined" FullWidth="true">
+                                @foreach (var state in UsStates)
+                                {
+                                    <MudSelectItem T="string" Value="@state.Code">@state.Name</MudSelectItem>
+                                }
+                            </MudSelect>
+                        </MudItem>
+                    }
+                    
+                    <MudItem xs="12" md="6">
+                        <MudSelect T="string" @bind-Value="CustomerType" Label="Customer Type" Variant="Variant.Outlined" FullWidth="true">
+                            <MudSelectItem T="string" Value="business">Business</MudSelectItem>
+                            <MudSelectItem T="string" Value="individual">Individual</MudSelectItem>
+                        </MudSelect>
+                    </MudItem>
+                    
+                    @if (CustomerType == "business" && IsEuCountry())
+                    {
+                        <MudItem xs="12" md="6">
+                            <MudTextField @bind-Value="VatNumber" Label="VAT Number (Optional)" Variant="Variant.Outlined" 
+                                        FullWidth="true" HelperText="Enter VAT number for EU reverse charge" />
+                        </MudItem>
+                    }
+                    
+                    <MudItem xs="12">
+                        <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="CalculateTax" 
+                                 StartIcon="Icons.Material.Filled.Calculate" Size="Size.Large" FullWidth="true"
+                                 Loading="_calculating">
+                            Calculate Tax & Total
+                        </MudButton>
+                    </MudItem>
+                </MudGrid>
+            </MudPaper>
+        </MudItem>
+
+        <!-- Results Section -->
+        <MudItem xs="12" lg="4">
+            <MudPaper Class="pa-6" Elevation="2">
+                <MudText Typo="Typo.h5" Class="mb-4">
+                    <MudIcon Icon="Icons.Material.Filled.Receipt" Class="mr-2" />
+                    Cost Breakdown
+                </MudText>
+                
+                @if (TaxResult != null)
+                {
+                    <MudList>
+                        <MudListItem>
+                            <div class="d-flex justify-space-between w-100">
+                                <MudText>Plan: @SubscriptionPlans[SelectedPlan].Name</MudText>
+                                <MudText>@SubscriptionPlans[SelectedPlan].Price.ToString("C")</MudText>
+                            </div>
+                        </MudListItem>
+                        
+                        @if (UserSeats > 1)
+                        {
+                            <MudListItem>
+                                <div class="d-flex justify-space-between w-100">
+                                    <MudText>Additional Users (@(UserSeats - 1))</MudText>
+                                    <MudText>@((UserSeats - 1) * AdditionalUserCost).ToString("C")</MudText>
+                                </div>
+                            </MudListItem>
+                        }
+                        
+                        <MudDivider Class="my-2" />
+                        
+                        <MudListItem>
+                            <div class="d-flex justify-space-between w-100">
+                                <MudText><strong>Subtotal</strong></MudText>
+                                <MudText><strong>@TaxResult.Subtotal.ToString("C")</MudText>
+                            </div>
+                        </MudListItem>
+                        
+                        @foreach (var tax in TaxResult.TaxBreakdown)
+                        {
+                            <MudListItem>
+                                <div class="d-flex justify-space-between w-100">
+                                    <MudText>@tax.Description</MudText>
+                                    <MudText>@tax.Amount.ToString("C")</MudText>
+                                </div>
+                            </MudListItem>
+                        }
+                        
+                        @if (TaxResult.IsReverseCharge)
+                        {
+                            <MudListItem>
+                                <MudAlert Severity="Severity.Info" Dense="true" Class="my-2">
+                                    <MudText Typo="Typo.body2">EU Reverse Charge applies - VAT will be handled by your country's tax authority</MudText>
+                                </MudAlert>
+                            </MudListItem>
+                        }
+                        
+                        <MudDivider Class="my-2" />
+                        
+                        <MudListItem>
+                            <div class="d-flex justify-space-between w-100">
+                                <MudText Typo="Typo.h6" Color="Color.Primary"><strong>Monthly Total</strong></MudText>
+                                <MudText Typo="Typo.h6" Color="Color.Primary"><strong>@TaxResult.Total.ToString("C")</strong></MudText>
+                            </div>
+                        </MudListItem>
+                        
+                        <MudListItem>
+                            <div class="d-flex justify-space-between w-100">
+                                <MudText Color="Color.Secondary">Annual Total</MudText>
+                                <MudText Color="Color.Secondary"><strong>@((TaxResult.Total * 12).ToString("C"))</strong></MudText>
+                            </div>
+                        </MudListItem>
+                    </MudList>
+                    
+                    <MudButton Variant="Variant.Filled" Color="Color.Success" StartIcon="Icons.Material.Filled.ShoppingCart" 
+                             FullWidth="true" Class="mt-4" OnClick="StartSubscription">
+                        Start Subscription
+                    </MudButton>
+                    
+                    <MudButton Variant="Variant.Outlined" Color="Color.Primary" StartIcon="Icons.Material.Filled.Download" 
+                             FullWidth="true" Class="mt-2" OnClick="DownloadQuote">
+                        Download Quote
+                    </MudButton>
+                }
+                else
+                {
+                    <MudText Color="Color.Secondary" Align="Align.Center" Class="my-8">
+                        Configure your options and click "Calculate Tax & Total" to see pricing
+                    </MudText>
+                }
+            </MudPaper>
+        </MudItem>
+    </MudGrid>
+
+    <!-- Tax Information Section -->
+    <MudPaper Class="pa-6 mt-4" Elevation="1">
+        <MudText Typo="Typo.h6" Class="mb-3">
+            <MudIcon Icon="Icons.Material.Filled.Info" Class="mr-2" />
+            Tax Information
+        </MudText>
+        
+        <MudGrid>
+            <MudItem xs="12" md="4">
+                <MudText Typo="Typo.subtitle1" Class="mb-2"><strong>EU Customers</strong></MudText>
+                <MudText Typo="Typo.body2">
+                    • VAT applies to individual customers<br>
+                    • Business customers with valid VAT number: Reverse charge applies<br>
+                    • Digital services VAT rate varies by country
+                </MudText>
+            </MudItem>
+            
+            <MudItem xs="12" md="4">
+                <MudText Typo="Typo.subtitle1" Class="mb-2"><strong>US Customers</strong></MudText>
+                <MudText Typo="Typo.body2">
+                    • Sales tax applies based on state<br>
+                    • Software as a Service taxation varies by state<br>
+                    • Business exemptions may apply
+                </MudText>
+            </MudItem>
+            
+            <MudItem xs="12" md="4">
+                <MudText Typo="Typo.subtitle1" Class="mb-2"><strong>Other Countries</strong></MudText>
+                <MudText Typo="Typo.body2">
+                    • GST/VAT rates vary by country<br>
+                    • Digital services taxation may apply<br>
+                    • Local tax regulations apply
+                </MudText>
+            </MudItem>
+        </MudGrid>
+    </MudPaper>
+</MudContainer>
 
 @code {
-    int Seats = 1;
-    string Country = "US";
-    string Result = "";
+    private bool _calculating = false;
+    private string SelectedPlan = "professional";
+    private int UserSeats = 1;
+    private string SelectedCountry = "US";
+    private string SelectedState = "CA";
+    private string CustomerType = "business";
+    private string VatNumber = "";
+    private decimal AdditionalUserCost = 25m;
+    
+    private TaxCalculationResult? TaxResult;
 
-    async Task Calculate()
+    private readonly Dictionary<string, SubscriptionPlan> SubscriptionPlans = new()
     {
-        var req = new { seats = Seats, country = Country };
-        var response = await Http.PostAsJsonAsync("/api/tax/calculate", req);
-        if (response.IsSuccessStatusCode)
+        ["starter"] = new() { Name = "Starter", Price = 99m, Description = "Perfect for small teams" },
+        ["professional"] = new() { Name = "Professional", Price = 299m, Description = "Most popular choice" },
+        ["enterprise"] = new() { Name = "Enterprise", Price = 999m, Description = "For large organizations" }
+    };
+
+    private readonly List<Country> Countries = new()
+    {
+        new() { Code = "US", Name = "United States", Flag = "🇺🇸" },
+        new() { Code = "GB", Name = "United Kingdom", Flag = "🇬🇧" },
+        new() { Code = "DE", Name = "Germany", Flag = "🇩🇪" },
+        new() { Code = "FR", Name = "France", Flag = "🇫🇷" },
+        new() { Code = "IT", Name = "Italy", Flag = "🇮🇹" },
+        new() { Code = "ES", Name = "Spain", Flag = "🇪🇸" },
+        new() { Code = "NL", Name = "Netherlands", Flag = "🇳🇱" },
+        new() { Code = "CA", Name = "Canada", Flag = "🇨🇦" },
+        new() { Code = "AU", Name = "Australia", Flag = "🇦🇺" },
+        new() { Code = "IN", Name = "India", Flag = "🇮🇳" },
+        new() { Code = "JP", Name = "Japan", Flag = "🇯🇵" },
+        new() { Code = "SG", Name = "Singapore", Flag = "🇸🇬" },
+        new() { Code = "BR", Name = "Brazil", Flag = "🇧🇷" }
+    };
+
+    private readonly List<State> UsStates = new()
+    {
+        new() { Code = "CA", Name = "California" },
+        new() { Code = "NY", Name = "New York" },
+        new() { Code = "TX", Name = "Texas" },
+        new() { Code = "FL", Name = "Florida" },
+        new() { Code = "IL", Name = "Illinois" },
+        new() { Code = "PA", Name = "Pennsylvania" },
+        new() { Code = "OH", Name = "Ohio" }
+    };
+
+    private readonly HashSet<string> EuCountries = new() { "DE", "FR", "IT", "ES", "NL", "AT", "BE", "BG", "HR", "CY", "CZ", "DK", "EE", "FI", "GR", "HU", "IE", "LV", "LT", "LU", "MT", "PL", "PT", "RO", "SK", "SI", "SE" };
+
+    private async Task CalculateTax()
+    {
+        _calculating = true;
+        
+        try
         {
-            var res = await response.Content.ReadFromJsonAsync<TaxResult>();
-            Result = $"Subtotal: ${res.Subtotal:F2}\nTax: ${res.Tax:F2}\nTotal: ${res.Total:F2}";
+            var baseCost = SubscriptionPlans[SelectedPlan].Price;
+            var additionalUsersCost = (UserSeats - 1) * AdditionalUserCost;
+            var totalAmount = baseCost + additionalUsersCost;
+
+            var request = new TaxCalculationRequest
+            {
+                Amount = totalAmount,
+                CountryCode = SelectedCountry,
+                StateCode = SelectedCountry == "US" ? SelectedState : null,
+                ProductType = "software",
+                CustomerType = CustomerType,
+                IsB2B = CustomerType == "business",
+                VatNumber = VatNumber,
+                Currency = "USD"
+            };
+
+            var response = await Http.PostAsJsonAsync("/api/tax/calculate", request);
+            
+            if (response.IsSuccessStatusCode)
+            {
+                TaxResult = await response.Content.ReadFromJsonAsync<TaxCalculationResult>();
+                Snackbar.Add("Tax calculation completed!", Severity.Success);
+            }
+            else
+            {
+                Snackbar.Add("Failed to calculate tax. Please try again.", Severity.Error);
+            }
         }
-        else
+        catch (Exception ex)
         {
-            Result = "Calculation failed.";
+            Snackbar.Add($"Error: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            _calculating = false;
         }
     }
 
-    public class TaxResult
+    private void OnCountryChanged()
     {
-        public double Subtotal { get; set; }
-        public double Tax { get; set; }
-        public double Total { get; set; }
+        if (SelectedCountry != "US")
+        {
+            SelectedState = "";
+        }
+        TaxResult = null; // Reset calculation when country changes
+    }
+
+    private bool IsEuCountry()
+    {
+        return EuCountries.Contains(SelectedCountry);
+    }
+
+    private async Task StartSubscription()
+    {
+        // Redirect to checkout with pre-filled information
+        Snackbar.Add("Redirecting to checkout...", Severity.Info);
+        // TODO: Implement redirect to Stripe Checkout
+    }
+
+    private async Task DownloadQuote()
+    {
+        Snackbar.Add("Generating quote PDF...", Severity.Info);
+        // TODO: Implement PDF quote generation
+    }
+
+    public class SubscriptionPlan
+    {
+        public string Name { get; set; } = "";
+        public decimal Price { get; set; }
+        public string Description { get; set; } = "";
+    }
+
+    public class Country
+    {
+        public string Code { get; set; } = "";
+        public string Name { get; set; } = "";
+        public string Flag { get; set; } = "";
+    }
+
+    public class State
+    {
+        public string Code { get; set; } = "";
+        public string Name { get; set; } = "";
+    }
+
+    // API Response Models
+    public class TaxCalculationRequest
+    {
+        public decimal Amount { get; set; }
+        public string CountryCode { get; set; } = "";
+        public string? StateCode { get; set; }
+        public string ProductType { get; set; } = "software";
+        public string CustomerType { get; set; } = "business";
+        public bool IsB2B { get; set; } = true;
+        public string? VatNumber { get; set; }
+        public string Currency { get; set; } = "USD";
+    }
+
+    public class TaxCalculationResult
+    {
+        public decimal Subtotal { get; set; }
+        public decimal TotalTax { get; set; }
+        public decimal Total { get; set; }
+        public List<TaxBreakdown> TaxBreakdown { get; set; } = new();
+        public string Currency { get; set; } = "";
+        public bool TaxIncluded { get; set; }
+        public string? TaxJurisdiction { get; set; }
+        public bool IsVatApplicable { get; set; }
+        public bool IsReverseCharge { get; set; }
+    }
+
+    public class TaxBreakdown
+    {
+        public string TaxType { get; set; } = "";
+        public string Jurisdiction { get; set; } = "";
+        public decimal Rate { get; set; }
+        public decimal Amount { get; set; }
+        public string Description { get; set; } = "";
     }
 }
