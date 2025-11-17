@@ -2,34 +2,21 @@ using ScoutVision.Core.Enums;
 
 namespace ScoutVision.Core.Entities;
 
-public class Player : BaseEntity
+public class Player
 {
-    public string FirstName { get; set; } = string.Empty;
-    public string LastName { get; set; } = string.Empty;
-    public string FullName => $"{FirstName} {LastName}";
-    public DateTime DateOfBirth { get; set; }
-    public int Age => DateTime.Today.Year - DateOfBirth.Year - (DateTime.Today.DayOfYear < DateOfBirth.DayOfYear ? 1 : 0);
-    
-    public string Position { get; set; } = string.Empty;
-    public string CurrentTeam { get; set; } = string.Empty;
-    public string League { get; set; } = string.Empty;
-    public string Nationality { get; set; } = string.Empty;
-    
-    public decimal Height { get; set; } // in meters
-    public decimal Weight { get; set; } // in kg
-    
-    public PlayerStatus Status { get; set; } = PlayerStatus.Active;
-    public ScoutingPriority Priority { get; set; } = ScoutingPriority.Medium;
-    
-    public string Biography { get; set; } = string.Empty;
-    public string Notes { get; set; } = string.Empty;
+    public int Id { get; set; }
+    public string Name { get; set; } = string.Empty;
+    public int Age { get; set; }
+    public Position Position { get; set; }
+    public string? Team { get; set; }
+    public string? Nationality { get; set; }
+    public double Height { get; set; }
+    public double Weight { get; set; }
+    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+    public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
+    public bool IsActive { get; set; } = true;
     
     // Navigation properties
-    public PlayerContactInfo? ContactInfo { get; set; }
-    public ICollection<PerformanceMetric> PerformanceMetrics { get; set; } = [];
-    public ICollection<VideoAnalysis> VideoAnalyses { get; set; } = [];
-    public ICollection<ScoutingReport> ScoutingReports { get; set; } = [];
-    public ICollection<TalentPrediction> TalentPredictions { get; set; } = [];
-    public ICollection<MindsetProfile> MindsetProfiles { get; set; } = [];
-    public ICollection<PlayerTag> Tags { get; set; } = [];
+    public virtual ICollection<Performance> Performances { get; set; } = new List<Performance>();
+    public virtual ICollection<InjuryReport> InjuryReports { get; set; } = new List<InjuryReport>();
 }
