@@ -66,7 +66,7 @@ public class MobileAnalyticsService : IMobileAnalyticsService
         {
             Id = i,
             Name = $"Player {i}",
-            Position = i % 4 switch { 0 => "GK", 1 => "DEF", 2 => "MID", _ => "FWD" },
+            Position = (i % 4) switch { 0 => "GK", 1 => "DEF", 2 => "MID", _ => "FWD" },
             OverallRating = 75 + (i * 2),
             RecentForm = Random.Shared.Next(60, 95)
         }).ToList();
@@ -81,7 +81,7 @@ public class MobileAnalyticsService : IMobileAnalyticsService
             Id = i,
             Description = $"Activity {i} completed",
             Timestamp = DateTime.UtcNow.AddMinutes(-i * 5),
-            Type = i % 3 switch { 0 => "analysis", 1 => "alert", _ => "update" }
+            Type = (i % 3) switch { 0 => "analysis", 1 => "alert", _ => "update" }
         }).ToList();
     }
 }

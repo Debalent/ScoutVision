@@ -1,9 +1,10 @@
 @namespace ScoutVision.Web.Components
+@using ScoutVision.Web.Models
 
 <div class="skeleton-container">
     @switch (Type)
     {
-        case SkeletonType.PlayerCard:
+        case ScoutVision.Web.Models.SkeletonType.PlayerCard:
             <div class="skeleton-player-card">
                 <div class="skeleton-avatar"></div>
                 <div class="skeleton-content">
@@ -13,7 +14,7 @@
                 </div>
             </div>
             break;
-        case SkeletonType.Chart:
+        case ScoutVision.Web.Models.SkeletonType.Chart:
             <div class="skeleton-chart">
                 <div class="skeleton-chart-bars">
                     @for (int i = 0; i < 6; i++)
@@ -23,7 +24,7 @@
                 </div>
             </div>
             break;
-        case SkeletonType.Table:
+        case ScoutVision.Web.Models.SkeletonType.Table:
             @for (int i = 0; i < Rows; i++)
             {
                 <div class="skeleton-table-row">
@@ -65,22 +66,15 @@
     .skeleton-subtitle { height: 16px; width: 40%; margin-bottom: 8px; }
     .skeleton-stats { height: 14px; width: 80%; }
     
-    @keyframes loading {
+    @@keyframes loading {
         0% { background-position: 200% 0; }
         100% { background-position: -200% 0; }
     }
 </style>
 
 @code {
-    [Parameter] public SkeletonType Type { get; set; } = SkeletonType.PlayerCard;
+    [Parameter] public ScoutVision.Web.Models.SkeletonType Type { get; set; } = ScoutVision.Web.Models.SkeletonType.PlayerCard;
     [Parameter] public int Rows { get; set; } = 5;
     [Parameter] public int Columns { get; set; } = 4;
 }
 
-public enum SkeletonType
-{
-    PlayerCard,
-    Chart,
-    Table,
-    Dashboard
-}

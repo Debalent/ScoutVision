@@ -1,8 +1,16 @@
-<MudAutocomplete T="SearchResult" 
+@namespace ScoutVision.Web.Components
+@using ScoutVision.Web.Models
+
+@using ScoutVision.Web.Models
+
+@using MudBlazor
+@using WebSearchResult = ScoutVision.Web.Models.SearchResult
+
+<MudAutocomplete T="WebSearchResult" 
                  Label="Search players, teams, matches..."
                  @bind-Value="selectedResult"
                  SearchFunc="SearchAsync"
-                 ToStringFunc="@(x => x?.DisplayText ?? "")"
+                 ToStringFunc="@(x => x?.Title ?? "")"
                  ShowProgressIndicator="true"
                  Immediate="true"
                  ResetValueOnEmptyText="true"
@@ -17,3 +25,36 @@
         </div>
     </ItemTemplate>
 </MudAutocomplete>
+
+@code {
+    [Parameter] public EventCallback<WebSearchResult> OnResultSelected { get; set; }
+    
+    private WebSearchResult? selectedResult;
+    
+    private async Task<IEnumerable<WebSearchResult>> SearchAsync(string value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+            return new List<WebSearchResult>();
+            
+        // Mock search results for now
+        await Task.Delay(100);
+        
+        return new List<WebSearchResult>
+        {
+            new WebSearchResult { Title = $"Player: {value}", Type = "Player", Subtitle = "Forward, Manchester United" },
+            new WebSearchResult { Title = $"Team: {value}", Type = "Team", Subtitle = "Premier League" },
+            new WebSearchResult { Title = $"Match: {value}", Type = "Match", Subtitle = "Recent match" }
+        };
+    }
+    
+    private string GetResultIcon(string type)
+    {
+        return type switch
+        {
+            "Player" => Icons.Material.Filled.Person,
+            "Team" => Icons.Material.Filled.Group,
+            "Match" => Icons.Material.Filled.SportsFootball,
+            _ => Icons.Material.Filled.Search
+        };
+    }
+}

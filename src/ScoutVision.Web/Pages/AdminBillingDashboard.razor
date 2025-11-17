@@ -20,7 +20,14 @@
             <MudItem xs="12" md="4" Class="d-flex justify-end">
                 <MudButtonGroup>
                     <MudButton StartIcon="Icons.Material.Filled.Refresh" OnClick="RefreshData" Disabled="@_loading">
-                        @if (_loading) { <MudProgressCircular Size="Size.Small" /> } else { "Refresh" }
+                        @if (_loading) 
+                        { 
+                            <MudProgressCircular Size="Size.Small" /> 
+                        } 
+                        else 
+                        { 
+                            <text>Refresh</text>
+                        }
                     </MudButton>
                     <MudButton StartIcon="Icons.Material.Filled.GetApp" OnClick="ExportData">
                         Export
