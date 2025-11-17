@@ -376,7 +376,7 @@ public class StatBookService : IStatBookService
                     PlayerId = player.Id,
                     PlayerName = player.FullName,
                     MetricValue = value,
-                    Position = player.Position,
+                    Position = player.Position.ToString(),
                     Team = player.CurrentTeam
                 });
             }
@@ -457,7 +457,7 @@ public class SearchService : ISearchService
 
         if (!string.IsNullOrEmpty(request.Position))
         {
-            query = query.Where(p => p.Position.Contains(request.Position));
+            query = query.Where(p => p.Position.ToString().Contains(request.Position));
         }
 
         if (!string.IsNullOrEmpty(request.Team))

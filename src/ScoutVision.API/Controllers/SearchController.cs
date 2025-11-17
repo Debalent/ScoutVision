@@ -321,13 +321,13 @@ public class SearchController : ControllerBase
                 p.FirstName.Contains(query) || 
                 p.LastName.Contains(query) ||
                 p.CurrentTeam.Contains(query) ||
-                p.Biography.Contains(query));
+                (p.Biography != null && p.Biography.Contains(query)));
         }
 
         // Apply standard filters
         if (!string.IsNullOrEmpty(position))
         {
-            playerQuery = playerQuery.Where(p => p.Position.Contains(position));
+            playerQuery = playerQuery.Where(p => p.Position.ToString().Contains(position));
         }
 
         if (!string.IsNullOrEmpty(team))
@@ -337,7 +337,7 @@ public class SearchController : ControllerBase
 
         if (!string.IsNullOrEmpty(nationality))
         {
-            playerQuery = playerQuery.Where(p => p.Nationality.Contains(nationality));
+            playerQuery = playerQuery.Where(p => p.Nationality != null && p.Nationality.Contains(nationality));
         }
 
         if (ageMin.HasValue)
@@ -568,7 +568,7 @@ public class SearchController : ControllerBase
     private async Task<List<string>> GetAvailablePositions()
     {
         return await _context.Players
-            .Select(p => p.Position)
+            .Select(p => p.Position.ToString())
             .Distinct()
             .OrderBy(p => p)
             .ToListAsync();
@@ -586,7 +586,8 @@ public class SearchController : ControllerBase
     private async Task<List<string>> GetAvailableNationalities()
     {
         return await _context.Players
-            .Select(p => p.Nationality)
+            .Where(p => p.Nationality != null)
+            .Select(p => p.Nationality!)
             .Distinct()
             .OrderBy(n => n)
             .ToListAsync();

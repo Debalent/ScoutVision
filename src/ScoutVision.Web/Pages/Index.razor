@@ -189,11 +189,11 @@
     {
         return new List<Player>
         {
-            new() { Id = 1, FirstName = "Marcus", LastName = "Johnson", Position = "Forward", CurrentTeam = "Elite FC", Priority = ScoutingPriority.Critical },
-            new() { Id = 2, FirstName = "Sarah", LastName = "Chen", Position = "Midfielder", CurrentTeam = "Thunder United", Priority = ScoutingPriority.High },
-            new() { Id = 3, FirstName = "Alex", LastName = "Rodriguez", Position = "Defender", CurrentTeam = "Victory SC", Priority = ScoutingPriority.High },
-            new() { Id = 4, FirstName = "Emma", LastName = "Thompson", Position = "Goalkeeper", CurrentTeam = "Phoenix FC", Priority = ScoutingPriority.Medium },
-            new() { Id = 5, FirstName = "David", LastName = "Wilson", Position = "Winger", CurrentTeam = "Storm Athletic", Priority = ScoutingPriority.High }
+            new() { Id = 1, FirstName = "Marcus", LastName = "Johnson", Position = ScoutVision.Core.Enums.Position.Forward, CurrentTeam = "Elite FC", Priority = ScoutingPriority.Critical, DateOfBirth = DateTime.Now.AddYears(-22) },
+            new() { Id = 2, FirstName = "Sarah", LastName = "Chen", Position = ScoutVision.Core.Enums.Position.Midfielder, CurrentTeam = "Thunder United", Priority = ScoutingPriority.High, DateOfBirth = DateTime.Now.AddYears(-20) },
+            new() { Id = 3, FirstName = "Alex", LastName = "Rodriguez", Position = ScoutVision.Core.Enums.Position.Defender, CurrentTeam = "Victory SC", Priority = ScoutingPriority.High, DateOfBirth = DateTime.Now.AddYears(-24) },
+            new() { Id = 4, FirstName = "Emma", LastName = "Thompson", Position = ScoutVision.Core.Enums.Position.Goalkeeper, CurrentTeam = "Phoenix FC", Priority = ScoutingPriority.Medium, DateOfBirth = DateTime.Now.AddYears(-23) },
+            new() { Id = 5, FirstName = "David", LastName = "Wilson", Position = ScoutVision.Core.Enums.Position.Winger, CurrentTeam = "Storm Athletic", Priority = ScoutingPriority.High, DateOfBirth = DateTime.Now.AddYears(-21) }
         };
     }
 
