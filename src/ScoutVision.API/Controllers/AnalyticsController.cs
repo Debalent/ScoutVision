@@ -244,7 +244,7 @@ public class AnalyticsController : ControllerBase
             })
             .FirstOrDefaultAsync();
 
-        return positionAverages;
+        return positionAverages ?? new object();
     }
 
     private List<string> GenerateKeyInsights(PlayerAnalytics analytics, object trends)

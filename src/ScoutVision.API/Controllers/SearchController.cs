@@ -312,7 +312,8 @@ public class SearchController : ControllerBase
             searchQuery.InterpretedQuery = interpretedQuery?.ToString() ?? string.Empty;
             
             // Apply NLP-derived filters
-            ApplyNLPFilters(ref playerQuery, interpretedQuery);
+            if (interpretedQuery != null)
+                ApplyNLPFilters(ref playerQuery, interpretedQuery);
         }
         else if (!string.IsNullOrEmpty(query))
         {

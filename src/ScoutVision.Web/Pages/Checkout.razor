@@ -19,14 +19,18 @@
 </MudPaper>
 
 @code {
-    private MudForm _form;
+    private MudForm? _form;
     public long Amount { get; set; } = 1000;
     public string ClientSecret { get; set; } = string.Empty;
 
     private async Task CreatePaymentIntent()
     {
-        await _form.Validate();
-        if (!_form.IsValid) return;
+        if (_form != null)
+        {
+            await _form.Validate();
+            if (!_form.IsValid) return;
+        }
+        else return;
         var response = await Http.PostAsync($"/api/stripe/create-payment-intent?amount={Amount}", null);
         ClientSecret = await response.Content.ReadAsStringAsync();
         StateHasChanged();

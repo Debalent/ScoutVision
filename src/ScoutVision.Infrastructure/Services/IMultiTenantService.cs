@@ -23,20 +23,20 @@ public interface IMultiTenantService
 
 public class TenantInfo
 {
-    public string TenantId { get; set; }
-    public string Name { get; set; }
-    public string Type { get; set; } // "Club", "Agency", "Sportsbook", "HighSchool"
-    public string Country { get; set; }
+    public required string TenantId { get; set; }
+    public required string Name { get; set; }
+    public required string Type { get; set; } // "Club", "Agency", "Sportsbook", "HighSchool"
+    public required string Country { get; set; }
     public bool IsActive { get; set; }
     public DateTime CreatedAt { get; set; }
-    public TenantPackage Package { get; set; }
-    public Dictionary<string, object> CustomSettings { get; set; }
+    public required TenantPackage Package { get; set; }
+    public required Dictionary<string, object> CustomSettings { get; set; }
 }
 
 public class TenantPackage
 {
-    public string PackageName { get; set; } // "Scout", "Coach", "Enterprise", "HighSchool"
-    public List<string> IncludedModules { get; set; }
+    public required string PackageName { get; set; } // "Scout", "Coach", "Enterprise", "HighSchool"
+    public required List<string> IncludedModules { get; set; }
     public int MaxUsers { get; set; }
     public int MaxPlayers { get; set; }
     public bool IncludesInjuryPrevention { get; set; }
@@ -50,10 +50,10 @@ public class TenantPackage
 
 public class TenantUser
 {
-    public string UserId { get; set; }
-    public string Email { get; set; }
-    public string Name { get; set; }
-    public string Role { get; set; } // "Admin", "Coach", "Analyst", "Viewer"
+    public required string UserId { get; set; }
+    public required string Email { get; set; }
+    public required string Name { get; set; }
+    public required string Role { get; set; } // "Admin", "Coach", "Analyst", "Viewer"
     public DateTime CreatedAt { get; set; }
     public bool IsActive { get; set; }
 }
@@ -105,6 +105,22 @@ public class MultiTenantService : IMultiTenantService
             TenantId = tenantId,
             Name = "Default Tenant",
             Type = "Club",
+            Country = "US",
+            Package = new TenantPackage
+            {
+                PackageName = "Scout",
+                IncludedModules = new List<string> { "Basic" },
+                MaxUsers = 10,
+                MaxPlayers = 50,
+                IncludesInjuryPrevention = false,
+                IncludesTransferValuation = false,
+                IncludesHighSchoolPackage = false,
+                IncludesCoachingFeedback = true,
+                ApiCallsPerMonth = 1000,
+                RealtimeDataAccess = false,
+                MonthlyPrice = 29.99m
+            },
+            CustomSettings = new Dictionary<string, object>(),
             IsActive = true,
             CreatedAt = DateTime.UtcNow
         };

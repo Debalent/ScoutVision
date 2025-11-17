@@ -27,7 +27,7 @@ namespace ScoutVision.API.Controllers
 
     public class BillingStat
     {
-        public string Metric { get; set; }
-        public string Value { get; set; }
+        public required string Metric { get; set; }
+        public required string Value { get; set; }
     }
 }

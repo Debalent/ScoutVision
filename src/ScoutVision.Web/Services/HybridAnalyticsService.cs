@@ -350,7 +350,7 @@ namespace ScoutVision.Web.Services
             // Generate combined insights
             results.CombinedInsights = await GenerateCombinedInsightsAsync(
                 results.WebAnalytics, 
-                results.GModAnalytics);
+                results.GModAnalytics ?? new object());
 
             return results;
         }

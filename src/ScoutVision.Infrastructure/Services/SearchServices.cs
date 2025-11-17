@@ -69,14 +69,14 @@ public class FootageAnalysisService : IFootageAnalysisService
 
             // Update metadata with analysis results
             metadata.Duration = analysisResult?.Duration ?? TimeSpan.Zero;
-            metadata.Quality = analysisResult.Quality;
+            metadata.Quality = analysisResult?.Quality ?? VideoQuality.HD720p;
             // Store FileSize in AnalysisMetadata JSON
-            var analysisMetadata = new { FileSize = analysisResult.FileSize, AnalysisCompletedAt = DateTime.UtcNow };
+            var analysisMetadata = new { FileSize = analysisResult?.FileSize ?? 0, AnalysisCompletedAt = DateTime.UtcNow };
             metadata.AnalysisMetadata = System.Text.Json.JsonSerializer.Serialize(analysisMetadata);
-            metadata.RelevanceScore = CalculateRelevanceScore(analysisResult);
+            metadata.RelevanceScore = analysisResult != null ? CalculateRelevanceScore(analysisResult) : 0m;
 
             // Extract and save player involvement
-            foreach (var playerData in analysisResult.DetectedPlayers)
+            foreach (var playerData in analysisResult?.DetectedPlayers ?? new List<DetectedPlayerData>())
             {
                 var player = await _context.Players
                     .FirstOrDefaultAsync(p => p.FullName == playerData.Name);
@@ -98,7 +98,7 @@ public class FootageAnalysisService : IFootageAnalysisService
             }
 
             // Save highlights
-            foreach (var highlight in analysisResult.Highlights)
+            foreach (var highlight in analysisResult?.Highlights ?? new List<HighlightData>())
             {
                 var footageHighlight = new FootageHighlight
                 {
@@ -154,7 +154,7 @@ public class FootageAnalysisService : IFootageAnalysisService
         var response = await _httpClient.PostAsJsonAsync("http://localhost:8000/extract/highlights", extractionRequest);
         var highlights = await response.Content.ReadFromJsonAsync<List<HighlightData>>();
 
-        var footageHighlights = highlights.Select(h => new FootageHighlight
+        var footageHighlights = highlights?.Select(h => new FootageHighlight
         {
             GameFootageId = footageId,
             Title = h.Title,
@@ -165,10 +165,11 @@ public class FootageAnalysisService : IFootageAnalysisService
             ThumbnailUrl = h.ThumbnailUrl
         }).ToList();
 
-        _context.FootageHighlights.AddRange(footageHighlights);
+        if (footageHighlights != null)
+            _context.FootageHighlights.AddRange(footageHighlights);
         await _context.SaveChangesAsync();
 
-        return footageHighlights;
+        return footageHighlights ?? new List<FootageHighlight>();
     }
 
     public async Task<VideoAnalysisResult> PerformAdvancedAnalysisAsync(int footageId)
@@ -188,7 +189,7 @@ public class FootageAnalysisService : IFootageAnalysisService
         };
 
         var response = await _httpClient.PostAsJsonAsync("http://localhost:8000/analyze/advanced", analysisRequest);
-        return await response.Content.ReadFromJsonAsync<VideoAnalysisResult>();
+        return await response.Content.ReadFromJsonAsync<VideoAnalysisResult>() ?? new VideoAnalysisResult();
     }
 
     public async Task UpdateFootageMetadataAsync(int footageId, Dictionary<string, object> metadata)
@@ -201,11 +202,11 @@ public class FootageAnalysisService : IFootageAnalysisService
             switch (kvp.Key.ToLower())
             {
                 case "quality":
-                    if (Enum.TryParse<VideoQuality>(kvp.Value.ToString(), out var quality))
+                    if (kvp.Value != null && Enum.TryParse<VideoQuality>(kvp.Value.ToString(), out var quality))
                         footage.Quality = quality;
                     break;
                 case "relevancescore":
-                    if (decimal.TryParse(kvp.Value.ToString(), out var score))
+                    if (kvp.Value != null && decimal.TryParse(kvp.Value.ToString(), out var score))
                         footage.RelevanceScore = score;
                     break;
                 case "keywords":
@@ -276,16 +277,16 @@ public class StatBookService : IStatBookService
                 Title = $"{league} {season} Statistics",
                 League = league,
                 Season = season,
-                Competition = importResult.Competition,
+                Competition = importResult?.Competition ?? "Unknown",
                 Type = StatBookType.SeasonSummary,
                 DataProvider = dataSource,
-                DataAccuracy = importResult.AccuracyScore,
-                TotalMatches = importResult.TotalMatches,
+                DataAccuracy = importResult?.AccuracyScore ?? 0m,
+                TotalMatches = importResult?.TotalMatches ?? 0,
                 LastUpdated = DateTime.UtcNow,
-                IsRealTime = importResult.IsRealTime,
-                HasAdvancedMetrics = importResult.HasAdvancedMetrics,
+                IsRealTime = importResult?.IsRealTime ?? false,
+                HasAdvancedMetrics = importResult?.HasAdvancedMetrics ?? false,
                 // Store FileSize in SearchableContent JSON
-                SearchableContent = System.Text.Json.JsonSerializer.Serialize(new { FileSize = importResult.FileSize }),
+                SearchableContent = System.Text.Json.JsonSerializer.Serialize(new { FileSize = importResult?.FileSize ?? 0 }),
                 DownloadCount = 0,
                 UserRating = 0m
             };
@@ -294,7 +295,7 @@ public class StatBookService : IStatBookService
             await _context.SaveChangesAsync();
 
             // Import individual stat entries
-            foreach (var entryData in importResult.Entries)
+            foreach (var entryData in importResult?.Entries ?? new List<StatEntryData>())
             {
                 // Create statistics data JSON
                 var statsData = new

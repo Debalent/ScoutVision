@@ -36,16 +36,36 @@
         </MudText>
         <MudGrid>
             <MudItem xs="12" md="3">
-                <MudStatCard Title="Plan" Value="@CurrentSubscription.PlanName" />
+                <MudCard>
+                    <MudCardContent>
+                        <MudText Typo="Typo.h6">Plan</MudText>
+                        <MudText Typo="Typo.body1">@CurrentSubscription.PlanName</MudText>
+                    </MudCardContent>
+                </MudCard>
             </MudItem>
             <MudItem xs="12" md="3">
-                <MudStatCard Title="Monthly Cost" Value="@CurrentSubscription.Amount.ToString("C")" />
+                <MudCard>
+                    <MudCardContent>
+                        <MudText Typo="Typo.h6">Monthly Cost</MudText>
+                        <MudText Typo="Typo.body1">@CurrentSubscription.Amount.ToString("C")</MudText>
+                    </MudCardContent>
+                </MudCard>
             </MudItem>
             <MudItem xs="12" md="3">
-                <MudStatCard Title="Next Billing" Value="@CurrentSubscription.NextBillingDate.ToShortDateString()" />
+                <MudCard>
+                    <MudCardContent>
+                        <MudText Typo="Typo.h6">Next Billing</MudText>
+                        <MudText Typo="Typo.body1">@CurrentSubscription.NextBillingDate.ToShortDateString()</MudText>
+                    </MudCardContent>
+                </MudCard>
             </MudItem>
             <MudItem xs="12" md="3">
-                <MudStatCard Title="Status" Value="@CurrentSubscription.Status" />
+                <MudCard>
+                    <MudCardContent>
+                        <MudText Typo="Typo.h6">Status</MudText>
+                        <MudText Typo="Typo.body1">@CurrentSubscription.Status</MudText>
+                    </MudCardContent>
+                </MudCard>
             </MudItem>
         </MudGrid>
         <MudDivider Class="my-4" />

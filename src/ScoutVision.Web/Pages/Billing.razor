@@ -61,8 +61,12 @@
 
     private async Task GenerateInvoice()
     {
-        await _form.Validate();
-        if (!_form.IsValid) return;
+        if (_form != null)
+        {
+            await _form.Validate();
+            if (!_form.IsValid) return;
+        }
+        else return;
         var response = await Http.PostAsync($"/api/billing/generate-invoice?orgId={OrgId}&userCount={UserCount}&annual={IsAnnual}", null);
         Invoice = await response.Content.ReadFromJsonAsync<InvoiceModel>();
         StateHasChanged();
