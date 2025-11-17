@@ -8,10 +8,14 @@ on:
   schedule:
     - cron: '0 2 * * 1'  # Weekly on Mondays
 
+env:
+  DOTNET_VERSION: '8.0.x'
+
 jobs:
   analyze:
-    name: Analyze
+    name: Analyze (${{ matrix.language }})
     runs-on: ubuntu-latest
+    timeout-minutes: 360
     permissions:
       actions: read
       contents: read
@@ -20,28 +24,35 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        language: [ 'csharp', 'python' ]
+        include:
+          - language: csharp
+            build-mode: manual
+          - language: python
+            build-mode: none
 
     steps:
     - name: Checkout repository
       uses: actions/checkout@v4
 
     - name: Initialize CodeQL
-      uses: github/codeql-action/init@v2
+      uses: github/codeql-action/init@v3
       with:
         languages: ${{ matrix.language }}
+        build-mode: ${{ matrix.build-mode }}
 
     - name: Setup .NET
       if: matrix.language == 'csharp'
       uses: actions/setup-dotnet@v4
       with:
-        dotnet-version: '8.0.x'
+        dotnet-version: ${{ env.DOTNET_VERSION }}
 
-    - name: Build .NET
+    - name: Build .NET Application
       if: matrix.language == 'csharp'
       run: |
-        dotnet restore
-        dotnet build --no-restore
+        dotnet restore ScoutVision.sln
+        dotnet build ScoutVision.sln --no-restore --configuration Release
 
     - name: Perform CodeQL Analysis
-      uses: github/codeql-action/analyze@v2
+      uses: github/codeql-action/analyze@v3
+      with:
+        category: "/language:${{ matrix.language }}"

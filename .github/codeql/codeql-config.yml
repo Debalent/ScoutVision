@@ -1,0 +1,28 @@
+name: "CodeQL Config"
+
+# Disable default queries and only run security queries
+disable-default-queries: false
+
+# Run additional queries
+queries:
+  - uses: security-extended
+  - uses: security-and-quality
+
+# Specify paths to exclude from analysis
+paths-ignore:
+  - "**/*.Designer.cs"
+  - "**/*.g.cs"
+  - "**/*.g.i.cs"
+  - "**/bin/**"
+  - "**/obj/**"
+  - "**/packages/**"
+  - "**/node_modules/**"
+  - "**/.vs/**"
+  - "**/wwwroot/lib/**"
+  - "**/Migrations/**"
+
+# Specify paths to include (optional, if you want to be explicit)
+paths:
+  - "src/**"
+  - "**/*.cs"
+  - "**/*.py"
