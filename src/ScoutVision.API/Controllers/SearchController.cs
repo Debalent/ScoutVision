@@ -487,7 +487,7 @@ public class SearchController : ControllerBase
     }
 
     // Private helper methods
-    private async Task<object> InterpretNaturalLanguageQuery(string query)
+    private Task<object> InterpretNaturalLanguageQuery(string query)
     {
         // In production, integrate with NLP service (OpenAI, Azure Cognitive Services, etc.)
         var interpretation = new
@@ -508,7 +508,7 @@ public class SearchController : ControllerBase
             interpretation.Entities.Add(new { Type = "Age", Value = "Under25" });
         }
 
-        return interpretation;
+        return Task.FromResult<object>(interpretation);
     }
 
     private void ApplyNLPFilters(ref IQueryable<Player> query, object interpretation)
@@ -517,14 +517,14 @@ public class SearchController : ControllerBase
         // This would integrate with the interpretation results
     }
 
-    private async Task<List<string>> GenerateFootageRecommendations(string query, List<GameFootage> results)
+    private Task<List<string>> GenerateFootageRecommendations(string query, List<GameFootage> results)
     {
-        return new List<string>
+        return Task.FromResult(new List<string>
         {
             "Try searching for specific player names",
             "Filter by competition for better results",
             "Use date ranges to narrow down matches"
-        };
+        });
     }
 
     private async Task<List<string>> GetRelatedSearches(string query, SearchType searchType)
@@ -593,7 +593,7 @@ public class SearchController : ControllerBase
             .ToListAsync();
     }
 
-    private async Task<List<string>> GeneratePlayerSearchSuggestions(string query, List<Player> results)
+    private Task<List<string>> GeneratePlayerSearchSuggestions(string query, List<Player> results)
     {
         var suggestions = new List<string>();
         
@@ -609,7 +609,7 @@ public class SearchController : ControllerBase
         suggestions.Add("Search by specific attributes (fast, technical, young)");
         suggestions.Add("Try team names or competitions");
 
-        return suggestions;
+        return Task.FromResult(suggestions);
     }
 
     private async Task<List<object>> FindSimilarPlayers(Player? player)
@@ -651,38 +651,38 @@ public class SearchController : ControllerBase
         };
     }
 
-    private async Task<object> AggregateSearchResults(string query, List<object> results)
+    private Task<object> AggregateSearchResults(string query, List<object> results)
     {
-        return new
+        return Task.FromResult<object>(new
         {
             TotalResults = results.Count,
             ResultsByType = results.GroupBy(r => r.GetType().GetProperty("Type")?.GetValue(r))
                 .ToDictionary(g => g.Key?.ToString() ?? "Unknown", g => g.Count()),
             TopMatches = results.Take(3)
-        };
+        });
     }
 
-    private async Task<List<string>> GenerateTypedSuggestions(string query, SearchType searchType)
+    private Task<List<string>> GenerateTypedSuggestions(string query, SearchType searchType)
     {
-        return searchType switch
+        return Task.FromResult(searchType switch
         {
             SearchType.Players => new List<string> { "young forwards", "experienced defenders", "creative midfielders" },
             SearchType.GameFootage => new List<string> { "championship final", "derby matches", "playoff games" },
             SearchType.StatBooks => new List<string> { "season stats", "player rankings", "team analytics" },
             _ => new List<string>()
-        };
+        });
     }
 
-    private async Task<List<string>> GenerateGeneralSuggestions(string query)
+    private Task<List<string>> GenerateGeneralSuggestions(string query)
     {
-        return new List<string>
+        return Task.FromResult(new List<string>
         {
             $"{query} highlights",
             $"{query} statistics",
             $"{query} analysis",
             $"{query} performance",
             $"{query} scouting report"
-        };
+        });
     }
 
     private async Task<List<string>> GetPopularSearches(SearchType searchType)

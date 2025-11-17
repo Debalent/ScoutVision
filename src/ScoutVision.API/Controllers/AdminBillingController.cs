@@ -9,7 +9,7 @@ namespace ScoutVision.API.Controllers
     public class AdminBillingController : ControllerBase
     {
         [HttpGet("stats")]
-        public async Task<IActionResult> GetStats()
+        public Task<IActionResult> GetStats()
         {
             // Simulated metrics; replace with real data source
             var stats = new List<BillingStat>
@@ -21,7 +21,7 @@ namespace ScoutVision.API.Controllers
                 new BillingStat { Metric = "Trials Started", Value = "23" },
                 new BillingStat { Metric = "Coupons Used", Value = "14" }
             };
-            return Ok(stats);
+            return Task.FromResult<IActionResult>(Ok(stats));
         }
     }
 
